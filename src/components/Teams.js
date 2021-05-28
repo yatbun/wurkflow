@@ -15,6 +15,7 @@ import {
     InputGroup,
     FormControl,
     Form,
+    Modal,
 } from "react-bootstrap";
 
 import PageHeader from "./PageHeader";
@@ -25,6 +26,14 @@ export default function Teams() {
 
     const [joinOpen, setJoinOpen] = useState(false);
     const [createOpen, setCreateOpen] = useState(false);
+
+    const [delGroup, setDelGroup] = useState("");
+    const [showModal, setShowModal] = useState(false);
+    const closeModal = () => setShowModal(false);
+    const openModal = (group) => {
+        setDelGroup(group);
+        setShowModal(true);
+    };
 
     function getGroups() {
         const promises = [];
@@ -59,6 +68,35 @@ export default function Teams() {
         getGroups();
     }, []);
 
+    async function quitGroup() {
+        let gid = "";
+
+        await store
+            .collection("groups")
+            .where("id", "==", delGroup)
+            .get()
+            .then((querySnapshot) => {
+                gid = querySnapshot.docs[0].id;
+            });
+
+        await store
+            .collection("groups")
+            .doc(gid)
+            .update({
+                memebers: firebase.firestore.FieldValue.arrayRemove(currentUser.uid),
+            });
+
+        await store
+            .collection("users")
+            .doc(currentUser.uid)
+            .update({
+                groups: firebase.firestore.FieldValue.arrayRemove(gid),
+            });
+
+        setShowModal(false);
+        getGroups();
+    }
+
     const renderGroups = () => {
         if (groups.length == 0) {
             return <h2>You are currently not in any team right now.</h2>;
@@ -66,9 +104,25 @@ export default function Teams() {
             return (
                 <>
                     <h2>Teams you are part of</h2>
+
+                    <Modal show={showModal} onHilde={closeModal}>
+                        <Modal.Header>
+                            <Modal.Title>Confirm</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>Are you sure you want to leave this group?</Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={closeModal}>
+                                Cancel
+                            </Button>
+                            <Button variant="warning" onClick={quitGroup}>
+                                I AM SURE
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
+
                     <Tab.Container defaultActiveKey={groups[0].id}>
                         <Row className="mt-5">
-                            <Col sm={2}>
+                            <Col sm={2} className="border-end">
                                 <Nav variant="pills" className="flex-column">
                                     {groups.map((g) => (
                                         <Nav.Item key={g.id}>
@@ -78,12 +132,22 @@ export default function Teams() {
                                 </Nav>
                             </Col>
                             <Col sm={10}>
-                                <Tab.Content className="p-2 bg-light rounded border">
+                                <Tab.Content className="p-5 bg-light rounded border">
                                     {groups.map((g) => (
-                                        <Tab.Pane key={g.id} eventKey={g.id}>
-                                            <h2>{g.name}</h2>
-                                            <p>{g.desc}</p>
-                                        </Tab.Pane>
+                                        <>
+                                            <Tab.Pane key={g.id} eventKey={g.id}>
+                                                <h2>{g.name}</h2>
+                                                <h6>Team ID: {g.id}</h6>
+
+                                                <p className="mt-4">{g.desc}</p>
+                                                <Button
+                                                    variant="warning"
+                                                    onClick={() => openModal(g.id)}
+                                                >
+                                                    Quit Team
+                                                </Button>
+                                            </Tab.Pane>
+                                        </>
                                     ))}
                                 </Tab.Content>
                             </Col>
@@ -99,6 +163,8 @@ export default function Teams() {
             setCreateOpen(false);
         }
         setJoinOpen(!joinOpen);
+        setError("");
+        clearFields();
     }
 
     function createToggle() {
@@ -106,6 +172,8 @@ export default function Teams() {
             setJoinOpen(false);
         }
         setCreateOpen(!createOpen);
+        setError("");
+        clearFields();
     }
 
     const [error, setError] = useState("");
@@ -115,6 +183,13 @@ export default function Teams() {
     const groupDescRef = useRef();
     const [loading, setLoading] = useState(false);
     const [groupId, setGroupId] = useState();
+
+    function clearFields() {
+        joinGroupIdRef.current.value = "";
+        groupNameRef.current.value = "";
+        groupIdRef.current.value = "";
+        groupDescRef.current.value = "";
+    }
 
     async function joinGroup() {
         setError("");
