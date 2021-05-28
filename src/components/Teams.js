@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { store } from "../firebase";
 import { useStore } from "../contexts/StoreContext";
 import {
@@ -19,7 +19,7 @@ import {
 import PageHeader from "./PageHeader";
 
 export default function Teams() {
-    const { groups, quitGroup, joinGroup } = useStore();
+    const { groups, groupError, quitGroup, joinGroup, createGroup } = useStore();
 
     const [joinOpen, setJoinOpen] = useState(false);
     const [createOpen, setCreateOpen] = useState(false);
@@ -32,7 +32,12 @@ export default function Teams() {
         setShowModal(true);
     };
 
+    useEffect(() => {
+        setError(groupError);
+    }, [groupError]);
+
     async function quitTeam() {
+        setError("");
         quitGroup(delGroup);
         setShowModal(false);
     }
@@ -131,9 +136,12 @@ export default function Teams() {
         groupDescRef.current.value = "";
     }
 
-    function joinTeam() {
-        joinGroup(joinOpen ? joinGroupIdRef.current.value.toLowerCase() : groupIdRef.current.value);
-        clearFields();
+    async function joinTeam() {
+        setError("");
+
+        await joinGroup(
+            joinOpen ? joinGroupIdRef.current.value.toLowerCase() : groupIdRef.current.value
+        );
     }
 
     function nameChange() {
@@ -145,49 +153,17 @@ export default function Teams() {
         );
     }
 
-    async function createGroup(e) {
+    async function createTeam(e) {
         e.preventDefault();
 
         setError("");
-        setLoading(true);
+        await createGroup(
+            groupIdRef.current.value,
+            groupNameRef.current.value,
+            groupDescRef.current.value
+        );
 
-        let existing = false;
-
-        await store
-            .collection("groups")
-            .where("id", "==", groupIdRef.current.value)
-            .get()
-            .then((querySnapshot) => {
-                if (!querySnapshot.empty) {
-                    existing = true;
-                }
-            });
-
-        if (existing) {
-            setError("A team with this ID already exists. Try another one.");
-            setLoading(false);
-            return;
-        }
-
-        const newGroup = {
-            id: groupIdRef.current.value,
-            name: groupNameRef.current.value,
-            desc: groupDescRef.current.value,
-            members: [],
-        };
-
-        store
-            .collection("groups")
-            .add(newGroup)
-            .then(() => {
-                joinGroup(groupIdRef.current.value);
-            })
-            .catch((e) => {
-                setError("Failed to create new group.");
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+        clearFields();
     }
 
     return (
@@ -215,7 +191,10 @@ export default function Teams() {
                         </Button>
                         <Collapse in={joinOpen}>
                             <div>
-                                <Container className="mt-5 col-8" stlye={{ maxWidth: "300px" }}>
+                                <Container
+                                    className="mt-5 col-md-8 col-lg-5"
+                                    stlye={{ maxWidth: "300px" }}
+                                >
                                     <InputGroup className="mb-3">
                                         <FormControl
                                             type="text"
@@ -223,7 +202,7 @@ export default function Teams() {
                                             placeholder="Team ID"
                                         />
                                         <Button variant="outline-success" onClick={joinTeam}>
-                                            Join
+                                            Join Group!
                                         </Button>
                                     </InputGroup>
                                 </Container>
@@ -232,7 +211,7 @@ export default function Teams() {
                         <Collapse in={createOpen}>
                             <div>
                                 <Container className="mt-5 col-8" stlye={{ maxWidth: "300px" }}>
-                                    <Form onSubmit={createGroup}>
+                                    <Form onSubmit={createTeam}>
                                         <Form.Group as={Row} className="mb-3">
                                             <Form.Label column sm="2">
                                                 Team Name

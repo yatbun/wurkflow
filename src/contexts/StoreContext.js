@@ -14,6 +14,7 @@ export function StoreProvider({ children }) {
     const { currentUser } = useAuth();
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [groupError, setGroupError] = useState("");
 
     function getGroups() {
         if (!currentUser) {
@@ -100,6 +101,8 @@ export function StoreProvider({ children }) {
     }
 
     async function joinGroup(grpId) {
+        setGroupError("");
+
         let existing = false;
         let group = null;
 
@@ -117,6 +120,7 @@ export function StoreProvider({ children }) {
 
         // Check if group exists
         if (!existing) {
+            setGroupError("No group with such ID exists!");
             return;
         }
 
@@ -137,10 +141,49 @@ export function StoreProvider({ children }) {
         getGroups();
     }
 
+    async function createGroup(id, name, desc) {
+        setGroupError("");
+        let existing = false;
+
+        await store
+            .collection("groups")
+            .where("id", "==", id)
+            .get()
+            .then((querySnapshot) => {
+                if (!querySnapshot.empty) {
+                    existing = true;
+                }
+            });
+
+        if (existing) {
+            setGroupError("A team with this ID already exists. Try another one.");
+            return;
+        }
+
+        const newGroup = {
+            id: id,
+            name: name,
+            desc: desc,
+            members: [],
+        };
+
+        store
+            .collection("groups")
+            .add(newGroup)
+            .then(() => {
+                joinGroup(id);
+            })
+            .catch(() => {
+                setGroupError("Failed to create new group.");
+            });
+    }
+
     const value = {
         groups,
+        groupError,
         quitGroup,
         joinGroup,
+        createGroup,
     };
 
     return <StoreContext.Provider value={value}>{!loading && children}</StoreContext.Provider>;
