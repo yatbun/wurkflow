@@ -8,6 +8,8 @@ import Homepage from "./Homepage";
 import Login from "./Login";
 import Signup from "./Signup";
 import UpdateProfile from "./UpdateProfile";
+
+import Tasks from "./Tasks";
 import Teams from "./Teams";
 
 export default function App() {
@@ -21,6 +23,7 @@ export default function App() {
                         <LoggedOutRoute path="/signup" component={Signup} />
                         <LoggedInRoute path="/update-profile" component={UpdateProfile} />
 
+                        <LoggedInRoute path="/tasks" component={Tasks} />
                         <LoggedInRoute path="/teams" component={Teams} />
                     </Switch>
                 </AuthProvider>

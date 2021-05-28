@@ -318,7 +318,7 @@ export default function Teams() {
                         <h1>Teams</h1>
                         <p>
                             You can choose to be part of any number of teams! You will be subscribed
-                            to all the events that are ongoing in the teams you are part of.
+                            to all the tasks that are ongoing in the teams you are part of.
                         </p>
                         <Button onClick={joinToggle} variant="danger" size="lg">
                             Join a Team
