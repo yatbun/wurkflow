@@ -54,11 +54,24 @@ export default function Teams() {
                                     grps.push(g.data());
                                 })
                         );
+                        return group;
                     });
                 }
             })
             .finally(() => {
                 Promise.all(promises).then(() => {
+                    grps.sort((a, b) => {
+                        const fa = a.name.toLowerCase();
+                        const fb = b.name.toLowerCase();
+
+                        if (fa < fb) {
+                            return -1;
+                        }
+                        if (fa > fb) {
+                            return 1;
+                        }
+                        return 0;
+                    });
                     setGroups(grps);
                 });
             });
@@ -66,7 +79,7 @@ export default function Teams() {
 
     useEffect(() => {
         getGroups();
-    }, []);
+    });
 
     async function quitGroup() {
         let gid = "";
@@ -98,7 +111,7 @@ export default function Teams() {
     }
 
     const renderGroups = () => {
-        if (groups.length == 0) {
+        if (groups.length === 0) {
             return <h2>You are currently not in any team right now.</h2>;
         } else {
             return (
@@ -201,7 +214,11 @@ export default function Teams() {
         // Get the group
         await store
             .collection("groups")
-            .where("id", "==", joinOpen ? joinGroupIdRef.current.value : groupIdRef.current.value)
+            .where(
+                "id",
+                "==",
+                joinOpen ? joinGroupIdRef.current.value.toLowerCase() : groupIdRef.current.value
+            )
             .get()
             .then((querySnapshot) => {
                 if (!querySnapshot.empty) {
