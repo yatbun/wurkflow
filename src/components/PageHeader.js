@@ -23,7 +23,7 @@ export default function PageHeader() {
     }
 
     return (
-        <Navbar fixed="top" bg="white" className="pl-3 border-bottom">
+        <Navbar fixed="top" bg="white" className="pl-3 border-bottom shadow-sm">
             <Container>
                 <Navbar.Brand>
                     <Link to="/">
@@ -36,7 +36,21 @@ export default function PageHeader() {
                         Home
                     </Link>
 
-                    <Link to="/" className="nav-link px-2 link-dark">
+                    {currentUser && (
+                        <>
+                            <Link to="/events" className="nav-link px-2 link-dark disabled">
+                                Events
+                            </Link>
+                            <Link to="/teams" className="nav-link px-2 link-dark">
+                                Teams
+                            </Link>
+                            <Link to="/workflows" className="nav-link px-2 link-dark disabled">
+                                Workflows
+                            </Link>
+                        </>
+                    )}
+
+                    <Link to="/" className="nav-link px-2 link-dark disabled">
                         About
                     </Link>
                 </Nav>

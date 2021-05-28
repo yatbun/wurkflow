@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import firebase, { auth } from "../firebase";
+import firebase, { auth, store } from "../firebase";
 
 const AuthContext = React.createContext();
 
@@ -14,6 +14,9 @@ export function AuthProvider({ children }) {
     function signup(name, email, password) {
         return auth.createUserWithEmailAndPassword(email, password).then((res) => {
             const user = firebase.auth().currentUser;
+
+            store.collection("users").doc(user.uid).set({ groups: [] });
+
             return user.updateProfile({
                 displayName: name,
             });
