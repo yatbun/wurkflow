@@ -79,7 +79,8 @@ export default function Teams() {
 
     useEffect(() => {
         getGroups();
-    });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     async function quitGroup() {
         let gid = "";
@@ -135,16 +136,16 @@ export default function Teams() {
 
                     <Tab.Container defaultActiveKey={groups[0].id}>
                         <Row className="mt-5">
-                            <Col sm={2} className="border-end">
+                            <Col sm={3} lg={2} className="border-end">
                                 <Nav variant="pills" className="flex-column">
                                     {groups.map((g) => (
-                                        <Nav.Item key={g.id}>
+                                        <Nav.Item key={g.index}>
                                             <Nav.Link eventKey={g.id}>{g.name}</Nav.Link>
                                         </Nav.Item>
                                     ))}
                                 </Nav>
                             </Col>
-                            <Col sm={10}>
+                            <Col sm={9} lg={10}>
                                 <Tab.Content className="p-5 bg-light rounded border">
                                     {groups.map((g) => (
                                         <>
