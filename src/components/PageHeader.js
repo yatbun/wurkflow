@@ -3,7 +3,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 import logo from "../img/logo.png";
 
-import { Navbar, Nav, Container, Image } from "react-bootstrap";
+import { Navbar, Nav, Container, Image, Dropdown } from "react-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 
 export default function PageHeader() {
@@ -43,9 +43,20 @@ export default function PageHeader() {
 
                 {currentUser ? (
                     <>
-                        <button className="btn btn-outline-success" onClick={handleLogout}>
-                            Log Out of {currentUser.email}
-                        </button>
+                        <Dropdown>
+                            <Dropdown.Toggle variant="outline-success" id="dd-profile">
+                                {currentUser.displayName}
+                            </Dropdown.Toggle>
+
+                            <Dropdown.Menu>
+                                <Link to="/update-profile" className="dropdown-item">
+                                    Update Profile
+                                </Link>
+                                <Dropdown.Item>Settings</Dropdown.Item>
+                                <Dropdown.Divider />
+                                <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
                     </>
                 ) : (
                     <Link to="/login">

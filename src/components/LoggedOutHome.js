@@ -1,7 +1,7 @@
 import { Container } from "react-bootstrap";
 import { CustomPlaceholder } from "react-placeholder-image";
 
-export default function LoggedoutHome() {
+export default function LoggedOutHome() {
     return (
         <>
             <div className="px-4 my-5 text-center border-bottom">

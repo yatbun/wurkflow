@@ -3,7 +3,7 @@ import { Container } from "react-bootstrap";
 
 import PageHeader from "./PageHeader";
 import Dashboard from "./Dashboard";
-import LoggedoutHome from "./LoggedoutHome";
+import LoggedOutHome from "./LoggedOutHome";
 
 export default function Homepage() {
     const { currentUser } = useAuth();
@@ -12,7 +12,7 @@ export default function Homepage() {
         <>
             <PageHeader />
             <Container className="pt-5 mt-5">
-                {currentUser ? <Dashboard /> : <LoggedoutHome />}
+                {currentUser ? <Dashboard /> : <LoggedOutHome />}
             </Container>
         </>
     );

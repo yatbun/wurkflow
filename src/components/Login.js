@@ -21,8 +21,8 @@ export default function Login() {
             setLoading(true);
             await login(emailRef.current.value, passwordRef.current.value);
             history.push("/");
-        } catch (e) {
-            setError(e.message);
+        } catch {
+            setError("Failed to log in. Check your email and password.");
         }
         setLoading(false);
     }

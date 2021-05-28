@@ -7,6 +7,7 @@ import LoggedOutRoute from "./LoggedOutRoute";
 import Homepage from "./Homepage";
 import Login from "./Login";
 import Signup from "./Signup";
+import UpdateProfile from "./UpdateProfile";
 
 export default function App() {
     return (
@@ -17,6 +18,7 @@ export default function App() {
                         <Route exact path="/" component={Homepage} />
                         <LoggedOutRoute path="/login" component={Login} />
                         <LoggedOutRoute path="/signup" component={Signup} />
+                        <LoggedInRoute path="/update-profile" component={UpdateProfile} />
                     </Switch>
                 </AuthProvider>
             </Router>
