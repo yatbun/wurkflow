@@ -118,7 +118,7 @@ export default function Teams() {
                 <>
                     <h2>Teams you are part of</h2>
 
-                    <Modal show={showModal} onHilde={closeModal}>
+                    <Modal show={showModal} onHide={closeModal}>
                         <Modal.Header>
                             <Modal.Title>Confirm</Modal.Title>
                         </Modal.Header>
@@ -250,6 +250,7 @@ export default function Teams() {
 
         getGroups();
         setLoading(false);
+        clearFields();
     }
 
     function nameChange() {
