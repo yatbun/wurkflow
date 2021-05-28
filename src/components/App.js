@@ -2,12 +2,13 @@ import { Container } from "react-bootstrap";
 import { AuthProvider } from "../contexts/AuthContext";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
-import LoggedInRoute from "./LoggedInRoute";
 import LoggedOutRoute from "./LoggedOutRoute";
+import LoggedInRoute from "./LoggedInRoute";
 import Homepage from "./Homepage";
 import Login from "./Login";
 import Signup from "./Signup";
 import UpdateProfile from "./UpdateProfile";
+import Teams from "./Teams";
 
 export default function App() {
     return (
@@ -19,6 +20,8 @@ export default function App() {
                         <LoggedOutRoute path="/login" component={Login} />
                         <LoggedOutRoute path="/signup" component={Signup} />
                         <LoggedInRoute path="/update-profile" component={UpdateProfile} />
+
+                        <LoggedInRoute path="/teams" component={Teams} />
                     </Switch>
                 </AuthProvider>
             </Router>
