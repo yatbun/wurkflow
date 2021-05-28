@@ -1,8 +1,6 @@
-import firebase from "firebase/app";
-
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { store } from "../firebase";
-import { useAuth } from "../contexts/AuthContext";
+import { useStore } from "../contexts/StoreContext";
 import {
     Container,
     Alert,
@@ -21,8 +19,7 @@ import {
 import PageHeader from "./PageHeader";
 
 export default function Teams() {
-    const { currentUser } = useAuth();
-    const [groups, setGroups] = useState([]);
+    const { groups, quitGroup, joinGroup } = useStore();
 
     const [joinOpen, setJoinOpen] = useState(false);
     const [createOpen, setCreateOpen] = useState(false);
@@ -35,84 +32,13 @@ export default function Teams() {
         setShowModal(true);
     };
 
-    function getGroups() {
-        const promises = [];
-        const grps = [];
-        store
-            .collection("users")
-            .doc(currentUser.uid)
-            .get()
-            .then((doc) => {
-                if (doc.exists) {
-                    doc.data().groups.map((group) => {
-                        promises.push(
-                            store
-                                .collection("groups")
-                                .doc(group)
-                                .get()
-                                .then((g) => {
-                                    grps.push(g.data());
-                                })
-                        );
-                        return group;
-                    });
-                }
-            })
-            .finally(() => {
-                Promise.all(promises).then(() => {
-                    grps.sort((a, b) => {
-                        const fa = a.name.toLowerCase();
-                        const fb = b.name.toLowerCase();
-
-                        if (fa < fb) {
-                            return -1;
-                        }
-                        if (fa > fb) {
-                            return 1;
-                        }
-                        return 0;
-                    });
-                    setGroups(grps);
-                });
-            });
-    }
-
-    useEffect(() => {
-        getGroups();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    async function quitGroup() {
-        let gid = "";
-
-        await store
-            .collection("groups")
-            .where("id", "==", delGroup)
-            .get()
-            .then((querySnapshot) => {
-                gid = querySnapshot.docs[0].id;
-            });
-
-        await store
-            .collection("groups")
-            .doc(gid)
-            .update({
-                memebers: firebase.firestore.FieldValue.arrayRemove(currentUser.uid),
-            });
-
-        await store
-            .collection("users")
-            .doc(currentUser.uid)
-            .update({
-                groups: firebase.firestore.FieldValue.arrayRemove(gid),
-            });
-
+    async function quitTeam() {
+        quitGroup(delGroup);
         setShowModal(false);
-        getGroups();
     }
 
     const renderGroups = () => {
-        if (groups.length === 0) {
+        if (groups && groups.length === 0) {
             return <h2>You are currently not in any team right now.</h2>;
         } else {
             return (
@@ -128,7 +54,7 @@ export default function Teams() {
                             <Button variant="secondary" onClick={closeModal}>
                                 Cancel
                             </Button>
-                            <Button variant="warning" onClick={quitGroup}>
+                            <Button variant="warning" onClick={quitTeam}>
                                 I AM SURE
                             </Button>
                         </Modal.Footer>
@@ -205,52 +131,8 @@ export default function Teams() {
         groupDescRef.current.value = "";
     }
 
-    async function joinGroup() {
-        setError("");
-        setLoading(true);
-
-        let existing = false;
-        let group = null;
-
-        // Get the group
-        await store
-            .collection("groups")
-            .where(
-                "id",
-                "==",
-                joinOpen ? joinGroupIdRef.current.value.toLowerCase() : groupIdRef.current.value
-            )
-            .get()
-            .then((querySnapshot) => {
-                if (!querySnapshot.empty) {
-                    existing = true;
-                    group = querySnapshot.docs[0];
-                }
-            });
-
-        // Check if group exists
-        if (!existing) {
-            setError("No group with such ID was found.");
-            setLoading(false);
-            return;
-        }
-
-        await store
-            .collection("groups")
-            .doc(group.id)
-            .update({
-                members: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
-            });
-
-        await store
-            .collection("users")
-            .doc(currentUser.uid)
-            .update({
-                groups: firebase.firestore.FieldValue.arrayUnion(group.id),
-            });
-
-        getGroups();
-        setLoading(false);
+    function joinTeam() {
+        joinGroup(joinOpen ? joinGroupIdRef.current.value.toLowerCase() : groupIdRef.current.value);
         clearFields();
     }
 
@@ -340,7 +222,7 @@ export default function Teams() {
                                             ref={joinGroupIdRef}
                                             placeholder="Team ID"
                                         />
-                                        <Button variant="outline-success" onClick={joinGroup}>
+                                        <Button variant="outline-success" onClick={joinTeam}>
                                             Join
                                         </Button>
                                     </InputGroup>
