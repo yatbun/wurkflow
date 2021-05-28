@@ -49,8 +49,6 @@ export function AuthProvider({ children }) {
         });
     }
 
-    const [reloadGroups, setReloadGroups] = useState(false);
-
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             setCurrentUser(user);

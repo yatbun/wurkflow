@@ -17,6 +17,7 @@ export function StoreProvider({ children }) {
 
     function getGroups() {
         if (!currentUser) {
+            setGroups([]);
             return;
         }
 
@@ -30,7 +31,7 @@ export function StoreProvider({ children }) {
             .get()
             .then((doc) => {
                 if (doc.exists) {
-                    doc.data().groups.map((grp) => {
+                    doc.data().groups.forEach((grp) => {
                         promises.push(
                             store
                                 .collection("groups")
@@ -65,7 +66,10 @@ export function StoreProvider({ children }) {
 
     useEffect(() => {
         getGroups();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(getGroups, [currentUser]);
 
     async function quitGroup(delGroup) {
         let gid = "";

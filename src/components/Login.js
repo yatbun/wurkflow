@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { useStore } from "../contexts/StoreContext";
 import { Link, useHistory } from "react-router-dom";
 import { Container, Form, Button, CardGroup, Card, Alert } from "react-bootstrap";
 
@@ -10,7 +9,6 @@ export default function Login() {
     const emailRef = useRef();
     const passwordRef = useRef();
     const { login } = useAuth();
-    const { getGroups } = useStore();
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const history = useHistory();
