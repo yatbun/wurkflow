@@ -1,0 +1,10 @@
+{
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.detectIndentation": false,
+    "workbench.tree.indent": 4,
+    "editor.stickyTabStops": true,
+    "prettier.vueIndentScriptAndStyle": true,
+    "prettier.printWidth": 100,
+    "prettier.tabWidth": 4
+}
