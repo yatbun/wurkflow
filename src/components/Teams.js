@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { store } from "../firebase";
 import { useStore } from "../contexts/StoreContext";
 import {
     Container,
@@ -136,7 +135,8 @@ export default function Teams() {
         groupDescRef.current.value = "";
     }
 
-    async function joinTeam() {
+    async function joinTeam(e) {
+        e.preventDefault();
         setError("");
 
         await joinGroup(
@@ -195,16 +195,18 @@ export default function Teams() {
                                     className="mt-5 col-md-8 col-lg-5"
                                     stlye={{ maxWidth: "300px" }}
                                 >
-                                    <InputGroup className="mb-3">
-                                        <FormControl
-                                            type="text"
-                                            ref={joinGroupIdRef}
-                                            placeholder="Team ID"
-                                        />
-                                        <Button variant="outline-success" onClick={joinTeam}>
-                                            Join Group!
-                                        </Button>
-                                    </InputGroup>
+                                    <Form onSubmit={joinTeam}>
+                                        <InputGroup className="mb-3">
+                                            <FormControl
+                                                type="text"
+                                                ref={joinGroupIdRef}
+                                                placeholder="Team ID"
+                                            />
+                                            <Button variant="outline-success" type="submit">
+                                                Join Group!
+                                            </Button>
+                                        </InputGroup>
+                                    </Form>
                                 </Container>
                             </div>
                         </Collapse>

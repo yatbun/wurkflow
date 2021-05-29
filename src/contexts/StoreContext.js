@@ -65,13 +65,6 @@ export function StoreProvider({ children }) {
             });
     }
 
-    useEffect(() => {
-        getGroups();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    useEffect(getGroups, [currentUser]);
-
     async function quitGroup(delGroup) {
         let gid = "";
 
@@ -177,6 +170,13 @@ export function StoreProvider({ children }) {
                 setGroupError("Failed to create new group.");
             });
     }
+
+    useEffect(() => {
+        getGroups();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(getGroups, [currentUser]);
 
     const value = {
         groups,
