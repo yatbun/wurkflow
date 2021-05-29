@@ -32,19 +32,19 @@ export function StoreProvider({ children }) {
             .doc(currentUser.uid)
             .get()
             .then((doc) => {
-                if (doc.exists) {
-                    doc.data().groups.forEach((grp) => {
-                        promises.push(
-                            store
-                                .collection("groups")
-                                .doc(grp)
-                                .get()
-                                .then((g) => {
-                                    grps.push(g.data());
-                                })
-                        );
-                    });
-                }
+                doc.data().groups.forEach((grp) => {
+                    promises.push(
+                        store
+                            .collection("groups")
+                            .doc(grp)
+                            .get()
+                            .then((g) => {
+                                const newGroup = g.data();
+                                newGroup.uid = g.id;
+                                grps.push(newGroup);
+                            })
+                    );
+                });
             })
             .finally(() => {
                 Promise.all(promises).then(() => {
@@ -66,17 +66,7 @@ export function StoreProvider({ children }) {
             });
     }
 
-    async function quitGroup(delGroup) {
-        let gid = "";
-
-        await store
-            .collection("groups")
-            .where("id", "==", delGroup)
-            .get()
-            .then((querySnapshot) => {
-                gid = querySnapshot.docs[0].id;
-            });
-
+    async function quitGroup(gid) {
         await store
             .collection("groups")
             .doc(gid)
@@ -187,22 +177,16 @@ export function StoreProvider({ children }) {
 
         groups.forEach((group) => {
             store
-                .collection("groups")
-                .where("id", "==", group.id)
+                .collection("tasks")
+                .where("group", "==", group.uid)
                 .get()
                 .then((querySnapshot) => {
-                    store
-                        .collection("tasks")
-                        .where("group", "==", querySnapshot.docs[0].id)
-                        .get()
-                        .then((qrySs) => {
-                            if (!qrySs.empty) {
-                                const newTask = qrySs.docs[0].data();
-                                newTask.uid = qrySs.docs[0].id;
-                                newTask.groupName = group.name;
-                                tsks.push(newTask);
-                            }
-                        });
+                    if (!querySnapshot.empty) {
+                        const newTask = querySnapshot.docs[0].data();
+                        newTask.uid = querySnapshot.docs[0].id;
+                        newTask.groupName = group.name;
+                        tsks.push(newTask);
+                    }
                 });
         });
         setTasks(tsks);
@@ -216,7 +200,11 @@ export function StoreProvider({ children }) {
 
     useEffect(getGroups, [currentUser]);
 
-    useEffect(getTasks, [groups]);
+    useEffect(
+        getTasks,
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [groups]
+    );
 
     const value = {
         groups,
