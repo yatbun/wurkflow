@@ -38,6 +38,7 @@ export default function Teams() {
     async function quitTeam() {
         setError("");
         quitGroup(delGroup);
+        setDelGroup(null);
         setShowModal(false);
     }
 
@@ -69,7 +70,7 @@ export default function Teams() {
                             <Col sm={3} lg={2} className="border-end">
                                 <Nav variant="pills" className="flex-column">
                                     {groups.map((g) => (
-                                        <Nav.Item key={g.id}>
+                                        <Nav.Item key={g.uid}>
                                             <Nav.Link eventKey={g.id}>{g.name}</Nav.Link>
                                         </Nav.Item>
                                     ))}
@@ -78,14 +79,14 @@ export default function Teams() {
                             <Col sm={9} lg={10}>
                                 <Tab.Content className="p-5 bg-light rounded border">
                                     {groups.map((g) => (
-                                        <Tab.Pane key={g.id} eventKey={g.id}>
+                                        <Tab.Pane key={g.uid} eventKey={g.id}>
                                             <h2>{g.name}</h2>
                                             <h6>Team ID: {g.id}</h6>
 
                                             <p className="mt-4">{g.desc}</p>
                                             <Button
                                                 variant="warning"
-                                                onClick={() => openModal(g.id)}
+                                                onClick={() => openModal(g.uid)}
                                             >
                                                 Quit Team
                                             </Button>
@@ -123,7 +124,6 @@ export default function Teams() {
     const groupNameRef = useRef();
     const groupIdRef = useRef();
     const groupDescRef = useRef();
-    const [loading, setLoading] = useState(false);
     const [groupId, setGroupId] = useState();
 
     function clearFields() {
@@ -252,7 +252,7 @@ export default function Teams() {
                                                 />
                                             </Col>
                                         </Form.Group>
-                                        <Button disabled={loading} className="w-100" type="submit">
+                                        <Button className="w-100" type="submit">
                                             Create
                                         </Button>
                                     </Form>
