@@ -8,12 +8,12 @@ import "react-datepicker/dist/react-datepicker.css";
 import PageHeader from "./PageHeader";
 
 export default function Tasks() {
-    const { tasks } = useStore();
+    const { groups, tasks, createTask } = useStore();
 
     const [showCreate, setShowCreate] = useState(false);
     const [error, setError] = useState("");
 
-    function renderTasks() {
+    const renderTasks = () => {
         if (tasks && tasks.length === 0) {
             return <h2>You do not have any active tasks right now.</h2>;
         } else {
@@ -37,7 +37,7 @@ export default function Tasks() {
                                     <td>{index + 1}</td>
                                     <td>{task.name}</td>
                                     <td>{task.desc}</td>
-                                    <td>Date</td>
+                                    <td>{task.dueDate.toLocaleDateString("en-GB")}</td>
                                     <td>{task.groupName}</td>
                                 </tr>
                             ))}
@@ -46,7 +46,7 @@ export default function Tasks() {
                 </>
             );
         }
-    }
+    };
 
     const [loading, setLoading] = useState(false);
     const taskNameRef = useRef();
@@ -54,7 +54,16 @@ export default function Tasks() {
     const taskTeamRef = useRef();
     const [taskDate, setTaskDate] = useState(new Date());
 
-    function makeTask() {}
+    function makeTask(e) {
+        e.preventDefault();
+
+        createTask(
+            taskNameRef.current.value,
+            taskDescRef.current.value,
+            taskTeamRef.current.value,
+            taskDate
+        );
+    }
 
     return (
         <>
@@ -109,10 +118,13 @@ export default function Tasks() {
                                                 <Form.Control
                                                     as="select"
                                                     ref={taskTeamRef}
-                                                    defaultValue="Select a team"
+                                                    className="form-select"
                                                 >
-                                                    <option>Team A</option>
-                                                    <option>Team B</option>
+                                                    {groups.map((group) => (
+                                                        <option key={group.uid}>
+                                                            {group.name}
+                                                        </option>
+                                                    ))}
                                                 </Form.Control>
                                             </Col>
                                         </Form.Group>

@@ -14,12 +14,14 @@ export function StoreProvider({ children }) {
     const { currentUser } = useAuth();
 
     const [groups, setGroups] = useState([]);
+    const [groupNameToUidMap, setGroupNameToUidMap] = useState(new Map());
     const [groupLoading, setGroupLoading] = useState(false);
     const [groupError, setGroupError] = useState("");
 
     function getGroups() {
         if (!currentUser) {
             setGroups([]);
+            setGroupNameToUidMap(new Map());
             return;
         }
 
@@ -27,6 +29,7 @@ export function StoreProvider({ children }) {
 
         const promises = [];
         const grps = [];
+        const groupMap = new Map();
         store
             .collection("users")
             .doc(currentUser.uid)
@@ -41,6 +44,7 @@ export function StoreProvider({ children }) {
                             .then((g) => {
                                 const newGroup = g.data();
                                 newGroup.uid = g.id;
+                                groupMap.set(newGroup.name, newGroup.uid);
                                 grps.push(newGroup);
                             })
                     );
@@ -61,6 +65,7 @@ export function StoreProvider({ children }) {
                         return 0;
                     });
                     setGroups(grps);
+                    setGroupNameToUidMap(groupMap);
                     setGroupLoading(false);
                 });
             });
@@ -182,15 +187,50 @@ export function StoreProvider({ children }) {
                 .get()
                 .then((querySnapshot) => {
                     if (!querySnapshot.empty) {
-                        const newTask = querySnapshot.docs[0].data();
-                        newTask.uid = querySnapshot.docs[0].id;
+                        const tempTask = querySnapshot.docs[0].data();
+                        const newTask = tempTask;
+
+                        newTask.uid = tempTask.id;
                         newTask.groupName = group.name;
+                        newTask.dueDate = tempTask.due.toDate();
+
                         tsks.push(newTask);
                     }
+                })
+                .finally(() => {
+                    tsks.sort((a, b) => {
+                        const da = a.dueDate;
+                        const db = b.dueDate;
+
+                        if (da < db) {
+                            return -1;
+                        }
+                        if (da > db) {
+                            return 1;
+                        }
+                        return 0;
+                    });
+
+                    setTasks(tsks);
+                    setTaskLoading(false);
                 });
         });
-        setTasks(tsks);
-        setTaskLoading(false);
+    }
+
+    function createTask(name, desc, group, dueDate) {
+        const newTask = {
+            name: name,
+            desc: desc,
+            group: groupNameToUidMap.get(group),
+            due: firebase.firestore.Timestamp.fromDate(dueDate),
+        };
+
+        store
+            .collection("tasks")
+            .add(newTask)
+            .then(() => {
+                getTasks();
+            });
     }
 
     useEffect(() => {
@@ -213,6 +253,7 @@ export function StoreProvider({ children }) {
         joinGroup,
         createGroup,
         tasks,
+        createTask,
     };
 
     return (
