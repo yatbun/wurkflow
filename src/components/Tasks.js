@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
-import { Container, Alert, Button, Collapse, Form, Row, Col } from "react-bootstrap";
+import { useStore } from "../contexts/StoreContext";
+import { Container, Alert, Button, Collapse, Form, Row, Col, Table } from "react-bootstrap";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -7,8 +8,45 @@ import "react-datepicker/dist/react-datepicker.css";
 import PageHeader from "./PageHeader";
 
 export default function Tasks() {
+    const { tasks } = useStore();
+
     const [showCreate, setShowCreate] = useState(false);
     const [error, setError] = useState("");
+
+    function renderTasks() {
+        if (tasks && tasks.length === 0) {
+            return <h2>You do not have any active tasks right now.</h2>;
+        } else {
+            return (
+                <>
+                    <h2>Your tasks</h2>
+                    <Table striped bordered hover responsive className="mt-3">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Date Due</th>
+                                <th>Team</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {tasks.map((task, index) => (
+                                <tr key={index}>
+                                    <td>{index + 1}</td>
+                                    <td>{task.name}</td>
+                                    <td>{task.desc}</td>
+                                    <td>Date</td>
+                                    <td>{task.groupName}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                </>
+            );
+        }
+    }
 
     const [loading, setLoading] = useState(false);
     const taskNameRef = useRef();
@@ -16,7 +54,7 @@ export default function Tasks() {
     const taskTeamRef = useRef();
     const [taskDate, setTaskDate] = useState(new Date());
 
-    function createTask() {}
+    function makeTask() {}
 
     return (
         <>
@@ -40,7 +78,7 @@ export default function Tasks() {
                         <Collapse in={showCreate}>
                             <div>
                                 <Container className="mt-5 col-10" style={{ maxWidth: "600px" }}>
-                                    <Form onSubmit={createTask}>
+                                    <Form onSubmit={makeTask}>
                                         <Form.Group as={Row} className="mb-3">
                                             <Form.Label column sm="3">
                                                 Task Name
@@ -99,6 +137,7 @@ export default function Tasks() {
                             </div>
                         </Collapse>
                     </Container>
+                    <Container className="col-sm-12 mx-auto mt-2 pt-5">{renderTasks()}</Container>
                 </Container>
             </Container>
         </>

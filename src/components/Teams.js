@@ -69,7 +69,7 @@ export default function Teams() {
                             <Col sm={3} lg={2} className="border-end">
                                 <Nav variant="pills" className="flex-column">
                                     {groups.map((g) => (
-                                        <Nav.Item key={g.index}>
+                                        <Nav.Item key={g.id}>
                                             <Nav.Link eventKey={g.id}>{g.name}</Nav.Link>
                                         </Nav.Item>
                                     ))}
@@ -78,20 +78,18 @@ export default function Teams() {
                             <Col sm={9} lg={10}>
                                 <Tab.Content className="p-5 bg-light rounded border">
                                     {groups.map((g) => (
-                                        <>
-                                            <Tab.Pane key={g.id} eventKey={g.id}>
-                                                <h2>{g.name}</h2>
-                                                <h6>Team ID: {g.id}</h6>
+                                        <Tab.Pane key={g.id} eventKey={g.id}>
+                                            <h2>{g.name}</h2>
+                                            <h6>Team ID: {g.id}</h6>
 
-                                                <p className="mt-4">{g.desc}</p>
-                                                <Button
-                                                    variant="warning"
-                                                    onClick={() => openModal(g.id)}
-                                                >
-                                                    Quit Team
-                                                </Button>
-                                            </Tab.Pane>
-                                        </>
+                                            <p className="mt-4">{g.desc}</p>
+                                            <Button
+                                                variant="warning"
+                                                onClick={() => openModal(g.id)}
+                                            >
+                                                Quit Team
+                                            </Button>
+                                        </Tab.Pane>
                                     ))}
                                 </Tab.Content>
                             </Col>
@@ -262,7 +260,7 @@ export default function Teams() {
                             </div>
                         </Collapse>
                     </Container>
-                    <Container className="col-sm-12 mx-auto mt-5 p-5">{renderGroups()}</Container>
+                    <Container className="col-sm-12 mx-auto mt-2 p-5">{renderGroups()}</Container>
                 </Container>
             </Container>
         </>

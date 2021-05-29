@@ -12,8 +12,9 @@ export function useStore() {
 
 export function StoreProvider({ children }) {
     const { currentUser } = useAuth();
+
     const [groups, setGroups] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [groupLoading, setGroupLoading] = useState(false);
     const [groupError, setGroupError] = useState("");
 
     function getGroups() {
@@ -22,7 +23,7 @@ export function StoreProvider({ children }) {
             return;
         }
 
-        setLoading(true);
+        setGroupLoading(true);
 
         const promises = [];
         const grps = [];
@@ -60,7 +61,7 @@ export function StoreProvider({ children }) {
                         return 0;
                     });
                     setGroups(grps);
-                    setLoading(false);
+                    setGroupLoading(false);
                 });
             });
     }
@@ -171,6 +172,42 @@ export function StoreProvider({ children }) {
             });
     }
 
+    const [tasks, setTasks] = useState([]);
+    const [taskLoading, setTaskLoading] = useState(false);
+
+    function getTasks() {
+        if (!currentUser) {
+            setTasks([]);
+            return;
+        }
+
+        setTaskLoading(true);
+
+        const tsks = [];
+
+        groups.forEach((group) => {
+            store
+                .collection("groups")
+                .where("id", "==", group.id)
+                .get()
+                .then((querySnapshot) => {
+                    store
+                        .collection("tasks")
+                        .where("group", "==", querySnapshot.docs[0].id)
+                        .get()
+                        .then((qrySs) => {
+                            if (!qrySs.empty) {
+                                const newTask = qrySs.docs[0].data();
+                                newTask.groupName = group.name;
+                                tsks.push(newTask);
+                            }
+                        });
+                });
+        });
+        setTasks(tsks);
+        setTaskLoading(false);
+    }
+
     useEffect(() => {
         getGroups();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -178,13 +215,20 @@ export function StoreProvider({ children }) {
 
     useEffect(getGroups, [currentUser]);
 
+    useEffect(getTasks, [groups]);
+
     const value = {
         groups,
         groupError,
         quitGroup,
         joinGroup,
         createGroup,
+        tasks,
     };
 
-    return <StoreContext.Provider value={value}>{!loading && children}</StoreContext.Provider>;
+    return (
+        <StoreContext.Provider value={value}>
+            {!groupLoading && !taskLoading && children}
+        </StoreContext.Provider>
+    );
 }
