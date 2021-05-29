@@ -38,8 +38,8 @@ export default function PageHeader() {
 
                     {currentUser && (
                         <>
-                            <Link to="/events" className="nav-link px-2 link-dark disabled">
-                                Events
+                            <Link to="/tasks" className="nav-link px-2 link-dark">
+                                Tasks
                             </Link>
                             <Link to="/teams" className="nav-link px-2 link-dark">
                                 Teams
