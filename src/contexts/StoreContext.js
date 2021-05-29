@@ -198,6 +198,7 @@ export function StoreProvider({ children }) {
                         .then((qrySs) => {
                             if (!qrySs.empty) {
                                 const newTask = qrySs.docs[0].data();
+                                newTask.uid = qrySs.docs[0].id;
                                 newTask.groupName = group.name;
                                 tsks.push(newTask);
                             }
