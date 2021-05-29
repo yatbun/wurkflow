@@ -1,6 +1,18 @@
 import { useState, useRef } from "react";
 import { useStore } from "../contexts/StoreContext";
-import { Container, Alert, Button, Collapse, Form, Row, Col, Table } from "react-bootstrap";
+import {
+    Container,
+    Alert,
+    Button,
+    Collapse,
+    Form,
+    Row,
+    Col,
+    Table,
+    OverlayTrigger,
+    Tooltip,
+} from "react-bootstrap";
+import { FaEye, FaCheck, FaTrash } from "react-icons/fa";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -23,11 +35,12 @@ export default function Tasks() {
                     <Table striped bordered hover responsive className="mt-3">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th></th>
                                 <th>Name</th>
                                 <th>Description</th>
                                 <th>Date Due</th>
                                 <th>Team</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
 
@@ -39,6 +52,29 @@ export default function Tasks() {
                                     <td>{task.desc}</td>
                                     <td>{task.dueDate.toLocaleDateString("en-GB")}</td>
                                     <td>{task.groupName}</td>
+                                    <td>
+                                        <OverlayTrigger overlay={<Tooltip>View</Tooltip>}>
+                                            <span className="d-inline-block me-md-2 my-1">
+                                                <Button variant="primary" size="sm">
+                                                    <FaEye />
+                                                </Button>
+                                            </span>
+                                        </OverlayTrigger>
+                                        <OverlayTrigger overlay={<Tooltip>Complete</Tooltip>}>
+                                            <span className="d-inline-block me-md-2 my-1">
+                                                <Button variant="success" size="sm">
+                                                    <FaCheck />
+                                                </Button>
+                                            </span>
+                                        </OverlayTrigger>
+                                        <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
+                                            <span className="d-inline-block my-1">
+                                                <Button variant="danger" size="sm">
+                                                    <FaTrash />
+                                                </Button>
+                                            </span>
+                                        </OverlayTrigger>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -149,7 +185,9 @@ export default function Tasks() {
                             </div>
                         </Collapse>
                     </Container>
-                    <Container className="col-sm-12 mx-auto mt-2 pt-5">{renderTasks()}</Container>
+                    <Container className="col-sm-12 mx-auto mt-2 mb-5 pt-5">
+                        {renderTasks()}
+                    </Container>
                 </Container>
             </Container>
         </>
