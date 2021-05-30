@@ -18,7 +18,7 @@ export function StoreProvider({ children }) {
     const [groupLoading, setGroupLoading] = useState(false);
     const [groupError, setGroupError] = useState("");
 
-    function getGroups() {
+    async function getGroups() {
         if (!currentUser) {
             setGroups([]);
             setGroupNameToUidMap(new Map());
@@ -30,7 +30,7 @@ export function StoreProvider({ children }) {
         const promises = [];
         const grps = [];
         const groupMap = new Map();
-        store
+        await store
             .collection("users")
             .doc(currentUser.uid)
             .get()
@@ -170,7 +170,7 @@ export function StoreProvider({ children }) {
     const [tasks, setTasks] = useState([]);
     const [taskLoading, setTaskLoading] = useState(false);
 
-    function getTasks() {
+    async function getTasks() {
         if (!currentUser) {
             setTasks([]);
             return;
@@ -180,19 +180,19 @@ export function StoreProvider({ children }) {
 
         const tsks = [];
 
-        groups.forEach((group) => {
-            store
+        for (const group of groups) {
+            await store
                 .collection("tasks")
                 .where("group", "==", group.uid)
                 .get()
                 .then((querySnapshot) => {
                     if (!querySnapshot.empty) {
-                        const tempTask = querySnapshot.docs[0].data();
-                        const newTask = tempTask;
+                        const tempTask = querySnapshot.docs[0];
+                        const newTask = tempTask.data();
 
                         newTask.uid = tempTask.id;
                         newTask.groupName = group.name;
-                        newTask.dueDate = tempTask.due.toDate();
+                        newTask.dueDate = tempTask.data().due.toDate();
 
                         tsks.push(newTask);
                     }
@@ -210,11 +210,11 @@ export function StoreProvider({ children }) {
                         }
                         return 0;
                     });
-
-                    setTasks(tsks);
-                    setTaskLoading(false);
                 });
-        });
+        }
+
+        setTasks(tsks);
+        setTaskLoading(false);
     }
 
     function createTask(name, desc, group, dueDate) {
@@ -223,6 +223,7 @@ export function StoreProvider({ children }) {
             desc: desc,
             group: groupNameToUidMap.get(group),
             due: firebase.firestore.Timestamp.fromDate(dueDate),
+            completed: false,
         };
 
         store
@@ -233,18 +234,30 @@ export function StoreProvider({ children }) {
             });
     }
 
+    function deleteTask(task) {
+        store
+            .collection("tasks")
+            .doc(task)
+            .delete()
+            .then(() => {
+                getTasks();
+            });
+    }
+
     useEffect(() => {
         getGroups();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(getGroups, [currentUser]);
-
-    useEffect(
-        getTasks,
+    useEffect(() => {
+        getGroups();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [groups]
-    );
+    }, [currentUser]);
+
+    useEffect(() => {
+        getTasks();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [groups]);
 
     const value = {
         groups,
@@ -254,6 +267,7 @@ export function StoreProvider({ children }) {
         createGroup,
         tasks,
         createTask,
+        deleteTask,
     };
 
     return (

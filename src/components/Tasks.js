@@ -11,8 +11,9 @@ import {
     Table,
     OverlayTrigger,
     Tooltip,
+    Modal,
 } from "react-bootstrap";
-import { FaEye, FaCheck, FaTrash } from "react-icons/fa";
+import { FaEye, FaCheck, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -20,10 +21,33 @@ import "react-datepicker/dist/react-datepicker.css";
 import PageHeader from "./PageHeader";
 
 export default function Tasks() {
-    const { groups, tasks, createTask } = useStore();
+    const { groups, tasks, createTask, deleteTask } = useStore();
 
     const [showCreate, setShowCreate] = useState(false);
     const [error, setError] = useState("");
+
+    const [action, setAction] = useState("");
+    const [actionTask, setActionTask] = useState("");
+    const [showModal, setShowModal] = useState(false);
+
+    function modalAction() {
+        if (action === "delete") {
+            deleteTask(actionTask);
+        }
+        closeModal();
+    }
+
+    function openModal(taskUid, action) {
+        setAction(action);
+        setActionTask(taskUid);
+        setShowModal(true);
+    }
+
+    function closeModal() {
+        setAction("");
+        setActionTask("");
+        setShowModal(false);
+    }
 
     const renderTasks = () => {
         if (tasks && tasks.length === 0) {
@@ -32,6 +56,24 @@ export default function Tasks() {
             return (
                 <>
                     <h2>Your tasks</h2>
+
+                    <Modal show={showModal} onHide={closeModal}>
+                        <Modal.Header>
+                            <Modal.Title>
+                                <FaExclamationTriangle />
+                            </Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>Are you sure?</Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={closeModal}>
+                                Cancel
+                            </Button>
+                            <Button variant="warning" onClick={modalAction}>
+                                I AM SURE
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
+
                     <Table striped bordered hover responsive className="mt-3">
                         <thead>
                             <tr>
@@ -48,28 +90,32 @@ export default function Tasks() {
                             {tasks.map((task, index) => (
                                 <tr key={index}>
                                     <td>{index + 1}</td>
-                                    <td>{task.name}</td>
+                                    <td>{task.uid}</td>
                                     <td>{task.desc}</td>
                                     <td>{task.dueDate.toLocaleDateString("en-GB")}</td>
                                     <td>{task.groupName}</td>
                                     <td>
                                         <OverlayTrigger overlay={<Tooltip>View</Tooltip>}>
                                             <span className="d-inline-block me-md-2 my-1">
-                                                <Button variant="primary" size="sm">
+                                                <Button variant="primary" size="sm" disabled>
                                                     <FaEye />
                                                 </Button>
                                             </span>
                                         </OverlayTrigger>
                                         <OverlayTrigger overlay={<Tooltip>Complete</Tooltip>}>
                                             <span className="d-inline-block me-md-2 my-1">
-                                                <Button variant="success" size="sm">
+                                                <Button variant="success" size="sm" disabled>
                                                     <FaCheck />
                                                 </Button>
                                             </span>
                                         </OverlayTrigger>
                                         <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
                                             <span className="d-inline-block my-1">
-                                                <Button variant="danger" size="sm">
+                                                <Button
+                                                    onClick={() => openModal(task.uid, "delete")}
+                                                    variant="danger"
+                                                    size="sm"
+                                                >
                                                     <FaTrash />
                                                 </Button>
                                             </span>
