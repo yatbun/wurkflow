@@ -14,12 +14,14 @@ export function StoreProvider({ children }) {
     const { currentUser } = useAuth();
 
     const [groups, setGroups] = useState([]);
+    const [groupNameToUidMap, setGroupNameToUidMap] = useState(new Map());
     const [groupLoading, setGroupLoading] = useState(false);
     const [groupError, setGroupError] = useState("");
 
-    function getGroups() {
+    async function getGroups() {
         if (!currentUser) {
             setGroups([]);
+            setGroupNameToUidMap(new Map());
             return;
         }
 
@@ -27,7 +29,8 @@ export function StoreProvider({ children }) {
 
         const promises = [];
         const grps = [];
-        store
+        const groupMap = new Map();
+        await store
             .collection("users")
             .doc(currentUser.uid)
             .get()
@@ -41,6 +44,7 @@ export function StoreProvider({ children }) {
                             .then((g) => {
                                 const newGroup = g.data();
                                 newGroup.uid = g.id;
+                                groupMap.set(newGroup.name, newGroup.uid);
                                 grps.push(newGroup);
                             })
                     );
@@ -61,6 +65,7 @@ export function StoreProvider({ children }) {
                         return 0;
                     });
                     setGroups(grps);
+                    setGroupNameToUidMap(groupMap);
                     setGroupLoading(false);
                 });
             });
@@ -165,7 +170,7 @@ export function StoreProvider({ children }) {
     const [tasks, setTasks] = useState([]);
     const [taskLoading, setTaskLoading] = useState(false);
 
-    function getTasks() {
+    async function getTasks() {
         if (!currentUser) {
             setTasks([]);
             return;
@@ -175,22 +180,68 @@ export function StoreProvider({ children }) {
 
         const tsks = [];
 
-        groups.forEach((group) => {
-            store
+        for (const group of groups) {
+            await store
                 .collection("tasks")
                 .where("group", "==", group.uid)
                 .get()
                 .then((querySnapshot) => {
                     if (!querySnapshot.empty) {
-                        const newTask = querySnapshot.docs[0].data();
-                        newTask.uid = querySnapshot.docs[0].id;
+                        const tempTask = querySnapshot.docs[0];
+                        const newTask = tempTask.data();
+
+                        newTask.uid = tempTask.id;
                         newTask.groupName = group.name;
+                        newTask.dueDate = tempTask.data().due.toDate();
+
                         tsks.push(newTask);
                     }
+                })
+                .finally(() => {
+                    tsks.sort((a, b) => {
+                        const da = a.dueDate;
+                        const db = b.dueDate;
+
+                        if (da < db) {
+                            return -1;
+                        }
+                        if (da > db) {
+                            return 1;
+                        }
+                        return 0;
+                    });
                 });
-        });
+        }
+
         setTasks(tsks);
         setTaskLoading(false);
+    }
+
+    function createTask(name, desc, group, dueDate) {
+        const newTask = {
+            name: name,
+            desc: desc,
+            group: groupNameToUidMap.get(group),
+            due: firebase.firestore.Timestamp.fromDate(dueDate),
+            completed: false,
+        };
+
+        store
+            .collection("tasks")
+            .add(newTask)
+            .then(() => {
+                getTasks();
+            });
+    }
+
+    function deleteTask(task) {
+        store
+            .collection("tasks")
+            .doc(task)
+            .delete()
+            .then(() => {
+                getTasks();
+            });
     }
 
     useEffect(() => {
@@ -198,13 +249,15 @@ export function StoreProvider({ children }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(getGroups, [currentUser]);
-
-    useEffect(
-        getTasks,
+    useEffect(() => {
+        getGroups();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [groups]
-    );
+    }, [currentUser]);
+
+    useEffect(() => {
+        getTasks();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [groups]);
 
     const value = {
         groups,
@@ -213,6 +266,8 @@ export function StoreProvider({ children }) {
         joinGroup,
         createGroup,
         tasks,
+        createTask,
+        deleteTask,
     };
 
     return (

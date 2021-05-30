@@ -14,6 +14,7 @@ import {
     Form,
     Modal,
 } from "react-bootstrap";
+import { FaExclamationTriangle } from "react-icons/fa";
 
 import PageHeader from "./PageHeader";
 
@@ -52,7 +53,9 @@ export default function Teams() {
 
                     <Modal show={showModal} onHide={closeModal}>
                         <Modal.Header>
-                            <Modal.Title>Confirm</Modal.Title>
+                            <Modal.Title>
+                                <FaExclamationTriangle />
+                            </Modal.Title>
                         </Modal.Header>
                         <Modal.Body>Are you sure you want to leave this group?</Modal.Body>
                         <Modal.Footer>
