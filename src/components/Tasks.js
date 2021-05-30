@@ -90,7 +90,7 @@ export default function Tasks() {
                             {tasks.map((task, index) => (
                                 <tr key={index}>
                                     <td>{index + 1}</td>
-                                    <td>{task.uid}</td>
+                                    <td>{task.name}</td>
                                     <td>{task.desc}</td>
                                     <td>{task.dueDate.toLocaleDateString("en-GB")}</td>
                                     <td>{task.groupName}</td>
