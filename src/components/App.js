@@ -7,6 +7,7 @@ import LoggedOutRoute from "./LoggedOutRoute";
 import LoggedInRoute from "./LoggedInRoute";
 import Homepage from "./Homepage";
 import Login from "./Login";
+import ForgotPassword from "./ForgotPassword";
 import Signup from "./Signup";
 import UpdateProfile from "./UpdateProfile";
 
@@ -22,6 +23,7 @@ export default function App() {
                         <Switch>
                             <Route exact path="/" component={Homepage} />
                             <LoggedOutRoute path="/login" component={Login} />
+                            <LoggedOutRoute path="/forgot-password" component={ForgotPassword} />
                             <LoggedOutRoute path="/signup" component={Signup} />
                             <LoggedInRoute path="/update-profile" component={UpdateProfile} />
 
