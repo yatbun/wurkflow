@@ -63,10 +63,12 @@ export default function PageHeader() {
                             </Dropdown.Toggle>
 
                             <Dropdown.Menu>
+                                <Link to="/user-settings" className="dropdown-item">
+                                    User Settings
+                                </Link>
                                 <Link to="/update-profile" className="dropdown-item">
                                     Update Profile
                                 </Link>
-                                <Dropdown.Item>Settings</Dropdown.Item>
                                 <Dropdown.Divider />
                                 <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
                             </Dropdown.Menu>

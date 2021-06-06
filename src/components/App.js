@@ -9,6 +9,7 @@ import Homepage from "./Homepage";
 import Login from "./Login";
 import ForgotPassword from "./ForgotPassword";
 import Signup from "./Signup";
+import UserSettings from "./UserSettings";
 import UpdateProfile from "./UpdateProfile";
 
 import Tasks from "./Tasks";
@@ -25,6 +26,7 @@ export default function App() {
                             <LoggedOutRoute path="/login" component={Login} />
                             <LoggedOutRoute path="/forgot-password" component={ForgotPassword} />
                             <LoggedOutRoute path="/signup" component={Signup} />
+                            <LoggedInRoute path="/user-settings" component={UserSettings} />
                             <LoggedInRoute path="/update-profile" component={UpdateProfile} />
 
                             <LoggedInRoute path="/tasks" component={Tasks} />

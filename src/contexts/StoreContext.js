@@ -13,6 +13,89 @@ export function useStore() {
 export function StoreProvider({ children }) {
     const { currentUser } = useAuth();
 
+    // -------------------------
+    // Manages the user document
+
+    const [userData, setUserData] = useState(null);
+
+    async function getUserData() {
+        if (!currentUser) {
+            setUserData(null);
+            return;
+        }
+
+        store
+            .collection("users")
+            .doc(currentUser.uid)
+            .get()
+            .then((doc) => {
+                setUserData(doc.data());
+            });
+    }
+
+    async function updateCurrentOrg(oid) {
+        store
+            .collection("users")
+            .doc(currentUser.uid)
+            .update({
+                currentOrg: store.collection("orgs").doc(oid),
+            })
+            .then(() => {
+                getUserData();
+            });
+    }
+
+    // -----------------------------------------
+    // Gets the list of orgs that the user is in
+
+    const [orgs, setOrgs] = useState([]);
+
+    async function getOrgs() {
+        if (userData === null) {
+            setOrgs([]);
+            return;
+        }
+
+        const tempOrgs = [];
+
+        userData.orgs.forEach((o) => {
+            o.get().then((doc) => {
+                const temp = doc.data();
+                temp.uid = doc.id;
+                tempOrgs.push(temp);
+            });
+        });
+
+        setOrgs(tempOrgs);
+    }
+
+    // -----------------------------------------
+    // Get the list of teams that the user is in
+    // Note: Only the teams in the currentOrg
+
+    const [teams, setTeams] = useState([]);
+
+    async function getTeams() {
+        if (userData === null) {
+            setTeams([]);
+            return;
+        }
+
+        const tempTeams = [];
+
+        userData.teams.forEach((t) => {
+            t.get().then((doc) => {
+                if (doc.data().org.id === userData.currentOrg.id) {
+                    const temp = doc.data();
+                    temp.uid = doc.id;
+                    tempTeams.push(temp);
+                }
+            });
+        });
+
+        setTeams(tempTeams);
+    }
+
     const [groups, setGroups] = useState([]);
     const [groupNameToUidMap, setGroupNameToUidMap] = useState(new Map());
     const [groupLoading, setGroupLoading] = useState(false);
@@ -245,21 +328,21 @@ export function StoreProvider({ children }) {
     }
 
     useEffect(() => {
-        getGroups();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    useEffect(() => {
-        getGroups();
+        getUserData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentUser]);
 
     useEffect(() => {
-        getTasks();
+        getOrgs();
+        getTeams();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [groups]);
+    }, [userData]);
 
     const value = {
+        userData,
+        orgs,
+        updateCurrentOrg,
+        teams,
         groups,
         groupError,
         quitGroup,

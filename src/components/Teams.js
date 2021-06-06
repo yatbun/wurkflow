@@ -19,7 +19,7 @@ import { FaExclamationTriangle } from "react-icons/fa";
 import PageHeader from "./PageHeader";
 
 export default function Teams() {
-    const { groups, groupError, quitGroup, joinGroup, createGroup } = useStore();
+    const { teams, groupError, quitGroup, joinGroup, createGroup } = useStore();
 
     const [joinOpen, setJoinOpen] = useState(false);
     const [createOpen, setCreateOpen] = useState(false);
@@ -43,8 +43,9 @@ export default function Teams() {
         setShowModal(false);
     }
 
-    const renderGroups = () => {
-        if (groups && groups.length === 0) {
+    const renderTeams = () => {
+        console.log(teams);
+        if (teams && teams.length === 0) {
             return <h2>You are currently not in any team right now.</h2>;
         } else {
             return (
@@ -68,28 +69,28 @@ export default function Teams() {
                         </Modal.Footer>
                     </Modal>
 
-                    <Tab.Container defaultActiveKey={groups[0].id}>
+                    <Tab.Container defaultActiveKey={teams[0].id}>
                         <Row className="mt-5">
                             <Col sm={3} lg={2} className="border-end">
                                 <Nav variant="pills" className="flex-column">
-                                    {groups.map((g) => (
-                                        <Nav.Item key={g.uid}>
-                                            <Nav.Link eventKey={g.id}>{g.name}</Nav.Link>
+                                    {teams.map((t) => (
+                                        <Nav.Item key={t.uid}>
+                                            <Nav.Link eventKey={t.id}>{t.name}</Nav.Link>
                                         </Nav.Item>
                                     ))}
                                 </Nav>
                             </Col>
                             <Col sm={9} lg={10}>
                                 <Tab.Content className="p-5 bg-light rounded border">
-                                    {groups.map((g) => (
-                                        <Tab.Pane key={g.uid} eventKey={g.id}>
-                                            <h2>{g.name}</h2>
-                                            <h6>Team ID: {g.id}</h6>
+                                    {teams.map((t) => (
+                                        <Tab.Pane key={t.uid} eventKey={t.id}>
+                                            <h2>{t.name}</h2>
+                                            <h6>Team ID: {t.id}</h6>
 
-                                            <p className="mt-4">{g.desc}</p>
+                                            <p className="mt-4">{t.desc}</p>
                                             <Button
                                                 variant="warning"
-                                                onClick={() => openModal(g.uid)}
+                                                onClick={() => openModal(t.uid)}
                                             >
                                                 Quit Team
                                             </Button>
@@ -263,7 +264,7 @@ export default function Teams() {
                             </div>
                         </Collapse>
                     </Container>
-                    <Container className="col-sm-12 mx-auto mt-2 p-5">{renderGroups()}</Container>
+                    <Container className="col-sm-12 mx-auto mt-2 p-5">{renderTeams()}</Container>
                 </Container>
             </Container>
         </>
