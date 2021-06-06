@@ -19,32 +19,12 @@ import { FaExclamationTriangle } from "react-icons/fa";
 import PageHeader from "./PageHeader";
 
 export default function Teams() {
-    const { teams, groupError, quitGroup, joinGroup, createGroup } = useStore();
-
-    const [joinOpen, setJoinOpen] = useState(false);
-    const [createOpen, setCreateOpen] = useState(false);
-
-    const [delGroup, setDelGroup] = useState("");
-    const [showModal, setShowModal] = useState(false);
-    const closeModal = () => setShowModal(false);
-    const openModal = (group) => {
-        setDelGroup(group);
-        setShowModal(true);
-    };
-
-    useEffect(() => {
-        setError(groupError);
-    }, [groupError]);
-
-    async function quitTeam() {
-        setError("");
-        quitGroup(delGroup);
-        setDelGroup(null);
-        setShowModal(false);
-    }
+    const { currentOrg, teams, teamsMessage, teamsError, quitTeam, joinTeam, createTeam } =
+        useStore();
+    const [message, setMessage] = useState("");
+    const [error, setError] = useState("");
 
     const renderTeams = () => {
-        console.log(teams);
         if (teams && teams.length === 0) {
             return <h2>You are currently not in any team right now.</h2>;
         } else {
@@ -63,7 +43,7 @@ export default function Teams() {
                             <Button variant="secondary" onClick={closeModal}>
                                 Cancel
                             </Button>
-                            <Button variant="warning" onClick={quitTeam}>
+                            <Button variant="warning" onClick={quitHandler}>
                                 I AM SURE
                             </Button>
                         </Modal.Footer>
@@ -105,11 +85,37 @@ export default function Teams() {
         }
     };
 
+    // -----------------------------
+    // Handles the quitting of teams
+
+    const [teamQuit, setTeamQuit] = useState("");
+    const [showModal, setShowModal] = useState(false);
+    const closeModal = () => setShowModal(false);
+    const openModal = (tuid) => {
+        setMessage("");
+        setTeamQuit(tuid);
+        setShowModal(true);
+    };
+
+    async function quitHandler() {
+        setError("");
+        quitTeam(teamQuit);
+        setTeamQuit("");
+        setShowModal(false);
+    }
+
+    // -----------------------------------------
+    // Handles the joining and creating of teams
+
+    const [joinOpen, setJoinOpen] = useState(false);
+    const [createOpen, setCreateOpen] = useState(false);
+
     function joinToggle() {
         if (!joinOpen && createOpen) {
             setCreateOpen(false);
         }
         setJoinOpen(!joinOpen);
+        setMessage("");
         setError("");
         clearFields();
     }
@@ -119,11 +125,12 @@ export default function Teams() {
             setJoinOpen(false);
         }
         setCreateOpen(!createOpen);
+        setMessage("");
         setError("");
         clearFields();
     }
 
-    const [error, setError] = useState("");
+    const [currentOrgName, setCurrentOrgName] = useState("");
     const joinGroupIdRef = useRef();
     const groupNameRef = useRef();
     const groupIdRef = useRef();
@@ -137,41 +144,67 @@ export default function Teams() {
         groupDescRef.current.value = "";
     }
 
-    async function joinTeam(e) {
+    async function handleJoin(e) {
         e.preventDefault();
-        setError("");
 
-        await joinGroup(
-            joinOpen ? joinGroupIdRef.current.value.toLowerCase() : groupIdRef.current.value
-        );
+        const temp = joinOpen ? joinGroupIdRef.current.value : groupIdRef.current.value;
+        joinTeam(currentOrgName + "-" + temp);
+
+        clearFields();
+        joinToggle();
     }
 
     function nameChange() {
         setGroupId(
-            groupNameRef.current.value
-                .replace(/[^\w\s]/gi, "")
-                .replace(/\s+/g, "-")
-                .toLowerCase()
+            currentOrgName +
+                "-" +
+                groupNameRef.current.value
+                    .replace(/[^\w\s]/gi, "")
+                    .replace(/\s+/g, "-")
+                    .toLowerCase()
         );
     }
 
-    async function createTeam(e) {
+    async function handleCreate(e) {
         e.preventDefault();
 
         setError("");
-        await createGroup(
+        createTeam(
             groupIdRef.current.value,
             groupNameRef.current.value,
             groupDescRef.current.value
         );
 
         clearFields();
+        createToggle();
     }
+
+    useEffect(() => {
+        if (currentOrg) {
+            setCurrentOrgName(currentOrg.id);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        if (currentOrg) {
+            setCurrentOrgName(currentOrg.id);
+        }
+    }, [currentOrg]);
+
+    useEffect(() => {
+        setMessage(teamsMessage);
+    }, [teamsMessage]);
+
+    useEffect(() => {
+        setError(teamsError);
+    }, [teamsError]);
 
     return (
         <>
             <PageHeader />
             <Container className="pt-5 mt-5">
+                {message && <Alert variant="success">{message}</Alert>}
                 {error && <Alert variant="danger">{error}</Alert>}
                 <Container className="d-flex flex-column">
                     <Container className="col-sm-12 mx-auto bg-light p-5 rounded">
@@ -197,8 +230,13 @@ export default function Teams() {
                                     className="mt-5 col-md-8 col-lg-5"
                                     stlye={{ maxWidth: "300px" }}
                                 >
-                                    <Form onSubmit={joinTeam}>
+                                    <Form onSubmit={handleJoin}>
                                         <InputGroup className="mb-3">
+                                            <InputGroup.Prepend>
+                                                <InputGroup.Text>
+                                                    {currentOrgName + "-"}
+                                                </InputGroup.Text>
+                                            </InputGroup.Prepend>
                                             <FormControl
                                                 type="text"
                                                 ref={joinGroupIdRef}
@@ -215,7 +253,7 @@ export default function Teams() {
                         <Collapse in={createOpen}>
                             <div>
                                 <Container className="mt-5 col-8" stlye={{ maxWidth: "300px" }}>
-                                    <Form onSubmit={createTeam}>
+                                    <Form onSubmit={handleCreate}>
                                         <Form.Group as={Row} className="mb-3">
                                             <Form.Label column sm="2">
                                                 Team Name

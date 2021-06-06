@@ -45,6 +45,19 @@ export function StoreProvider({ children }) {
             });
     }
 
+    const [currentOrg, setCurrentOrg] = useState(null);
+
+    async function getCurrentOrg() {
+        if (userData) {
+            userData.currentOrg.get().then((doc) => {
+                const temp = doc.data();
+                temp.uid = doc.id;
+                temp.ref = store.doc(doc.ref.path);
+                setCurrentOrg(temp);
+            });
+        }
+    }
+
     // -----------------------------------------
     // Gets the list of orgs that the user is in
 
@@ -74,6 +87,8 @@ export function StoreProvider({ children }) {
     // Note: Only the teams in the currentOrg
 
     const [teams, setTeams] = useState([]);
+    const [teamsMessage, setTeamsMessage] = useState("");
+    const [teamsError, setTeamsError] = useState("");
 
     async function getTeams() {
         if (userData === null) {
@@ -96,160 +111,87 @@ export function StoreProvider({ children }) {
         setTeams(tempTeams);
     }
 
-    const [groups, setGroups] = useState([]);
-    const [groupNameToUidMap, setGroupNameToUidMap] = useState(new Map());
-    const [groupLoading, setGroupLoading] = useState(false);
-    const [groupError, setGroupError] = useState("");
+    async function quitTeam(tuid) {
+        setTeamsMessage("");
+        setTeamsError("");
 
-    async function getGroups() {
-        if (!currentUser) {
-            setGroups([]);
-            setGroupNameToUidMap(new Map());
-            return;
-        }
+        const tempTeam = store.collection("teams").doc(tuid);
 
-        setGroupLoading(true);
-
-        const promises = [];
-        const grps = [];
-        const groupMap = new Map();
-        await store
+        store
             .collection("users")
             .doc(currentUser.uid)
-            .get()
-            .then((doc) => {
-                doc.data().groups.forEach((grp) => {
-                    promises.push(
-                        store
-                            .collection("groups")
-                            .doc(grp)
-                            .get()
-                            .then((g) => {
-                                const newGroup = g.data();
-                                newGroup.uid = g.id;
-                                groupMap.set(newGroup.name, newGroup.uid);
-                                grps.push(newGroup);
-                            })
-                    );
-                });
+            .update({
+                teams: firebase.firestore.FieldValue.arrayRemove(tempTeam),
             })
-            .finally(() => {
-                Promise.all(promises).then(() => {
-                    grps.sort((a, b) => {
-                        const fa = a.name.toLowerCase();
-                        const fb = b.name.toLowerCase();
-
-                        if (fa < fb) {
-                            return -1;
-                        }
-                        if (fa > fb) {
-                            return 1;
-                        }
-                        return 0;
-                    });
-                    setGroups(grps);
-                    setGroupNameToUidMap(groupMap);
-                    setGroupLoading(false);
-                });
+            .then(() => {
+                getUserData();
+            })
+            .catch((e) => {
+                setTeamsError(e);
             });
+
+        setTeamsMessage("Successfully quit team.");
     }
 
-    async function quitGroup(gid) {
-        await store
-            .collection("groups")
-            .doc(gid)
-            .update({
-                members: firebase.firestore.FieldValue.arrayRemove(currentUser.uid),
-            });
+    async function joinTeam(tid) {
+        setTeamsMessage("");
+        setTeamsError("");
 
-        await store
-            .collection("users")
-            .doc(currentUser.uid)
-            .update({
-                groups: firebase.firestore.FieldValue.arrayRemove(gid),
-            });
-
-        getGroups();
-    }
-
-    async function joinGroup(grpId) {
-        setGroupError("");
-
-        let existing = false;
-        let group = null;
-
-        // Get the group
-        await store
-            .collection("groups")
-            .where("id", "==", grpId)
+        store
+            .collection("teams")
+            .where("id", "==", tid)
             .get()
             .then((querySnapshot) => {
-                if (!querySnapshot.empty) {
-                    existing = true;
-                    group = querySnapshot.docs[0];
+                if (querySnapshot.empty) {
+                    setTeamsError("No team with such ID exists.");
+                    return;
+                } else {
+                    store
+                        .collection("users")
+                        .doc(currentUser.uid)
+                        .update({
+                            teams: firebase.firestore.FieldValue.arrayUnion(
+                                store.doc(querySnapshot.docs[0].ref.path)
+                            ),
+                        })
+                        .then(() => {
+                            getUserData();
+                        });
                 }
             });
-
-        // Check if group exists
-        if (!existing) {
-            setGroupError("No group with such ID exists!");
-            return;
-        }
-
-        await store
-            .collection("groups")
-            .doc(group.id)
-            .update({
-                members: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
-            });
-
-        await store
-            .collection("users")
-            .doc(currentUser.uid)
-            .update({
-                groups: firebase.firestore.FieldValue.arrayUnion(group.id),
-            });
-
-        getGroups();
     }
 
-    async function createGroup(id, name, desc) {
-        setGroupError("");
-        let existing = false;
+    async function createTeam(id, name, desc) {
+        setTeamsMessage("");
+        setTeamsError("");
 
-        await store
-            .collection("groups")
+        store
+            .collection("teams")
             .where("id", "==", id)
             .get()
             .then((querySnapshot) => {
-                if (!querySnapshot.empty) {
-                    existing = true;
+                if (querySnapshot.empty) {
+                    // Create new team
+                    const newTeam = {
+                        id: id,
+                        name: name,
+                        desc: desc,
+                        org: currentOrg.ref,
+                    };
+                    store
+                        .collection("teams")
+                        .add(newTeam)
+                        .then(() => {
+                            joinTeam(id);
+                        });
+                } else {
+                    setTeamsError("A team with this ID already exists. Try another one.");
+                    return;
                 }
-            });
-
-        if (existing) {
-            setGroupError("A team with this ID already exists. Try another one.");
-            return;
-        }
-
-        const newGroup = {
-            id: id,
-            name: name,
-            desc: desc,
-            members: [],
-        };
-
-        store
-            .collection("groups")
-            .add(newGroup)
-            .then(() => {
-                joinGroup(id);
-            })
-            .catch(() => {
-                setGroupError("Failed to create new group.");
             });
     }
 
+    const [groups, setGroups] = useState([]);
     const [tasks, setTasks] = useState([]);
     const [taskLoading, setTaskLoading] = useState(false);
 
@@ -304,7 +246,7 @@ export function StoreProvider({ children }) {
         const newTask = {
             name: name,
             desc: desc,
-            group: groupNameToUidMap.get(group),
+            group: group,
             due: firebase.firestore.Timestamp.fromDate(dueDate),
             completed: false,
         };
@@ -333,6 +275,7 @@ export function StoreProvider({ children }) {
     }, [currentUser]);
 
     useEffect(() => {
+        getCurrentOrg();
         getOrgs();
         getTeams();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -340,22 +283,19 @@ export function StoreProvider({ children }) {
 
     const value = {
         userData,
+        currentOrg,
         orgs,
         updateCurrentOrg,
         teams,
-        groups,
-        groupError,
-        quitGroup,
-        joinGroup,
-        createGroup,
+        teamsMessage,
+        teamsError,
+        quitTeam,
+        joinTeam,
+        createTeam,
         tasks,
         createTask,
         deleteTask,
     };
 
-    return (
-        <StoreContext.Provider value={value}>
-            {!groupLoading && !taskLoading && children}
-        </StoreContext.Provider>
-    );
+    return <StoreContext.Provider value={value}>{!taskLoading && children}</StoreContext.Provider>;
 }

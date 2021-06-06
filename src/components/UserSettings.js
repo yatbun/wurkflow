@@ -6,34 +6,26 @@ import { useHistory } from "react-router-dom";
 import PageHeader from "./PageHeader";
 
 export default function UserSettings() {
-    const { userData, orgs, updateCurrentOrg } = useStore();
+    const { currentOrg, orgs, updateCurrentOrg } = useStore();
     const orgsRef = useRef();
     const history = useHistory();
-
-    // Sets the value of the selector to the current organisation
-    function updateSelect() {
-        if (userData) {
-            userData.currentOrg.get().then((doc) => {
-                orgsRef.current.value = doc.data().name;
-            });
-        }
-    }
 
     function handleSubmit(e) {
         e.preventDefault();
 
         // Get the unique ID of the selected organisation
-        const oid = orgs.filter((o) => {
+        const ouid = orgs.filter((o) => {
             return o.name === orgsRef.current.value;
         })[0].uid;
 
-        updateCurrentOrg(oid);
+        updateCurrentOrg(ouid);
 
         history.push("/");
     }
 
     useEffect(() => {
-        updateSelect();
+        orgsRef.current.value = currentOrg.name;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
