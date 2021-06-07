@@ -7,10 +7,20 @@ import PageHeader from "./PageHeader";
 
 export default function UserSettings() {
     const { currentOrg, orgs, updateCurrentOrg } = useStore();
-    const orgsRef = useRef();
     const history = useHistory();
 
-    function handleSubmit(e) {
+    const joinRef = useRef();
+
+    function handleJoin(e) {
+        e.preventDefault();
+    }
+
+    // ---------------------------------------
+    // Handle changing of current organisation
+
+    const orgsRef = useRef();
+
+    function handleChange(e) {
         e.preventDefault();
 
         // Get the unique ID of the selected organisation
@@ -24,7 +34,9 @@ export default function UserSettings() {
     }
 
     useEffect(() => {
-        orgsRef.current.value = currentOrg.name;
+        if (currentOrg) {
+            orgsRef.current.value = currentOrg.name;
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -36,7 +48,17 @@ export default function UserSettings() {
                     <Card className="p-4" style={{ minWidth: "400px" }}>
                         <Card.Title>User Settings</Card.Title>
 
-                        <Form onSubmit={handleSubmit}>
+                        <Form onSubmit={handleJoin}>
+                            <Form.Group className="mt-4">
+                                <Form.Label>Join Organisation:</Form.Label>
+                                <Form.Control type="text" ref={joinRef} placeholder="Invite ID" />
+                            </Form.Group>
+                            <Button className="w-100 mt-4" type="submit" disabled>
+                                Join
+                            </Button>
+                        </Form>
+
+                        <Form onSubmit={handleChange}>
                             <Form.Group className="mt-4">
                                 <Form.Label>Current Organisation: </Form.Label>
                                 <Form.Control as="select" ref={orgsRef} className="form-select">
