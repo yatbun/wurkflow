@@ -13,215 +13,260 @@ export function useStore() {
 export function StoreProvider({ children }) {
     const { currentUser } = useAuth();
 
-    const [groups, setGroups] = useState([]);
-    const [groupNameToUidMap, setGroupNameToUidMap] = useState(new Map());
-    const [groupLoading, setGroupLoading] = useState(false);
-    const [groupError, setGroupError] = useState("");
+    // -------------------------
+    // Manages the user document
 
-    async function getGroups() {
+    const [userData, setUserData] = useState(null);
+
+    async function getUserData() {
         if (!currentUser) {
-            setGroups([]);
-            setGroupNameToUidMap(new Map());
+            setUserData(null);
             return;
         }
 
-        setGroupLoading(true);
-
-        const promises = [];
-        const grps = [];
-        const groupMap = new Map();
-        await store
+        store
             .collection("users")
             .doc(currentUser.uid)
             .get()
             .then((doc) => {
-                doc.data().groups.forEach((grp) => {
-                    promises.push(
-                        store
-                            .collection("groups")
-                            .doc(grp)
-                            .get()
-                            .then((g) => {
-                                const newGroup = g.data();
-                                newGroup.uid = g.id;
-                                groupMap.set(newGroup.name, newGroup.uid);
-                                grps.push(newGroup);
-                            })
-                    );
-                });
-            })
-            .finally(() => {
-                Promise.all(promises).then(() => {
-                    grps.sort((a, b) => {
-                        const fa = a.name.toLowerCase();
-                        const fb = b.name.toLowerCase();
-
-                        if (fa < fb) {
-                            return -1;
-                        }
-                        if (fa > fb) {
-                            return 1;
-                        }
-                        return 0;
-                    });
-                    setGroups(grps);
-                    setGroupNameToUidMap(groupMap);
-                    setGroupLoading(false);
-                });
+                setUserData(doc.data());
             });
     }
 
-    async function quitGroup(gid) {
-        await store
-            .collection("groups")
-            .doc(gid)
-            .update({
-                members: firebase.firestore.FieldValue.arrayRemove(currentUser.uid),
-            });
-
-        await store
+    async function updateCurrentOrg(oid) {
+        store
             .collection("users")
             .doc(currentUser.uid)
             .update({
-                groups: firebase.firestore.FieldValue.arrayRemove(gid),
+                currentOrg: store.collection("orgs").doc(oid),
+            })
+            .then(() => {
+                getUserData();
             });
-
-        getGroups();
     }
 
-    async function joinGroup(grpId) {
-        setGroupError("");
+    const [currentOrg, setCurrentOrg] = useState(null);
 
-        let existing = false;
-        let group = null;
-
-        // Get the group
-        await store
-            .collection("groups")
-            .where("id", "==", grpId)
-            .get()
-            .then((querySnapshot) => {
-                if (!querySnapshot.empty) {
-                    existing = true;
-                    group = querySnapshot.docs[0];
-                }
+    async function getCurrentOrg() {
+        if (userData) {
+            userData.currentOrg.get().then((doc) => {
+                const temp = doc.data();
+                temp.uid = doc.id;
+                temp.ref = store.doc(doc.ref.path);
+                setCurrentOrg(temp);
             });
+        }
+    }
 
-        // Check if group exists
-        if (!existing) {
-            setGroupError("No group with such ID exists!");
+    // -----------------------------------------
+    // Gets the list of orgs that the user is in
+
+    const [orgs, setOrgs] = useState([]);
+
+    async function getOrgs() {
+        if (userData === null) {
+            setOrgs([]);
             return;
         }
 
-        await store
-            .collection("groups")
-            .doc(group.id)
-            .update({
-                members: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+        const tempOrgs = [];
+
+        userData.orgs.forEach((o) => {
+            o.get().then((doc) => {
+                const temp = doc.data();
+                temp.uid = doc.id;
+                tempOrgs.push(temp);
+            });
+        });
+
+        setOrgs(tempOrgs);
+    }
+
+    // -----------------------------------------
+    // Get the list of teams that the user is in
+    // Note: Only the teams in the currentOrg
+
+    const [teams, setTeams] = useState([]);
+    const [teamsMessage, setTeamsMessage] = useState("");
+    const [teamsError, setTeamsError] = useState("");
+
+    async function getTeams() {
+        if (userData === null) {
+            setTeams([]);
+            return;
+        }
+
+        const promises = [];
+        const tempTeams = [];
+
+        userData.teams.forEach((t) => {
+            promises.push(
+                t.get().then((doc) => {
+                    if (doc.data().org.id === userData.currentOrg.id) {
+                        const temp = doc.data();
+                        temp.uid = doc.id;
+                        tempTeams.push(temp);
+                    }
+                })
+            );
+        });
+
+        Promise.all(promises).then(() => {
+            tempTeams.sort((a, b) => {
+                const na = a.name;
+                const nb = b.name;
+
+                if (na < nb) {
+                    return -1;
+                }
+                if (na > nb) {
+                    return 1;
+                }
+                return 0;
             });
 
-        await store
+            setTeams(tempTeams);
+        });
+    }
+
+    async function quitTeam(tuid) {
+        setTeamsMessage("");
+        setTeamsError("");
+
+        const tempTeam = store.collection("teams").doc(tuid);
+
+        store
             .collection("users")
             .doc(currentUser.uid)
             .update({
-                groups: firebase.firestore.FieldValue.arrayUnion(group.id),
+                teams: firebase.firestore.FieldValue.arrayRemove(tempTeam),
+            })
+            .then(() => {
+                getUserData();
+            })
+            .catch((e) => {
+                setTeamsError(e);
             });
 
-        getGroups();
+        setTeamsMessage("Successfully quit team.");
     }
 
-    async function createGroup(id, name, desc) {
-        setGroupError("");
-        let existing = false;
+    async function joinTeam(tid) {
+        setTeamsMessage("");
+        setTeamsError("");
 
-        await store
-            .collection("groups")
+        store
+            .collection("teams")
+            .where("id", "==", tid)
+            .get()
+            .then((querySnapshot) => {
+                if (querySnapshot.empty) {
+                    setTeamsError("No team with such ID exists.");
+                    return;
+                } else {
+                    store
+                        .collection("users")
+                        .doc(currentUser.uid)
+                        .update({
+                            teams: firebase.firestore.FieldValue.arrayUnion(
+                                store.doc(querySnapshot.docs[0].ref.path)
+                            ),
+                        })
+                        .then(() => {
+                            getUserData();
+                        });
+                }
+            });
+    }
+
+    async function createTeam(id, name, desc) {
+        setTeamsMessage("");
+        setTeamsError("");
+
+        store
+            .collection("teams")
             .where("id", "==", id)
             .get()
             .then((querySnapshot) => {
-                if (!querySnapshot.empty) {
-                    existing = true;
+                if (querySnapshot.empty) {
+                    // Create new team
+                    const newTeam = {
+                        id: id,
+                        name: name,
+                        desc: desc,
+                        org: currentOrg.ref,
+                    };
+                    store
+                        .collection("teams")
+                        .add(newTeam)
+                        .then(() => {
+                            joinTeam(id);
+                        });
+                } else {
+                    setTeamsError("A team with this ID already exists. Try another one.");
+                    return;
                 }
-            });
-
-        if (existing) {
-            setGroupError("A team with this ID already exists. Try another one.");
-            return;
-        }
-
-        const newGroup = {
-            id: id,
-            name: name,
-            desc: desc,
-            members: [],
-        };
-
-        store
-            .collection("groups")
-            .add(newGroup)
-            .then(() => {
-                joinGroup(id);
-            })
-            .catch(() => {
-                setGroupError("Failed to create new group.");
             });
     }
 
+    // -------------------------------------------
+    // Gets the list of tasks for the user's teams
+
     const [tasks, setTasks] = useState([]);
-    const [taskLoading, setTaskLoading] = useState(false);
 
     async function getTasks() {
-        if (!currentUser) {
+        if (teams.length === 0) {
             setTasks([]);
             return;
         }
 
-        setTaskLoading(true);
+        const promises = [];
+        const allTasks = [];
 
-        const tsks = [];
+        for (const team of teams) {
+            promises.push(
+                store
+                    .collection("tasks")
+                    .where("team", "==", store.collection("teams").doc(team.uid))
+                    .get()
+                    .then((querySnapshot) => {
+                        if (!querySnapshot.empty) {
+                            querySnapshot.forEach((doc) => {
+                                const newTask = doc.data();
+                                newTask.uid = doc.id;
+                                newTask.teamName = team.name;
+                                newTask.dueDate = newTask.due.toDate();
 
-        for (const group of groups) {
-            await store
-                .collection("tasks")
-                .where("group", "==", group.uid)
-                .get()
-                .then((querySnapshot) => {
-                    if (!querySnapshot.empty) {
-                        const tempTask = querySnapshot.docs[0];
-                        const newTask = tempTask.data();
-
-                        newTask.uid = tempTask.id;
-                        newTask.groupName = group.name;
-                        newTask.dueDate = tempTask.data().due.toDate();
-
-                        tsks.push(newTask);
-                    }
-                })
-                .finally(() => {
-                    tsks.sort((a, b) => {
-                        const da = a.dueDate;
-                        const db = b.dueDate;
-
-                        if (da < db) {
-                            return -1;
+                                allTasks.push(newTask);
+                            });
                         }
-                        if (da > db) {
-                            return 1;
-                        }
-                        return 0;
-                    });
-                });
+                    })
+            );
         }
 
-        setTasks(tsks);
-        setTaskLoading(false);
+        Promise.all(promises).then(() => {
+            allTasks.sort((a, b) => {
+                const da = a.dueDate;
+                const db = b.dueDate;
+
+                if (da < db) {
+                    return -1;
+                }
+                if (da > db) {
+                    return 1;
+                }
+                return 0;
+            });
+
+            setTasks(allTasks);
+        });
     }
 
-    function createTask(name, desc, group, dueDate) {
+    function createTask(name, desc, tuid, dueDate) {
         const newTask = {
             name: name,
             desc: desc,
-            group: groupNameToUidMap.get(group),
+            team: store.collection("teams").doc(tuid),
             due: firebase.firestore.Timestamp.fromDate(dueDate),
             completed: false,
         };
@@ -234,10 +279,10 @@ export function StoreProvider({ children }) {
             });
     }
 
-    function deleteTask(task) {
+    function deleteTask(tuid) {
         store
             .collection("tasks")
-            .doc(task)
+            .doc(tuid)
             .delete()
             .then(() => {
                 getTasks();
@@ -245,34 +290,37 @@ export function StoreProvider({ children }) {
     }
 
     useEffect(() => {
-        getGroups();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    useEffect(() => {
-        getGroups();
+        getUserData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentUser]);
 
     useEffect(() => {
+        getCurrentOrg();
+        getOrgs();
+        getTeams();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userData]);
+
+    useEffect(() => {
         getTasks();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [groups]);
+    }, [teams]);
 
     const value = {
-        groups,
-        groupError,
-        quitGroup,
-        joinGroup,
-        createGroup,
+        userData,
+        currentOrg,
+        orgs,
+        updateCurrentOrg,
+        teams,
+        teamsMessage,
+        teamsError,
+        quitTeam,
+        joinTeam,
+        createTeam,
         tasks,
         createTask,
         deleteTask,
     };
 
-    return (
-        <StoreContext.Provider value={value}>
-            {!groupLoading && !taskLoading && children}
-        </StoreContext.Provider>
-    );
+    return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

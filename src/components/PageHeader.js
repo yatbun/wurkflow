@@ -4,12 +4,14 @@ import { useAuth } from "../contexts/AuthContext";
 import logo from "../img/logo.png";
 
 import { Navbar, Nav, Container, Image, Dropdown } from "react-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 
 export default function PageHeader() {
     const { currentUser, logout } = useAuth();
-    const [error, setError] = useState("");
     const history = useHistory();
+
+    const [error, setError] = useState("");
 
     async function handleLogout() {
         setError("");
@@ -32,25 +34,29 @@ export default function PageHeader() {
                 </Navbar.Brand>
 
                 <Nav className="mr-auto">
-                    <Link to="/" className="nav-link px-2 link-dark">
-                        Home
-                    </Link>
+                    <LinkContainer to="/home">
+                        <Nav.Link eventKey={1}> Home</Nav.Link>
+                    </LinkContainer>
 
                     {currentUser && (
                         <>
-                            <Link to="/tasks" className="nav-link px-2 link-dark">
-                                Tasks
-                            </Link>
-                            <Link to="/teams" className="nav-link px-2 link-dark">
-                                Teams
-                            </Link>
-                            <Link to="/workflows" className="nav-link px-2 link-dark disabled">
-                                Workflows
-                            </Link>
+                            <LinkContainer to="/tasks">
+                                <Nav.Link eventKey={2}>Tasks</Nav.Link>
+                            </LinkContainer>
+
+                            <LinkContainer to="/teams">
+                                <Nav.Link eventKey={3}>Teams</Nav.Link>
+                            </LinkContainer>
+
+                            <LinkContainer to="/workflows">
+                                <Nav.Link eventKey={4} disabled>
+                                    Workflows
+                                </Nav.Link>
+                            </LinkContainer>
                         </>
                     )}
 
-                    <Link to="/" className="nav-link px-2 link-dark disabled">
+                    <Link to="/" className="nav-link px-2 disabled">
                         About
                     </Link>
                 </Nav>
@@ -63,10 +69,12 @@ export default function PageHeader() {
                             </Dropdown.Toggle>
 
                             <Dropdown.Menu>
+                                <Link to="/user-settings" className="dropdown-item">
+                                    User Settings
+                                </Link>
                                 <Link to="/update-profile" className="dropdown-item">
                                     Update Profile
                                 </Link>
-                                <Dropdown.Item>Settings</Dropdown.Item>
                                 <Dropdown.Divider />
                                 <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
                             </Dropdown.Menu>

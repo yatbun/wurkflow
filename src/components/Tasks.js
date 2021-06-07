@@ -21,7 +21,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import PageHeader from "./PageHeader";
 
 export default function Tasks() {
-    const { groups, tasks, createTask, deleteTask } = useStore();
+    const { teams, tasks, createTask, deleteTask } = useStore();
 
     const [showCreate, setShowCreate] = useState(false);
     const [error, setError] = useState("");
@@ -93,7 +93,7 @@ export default function Tasks() {
                                     <td>{task.name}</td>
                                     <td>{task.desc}</td>
                                     <td>{task.dueDate.toLocaleDateString("en-GB")}</td>
-                                    <td>{task.groupName}</td>
+                                    <td>{task.teamName}</td>
                                     <td>
                                         <OverlayTrigger overlay={<Tooltip>View</Tooltip>}>
                                             <span className="d-inline-block me-md-2 my-1">
@@ -136,15 +136,19 @@ export default function Tasks() {
     const taskTeamRef = useRef();
     const [taskDate, setTaskDate] = useState(new Date());
 
-    function makeTask(e) {
+    function handleCreate(e) {
         e.preventDefault();
 
-        createTask(
-            taskNameRef.current.value,
-            taskDescRef.current.value,
-            taskTeamRef.current.value,
-            taskDate
-        );
+        const tuid = teams.filter((t) => {
+            return t.name === taskTeamRef.current.value;
+        })[0].uid;
+
+        createTask(taskNameRef.current.value, taskDescRef.current.value, tuid, taskDate);
+
+        taskNameRef.current.value = "";
+        taskDescRef.current.value = "";
+        setTaskDate(new Date());
+        setShowCreate(false);
     }
 
     return (
@@ -169,7 +173,7 @@ export default function Tasks() {
                         <Collapse in={showCreate}>
                             <div>
                                 <Container className="mt-5 col-10" style={{ maxWidth: "600px" }}>
-                                    <Form onSubmit={makeTask}>
+                                    <Form onSubmit={handleCreate}>
                                         <Form.Group as={Row} className="mb-3">
                                             <Form.Label column sm="3">
                                                 Task Name
@@ -202,10 +206,8 @@ export default function Tasks() {
                                                     ref={taskTeamRef}
                                                     className="form-select"
                                                 >
-                                                    {groups.map((group) => (
-                                                        <option key={group.uid}>
-                                                            {group.name}
-                                                        </option>
+                                                    {teams.map((team) => (
+                                                        <option key={team.uid}>{team.name}</option>
                                                     ))}
                                                 </Form.Control>
                                             </Col>

@@ -6,9 +6,11 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import LoggedOutRoute from "./LoggedOutRoute";
 import LoggedInRoute from "./LoggedInRoute";
 import Homepage from "./Homepage";
+import Home from "./Home";
 import Login from "./Login";
 import ForgotPassword from "./ForgotPassword";
 import Signup from "./Signup";
+import UserSettings from "./UserSettings";
 import UpdateProfile from "./UpdateProfile";
 
 import Tasks from "./Tasks";
@@ -22,9 +24,11 @@ export default function App() {
                     <StoreProvider>
                         <Switch>
                             <Route exact path="/" component={Homepage} />
+                            <Route path="/home" component={Home} />
                             <LoggedOutRoute path="/login" component={Login} />
                             <LoggedOutRoute path="/forgot-password" component={ForgotPassword} />
                             <LoggedOutRoute path="/signup" component={Signup} />
+                            <LoggedInRoute path="/user-settings" component={UserSettings} />
                             <LoggedInRoute path="/update-profile" component={UpdateProfile} />
 
                             <LoggedInRoute path="/tasks" component={Tasks} />
