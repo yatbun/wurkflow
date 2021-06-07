@@ -96,19 +96,37 @@ export function StoreProvider({ children }) {
             return;
         }
 
+        const promises = [];
         const tempTeams = [];
 
         userData.teams.forEach((t) => {
-            t.get().then((doc) => {
-                if (doc.data().org.id === userData.currentOrg.id) {
-                    const temp = doc.data();
-                    temp.uid = doc.id;
-                    tempTeams.push(temp);
-                }
-            });
+            promises.push(
+                t.get().then((doc) => {
+                    if (doc.data().org.id === userData.currentOrg.id) {
+                        const temp = doc.data();
+                        temp.uid = doc.id;
+                        tempTeams.push(temp);
+                    }
+                })
+            );
         });
 
-        setTeams(tempTeams);
+        Promise.all(promises).then(() => {
+            tempTeams.sort((a, b) => {
+                const na = a.name;
+                const nb = b.name;
+
+                if (na < nb) {
+                    return -1;
+                }
+                if (na > nb) {
+                    return 1;
+                }
+                return 0;
+            });
+
+            setTeams(tempTeams);
+        });
     }
 
     async function quitTeam(tuid) {
@@ -191,62 +209,64 @@ export function StoreProvider({ children }) {
             });
     }
 
-    const [groups, setGroups] = useState([]);
+    // -------------------------------------------
+    // Gets the list of tasks for the user's teams
+
     const [tasks, setTasks] = useState([]);
-    const [taskLoading, setTaskLoading] = useState(false);
 
     async function getTasks() {
-        if (!currentUser) {
+        if (teams.length === 0) {
             setTasks([]);
             return;
         }
 
-        setTaskLoading(true);
+        const promises = [];
+        const allTasks = [];
 
-        const tsks = [];
+        for (const team of teams) {
+            promises.push(
+                store
+                    .collection("tasks")
+                    .where("team", "==", store.collection("teams").doc(team.uid))
+                    .get()
+                    .then((querySnapshot) => {
+                        if (!querySnapshot.empty) {
+                            querySnapshot.forEach((doc) => {
+                                const newTask = doc.data();
+                                newTask.uid = doc.id;
+                                newTask.teamName = team.name;
+                                newTask.dueDate = newTask.due.toDate();
 
-        for (const group of groups) {
-            await store
-                .collection("tasks")
-                .where("group", "==", group.uid)
-                .get()
-                .then((querySnapshot) => {
-                    if (!querySnapshot.empty) {
-                        const tempTask = querySnapshot.docs[0];
-                        const newTask = tempTask.data();
-
-                        newTask.uid = tempTask.id;
-                        newTask.groupName = group.name;
-                        newTask.dueDate = tempTask.data().due.toDate();
-
-                        tsks.push(newTask);
-                    }
-                })
-                .finally(() => {
-                    tsks.sort((a, b) => {
-                        const da = a.dueDate;
-                        const db = b.dueDate;
-
-                        if (da < db) {
-                            return -1;
+                                allTasks.push(newTask);
+                            });
                         }
-                        if (da > db) {
-                            return 1;
-                        }
-                        return 0;
-                    });
-                });
+                    })
+            );
         }
 
-        setTasks(tsks);
-        setTaskLoading(false);
+        Promise.all(promises).then(() => {
+            allTasks.sort((a, b) => {
+                const da = a.dueDate;
+                const db = b.dueDate;
+
+                if (da < db) {
+                    return -1;
+                }
+                if (da > db) {
+                    return 1;
+                }
+                return 0;
+            });
+
+            setTasks(allTasks);
+        });
     }
 
-    function createTask(name, desc, group, dueDate) {
+    function createTask(name, desc, tuid, dueDate) {
         const newTask = {
             name: name,
             desc: desc,
-            group: group,
+            team: store.collection("teams").doc(tuid),
             due: firebase.firestore.Timestamp.fromDate(dueDate),
             completed: false,
         };
@@ -259,10 +279,10 @@ export function StoreProvider({ children }) {
             });
     }
 
-    function deleteTask(task) {
+    function deleteTask(tuid) {
         store
             .collection("tasks")
-            .doc(task)
+            .doc(tuid)
             .delete()
             .then(() => {
                 getTasks();
@@ -281,6 +301,11 @@ export function StoreProvider({ children }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userData]);
 
+    useEffect(() => {
+        getTasks();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [teams]);
+
     const value = {
         userData,
         currentOrg,
@@ -297,5 +322,5 @@ export function StoreProvider({ children }) {
         deleteTask,
     };
 
-    return <StoreContext.Provider value={value}>{!taskLoading && children}</StoreContext.Provider>;
+    return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
