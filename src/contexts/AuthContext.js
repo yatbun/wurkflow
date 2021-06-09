@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
             store
                 .collection("users")
                 .doc(user.uid)
-                .set({ currentOrg: o, orgAdmin: [o], orgs: [o], teams: [] });
+                .set({ currentOrg: o, orgAdmin: o, orgs: [o], teams: [] });
 
             return user.updateProfile({
                 displayName: name,
