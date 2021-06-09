@@ -50,20 +50,19 @@ export default function PageHeader() {
                             <LinkContainer to="/tasks">
                                 <Nav.Link eventKey={3}>Tasks</Nav.Link>
                             </LinkContainer>
-
-                            <LinkContainer to="/teams">
-                                <Nav.Link eventKey={4}>Teams</Nav.Link>
-                            </LinkContainer>
                         </>
                     )}
 
-                    {userData && userData.orgAdmin && (
-                        <NavDropdown title="Manage" id="nav-dropdown">
+                    <NavDropdown title="Manage" id="nav-dropdown">
+                        {userData && userData.orgAdmin && (
                             <LinkContainer to="/manage-organisation">
-                                <NavDropdown.Item eventKey="5.1">My Organisation</NavDropdown.Item>
+                                <NavDropdown.Item eventKey={4.1}>My Organisation</NavDropdown.Item>
                             </LinkContainer>
-                        </NavDropdown>
-                    )}
+                        )}
+                        <LinkContainer to="/teams">
+                            <NavDropdown.Item eventKey={4.2}>My Teams</NavDropdown.Item>
+                        </LinkContainer>
+                    </NavDropdown>
 
                     <Link to="/" className="nav-link px-2 disabled">
                         About
