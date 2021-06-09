@@ -33,7 +33,7 @@ export default function PageHeader() {
                     </Link>
                 </Navbar.Brand>
 
-                <Nav className="mr-auto">
+                <Nav className="mx-auto">
                     <LinkContainer to="/home">
                         <Nav.Link eventKey={1}> Home</Nav.Link>
                     </LinkContainer>

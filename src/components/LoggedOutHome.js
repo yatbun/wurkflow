@@ -9,7 +9,9 @@ export default function LoggedOutHome() {
     return (
         <>
             <div className="px-4 my-5 text-center border-bottom">
-                <h1 className="display-4 fw-bold">Be ahead of the game</h1>
+                <h1 className="display-4">
+                    <strong>Be ahead of the game</strong>
+                </h1>
 
                 <div className="col-lg-6 mx-auto">
                     <p className="lead mb-4">
@@ -20,11 +22,11 @@ export default function LoggedOutHome() {
 
                     <div className="d-grid gap-2 d-sm-flex justify-content-sm-center mb-5">
                         <Link to="/signup">
-                            <button className="btn btn-danger btn-lg px-4 me-sm-3">
+                            <button className="btn btn-danger btn-lg px-4 mx-3 my-2">
                                 Create Account
                             </button>
                         </Link>
-                        <button className="btn btn-outline-danger btn-lg px-4">
+                        <button className="btn btn-outline-danger btn-lg px-4 my-2">
                             See It In Action
                         </button>
                     </div>
