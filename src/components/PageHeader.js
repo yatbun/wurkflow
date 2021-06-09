@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { useStore } from "../contexts/StoreContext";
 
 import logo from "../img/logo.png";
 
-import { Navbar, Nav, Container, Image, Dropdown } from "react-bootstrap";
+import { Navbar, Nav, NavDropdown, Container, Image, Dropdown } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import { Link, useHistory } from "react-router-dom";
 
 export default function PageHeader() {
     const { currentUser, logout } = useAuth();
+    const { userData } = useStore();
     const history = useHistory();
 
     const [error, setError] = useState("");
@@ -24,6 +26,32 @@ export default function PageHeader() {
         }
     }
 
+    const loggedInMenu = () => {
+        return (
+            <>
+                <LinkContainer to="/workflows">
+                    <Nav.Link eventKey={2} disabled>
+                        Workflows
+                    </Nav.Link>
+                </LinkContainer>
+
+                <LinkContainer to="/tasks">
+                    <Nav.Link eventKey={3}>Tasks</Nav.Link>
+                </LinkContainer>
+                <NavDropdown title="Manage" id="nav-dropdown">
+                    {userData && userData.orgAdmin && (
+                        <LinkContainer to="/manage-organisation">
+                            <NavDropdown.Item eventKey={4.1}>My Organisation</NavDropdown.Item>
+                        </LinkContainer>
+                    )}
+                    <LinkContainer to="/teams">
+                        <NavDropdown.Item eventKey={4.2}>My Teams</NavDropdown.Item>
+                    </LinkContainer>
+                </NavDropdown>
+            </>
+        );
+    };
+
     return (
         <Navbar fixed="top" bg="white" className="pl-3 border-bottom shadow-sm">
             <Container>
@@ -33,28 +61,12 @@ export default function PageHeader() {
                     </Link>
                 </Navbar.Brand>
 
-                <Nav className="mr-auto">
+                <Nav className="mx-auto">
                     <LinkContainer to="/home">
                         <Nav.Link eventKey={1}> Home</Nav.Link>
                     </LinkContainer>
 
-                    {currentUser && (
-                        <>
-                            <LinkContainer to="/tasks">
-                                <Nav.Link eventKey={2}>Tasks</Nav.Link>
-                            </LinkContainer>
-
-                            <LinkContainer to="/teams">
-                                <Nav.Link eventKey={3}>Teams</Nav.Link>
-                            </LinkContainer>
-
-                            <LinkContainer to="/workflows">
-                                <Nav.Link eventKey={4} disabled>
-                                    Workflows
-                                </Nav.Link>
-                            </LinkContainer>
-                        </>
-                    )}
+                    {currentUser && loggedInMenu()}
 
                     <Link to="/" className="nav-link px-2 disabled">
                         About
@@ -63,7 +75,7 @@ export default function PageHeader() {
 
                 {currentUser ? (
                     <>
-                        <Dropdown>
+                        <Dropdown alignRight={true}>
                             <Dropdown.Toggle variant="outline-success" id="dd-profile">
                                 {currentUser.displayName}
                             </Dropdown.Toggle>

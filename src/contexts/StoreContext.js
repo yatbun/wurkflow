@@ -82,6 +82,36 @@ export function StoreProvider({ children }) {
         setOrgs(tempOrgs);
     }
 
+    async function orgExistsFromUid(uid) {
+        const res = await store.collection("orgs").doc(uid).get();
+        return res.exists;
+    }
+
+    async function orgExistsFromId(oid) {
+        const res = await store.collection("orgs").where("id", "==", oid).get();
+        return !res.empty;
+    }
+
+    async function createOrg(oid, name) {
+        const res = await store.collection("orgs").add({
+            id: oid,
+            name: name,
+        });
+        return res.id;
+    }
+
+    async function joinOrg(ouid) {
+        store
+            .collection("users")
+            .doc(currentUser.uid)
+            .update({
+                orgs: firebase.firestore.FieldValue.arrayUnion(store.collection("orgs").doc(ouid)),
+            })
+            .then(() => {
+                updateCurrentOrg(ouid);
+            });
+    }
+
     // -----------------------------------------
     // Get the list of teams that the user is in
     // Note: Only the teams in the currentOrg
@@ -91,7 +121,7 @@ export function StoreProvider({ children }) {
     const [teamsError, setTeamsError] = useState("");
 
     async function getTeams() {
-        if (userData === null) {
+        if (userData === null || userData.teams === undefined) {
             setTeams([]);
             return;
         }
@@ -310,6 +340,10 @@ export function StoreProvider({ children }) {
         userData,
         currentOrg,
         orgs,
+        orgExistsFromUid,
+        orgExistsFromId,
+        createOrg,
+        joinOrg,
         updateCurrentOrg,
         teams,
         teamsMessage,
