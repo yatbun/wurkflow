@@ -100,6 +100,18 @@ export function StoreProvider({ children }) {
         return res.id;
     }
 
+    async function joinOrg(ouid) {
+        store
+            .collection("users")
+            .doc(currentUser.uid)
+            .update({
+                orgs: firebase.firestore.FieldValue.arrayUnion(store.collection("orgs").doc(ouid)),
+            })
+            .then(() => {
+                updateCurrentOrg(ouid);
+            });
+    }
+
     // -----------------------------------------
     // Get the list of teams that the user is in
     // Note: Only the teams in the currentOrg
@@ -331,6 +343,7 @@ export function StoreProvider({ children }) {
         orgExistsFromUid,
         orgExistsFromId,
         createOrg,
+        joinOrg,
         updateCurrentOrg,
         teams,
         teamsMessage,
