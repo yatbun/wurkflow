@@ -1,4 +1,5 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import { useStore } from "../contexts/StoreContext";
 
 import { Container, InputGroup, FormControl, Button, Row, Col } from "react-bootstrap";
@@ -6,6 +7,7 @@ import PageHeader from "./PageHeader";
 
 export default function ManageOrganisation() {
     const { userData } = useStore();
+    const history = useHistory();
     const [currentOrg, setCurrentOrg] = useState(null);
 
     const renderOrg = () => {
@@ -41,16 +43,18 @@ export default function ManageOrganisation() {
     };
 
     async function getCurrentOrg() {
-        if (userData) {
-            const res = await userData.currentOrg.get();
-            const temp = res.data();
-            temp.uid = res.id;
-            setCurrentOrg(temp);
-        }
+        const res = await userData.orgAdmin.get();
+        const temp = res.data();
+        temp.uid = res.id;
+        setCurrentOrg(temp);
     }
 
     useEffect(() => {
-        getCurrentOrg();
+        if (userData && userData.orgAdmin) {
+            getCurrentOrg();
+        } else {
+            history.push("/");
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userData]);
 
