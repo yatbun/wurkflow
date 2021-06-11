@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useStore } from "../contexts/StoreContext";
 import {
     Container,
@@ -21,7 +22,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import PageHeader from "./PageHeader";
 
 export default function Tasks() {
-    const { teams, tasks, createTask, deleteTask } = useStore();
+    const { teams, tasks, createTask, deleteTask, completeTask } = useStore();
 
     const [showCreate, setShowCreate] = useState(false);
     const [error, setError] = useState("");
@@ -33,6 +34,8 @@ export default function Tasks() {
     function modalAction() {
         if (action === "delete") {
             deleteTask(actionTask);
+        } else if (action === "complete") {
+            completeTask(actionTask);
         }
         closeModal();
     }
@@ -97,14 +100,35 @@ export default function Tasks() {
                                     <td>
                                         <OverlayTrigger overlay={<Tooltip>View</Tooltip>}>
                                             <span className="d-inline-block me-md-2 my-1">
-                                                <Button variant="primary" size="sm" disabled>
-                                                    <FaEye />
-                                                </Button>
+                                                <Link
+                                                    to={`/task/${task.uid}/${index}`}
+                                                    target="_blank"
+                                                >
+                                                    <Button variant="primary" size="sm">
+                                                        <FaEye />
+                                                    </Button>
+                                                </Link>
                                             </span>
                                         </OverlayTrigger>
-                                        <OverlayTrigger overlay={<Tooltip>Complete</Tooltip>}>
+                                        <OverlayTrigger
+                                            overlay={
+                                                task.completed ? (
+                                                    <Tooltip>
+                                                        {" "}
+                                                        Task has already been marked as completed{" "}
+                                                    </Tooltip>
+                                                ) : (
+                                                    <Tooltip>Complete</Tooltip>
+                                                )
+                                            }
+                                        >
                                             <span className="d-inline-block me-md-2 my-1">
-                                                <Button variant="success" size="sm" disabled>
+                                                <Button
+                                                    onClick={() => openModal(task.uid, "complete")}
+                                                    variant="success"
+                                                    size="sm"
+                                                    disabled={task.completed}
+                                                >
                                                     <FaCheck />
                                                 </Button>
                                             </span>

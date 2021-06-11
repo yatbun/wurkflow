@@ -289,6 +289,34 @@ export function StoreProvider({ children }) {
             });
     }
 
+    function completeTask(tuid) {
+        store
+            .collection("tasks")
+            .doc(tuid)
+            .update({
+                completed: true,
+            })
+            .then(() => {
+                getTasks();
+            });
+    }
+
+    function getUniqueTask(tuid) {
+        let data;
+        store
+            .collection("tasks")
+            .doc(tuid)
+            .get()
+            .then((doc) => {
+                const newTask = doc.data();
+                newTask.uid = doc.id;
+                newTask.dueDate = newTask.due.toDate();
+
+                data = newTask;
+            });
+        return data;
+    }
+
     useEffect(() => {
         getUserData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -320,6 +348,8 @@ export function StoreProvider({ children }) {
         tasks,
         createTask,
         deleteTask,
+        completeTask,
+        getUniqueTask,
     };
 
     return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

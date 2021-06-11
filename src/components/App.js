@@ -12,6 +12,7 @@ import ForgotPassword from "./ForgotPassword";
 import Signup from "./Signup";
 import UserSettings from "./UserSettings";
 import UpdateProfile from "./UpdateProfile";
+import TaskDetails from "./TaskDetails";
 
 import Tasks from "./Tasks";
 import Teams from "./Teams";
@@ -30,7 +31,11 @@ export default function App() {
                             <LoggedOutRoute path="/signup" component={Signup} />
                             <LoggedInRoute path="/user-settings" component={UserSettings} />
                             <LoggedInRoute path="/update-profile" component={UpdateProfile} />
-
+                            <LoggedInRoute
+                                exact
+                                path={`/task/:id/:index`}
+                                component={TaskDetails}
+                            />
                             <LoggedInRoute path="/tasks" component={Tasks} />
                             <LoggedInRoute path="/teams" component={Teams} />
                         </Switch>
