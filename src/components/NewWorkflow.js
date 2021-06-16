@@ -8,8 +8,9 @@ import { Container, Form, Button, ButtonGroup, Badge, Card, Spinner } from "reac
 
 import PageHeader from "./PageHeader";
 import Multiselect from "react-widgets/Multiselect";
-import DatePicker from "react-widgets/DatePicker";
 import Localization from "react-widgets/esm/Localization";
+import DatePicker from "react-widgets/DatePicker";
+import NumberPicker from "react-widgets/NumberPicker";
 
 export default function NewWorkflow() {
     const { teams } = useStore();
@@ -47,7 +48,7 @@ export default function NewWorkflow() {
             });
     }
 
-    const blankTask = { name: "", desc: "", users: [], dueDate: new Date() };
+    const blankTask = { name: "", desc: "", users: [], dueDate: wfDate };
     const [taskData, setTaskData] = useState([{ ...blankTask }]);
 
     function handleAdd(e) {
@@ -224,12 +225,12 @@ export default function NewWorkflow() {
                                                 <Container className="w-50">
                                                     <Form.Group>
                                                         <Form.Label>Days Due Before</Form.Label>
-                                                        <Form.Control
-                                                            type="number"
+                                                        <NumberPicker
                                                             defaultValue={0}
-                                                            onChange={(e) => {
+                                                            min={0}
+                                                            onChange={(val) => {
                                                                 const newDate = add(wfDate, {
-                                                                    days: -e.target.value,
+                                                                    days: -val,
                                                                 });
 
                                                                 handleDateChange(idx, newDate);
