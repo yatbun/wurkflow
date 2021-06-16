@@ -14,6 +14,8 @@ import UserSettings from "./UserSettings";
 import UpdateProfile from "./UpdateProfile";
 import ManageOrganisation from "./ManageOrganisation";
 
+import Workflows from "./Workflows";
+import NewWorkflow from "./NewWorkflow";
 import Tasks from "./Tasks";
 import Teams from "./Teams";
 
@@ -32,6 +34,8 @@ export default function App() {
                             <LoggedInRoute path="/user-settings" component={UserSettings} />
                             <LoggedInRoute path="/update-profile" component={UpdateProfile} />
 
+                            <LoggedInRoute path="/workflows" component={Workflows} />
+                            <LoggedInRoute path="/new-workflow" component={NewWorkflow} />
                             <LoggedInRoute path="/tasks" component={Tasks} />
                             <LoggedInRoute path="/teams" component={Teams} />
 
