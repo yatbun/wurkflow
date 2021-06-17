@@ -309,15 +309,15 @@ export function StoreProvider({ children }) {
     }
 
     function createTask(name, users, desc, tuid, dueDate) {
-        const refUsers = [];
+        const userRefs = [];
 
-        users.forEach((id) => {
-            refUsers.push(store.collection("users").doc(id));
+        users.forEach((uid) => {
+            userRefs.push(store.collection("users").doc(uid));
         });
 
         const newTask = {
             name: name,
-            users: refUsers,
+            users: userRefs,
             desc: desc,
             team: store.collection("teams").doc(tuid),
             due: firebase.firestore.Timestamp.fromDate(dueDate),
@@ -343,66 +343,21 @@ export function StoreProvider({ children }) {
             });
     }
 
-    // Retrieves the names of the users involved in the team specificed with the input team uid
-    // Used in Tasks.js
-    function getUsers(tuid) {
-        const userNames = [];
-        store
+    async function getTeamUsers(tuid) {
+        const tempUsers = [];
+
+        await store
             .collection("users")
-            .where("teams", "array-contains-any", [store.collection("teams").doc(tuid)])
+            .where("teams", "array-contains", store.collection("teams").doc(tuid))
             .get()
             .then((querySnapshot) => {
                 querySnapshot.forEach((doc) => {
-                    let userName;
-                    store
-                        .collection("users")
-                        .doc(doc.id)
-                        .get()
-                        .then((doc) => {
-                            userName = doc.data().name;
-                            userNames.push({
-                                label: userName,
-                                value: doc.id,
-                            });
-                        });
+                    const tempUser = doc.data();
+                    tempUser.uid = doc.id;
+                    tempUsers.push(tempUser);
                 });
             });
-        return userNames;
-    }
-
-    const [userNames, setUserNames] = useState([]);
-
-    // Retrieves the names of the users involved in a task specified by the task uid
-    // Used in TaskDetails.js
-    function getNames(tuid) {
-        const names = [];
-        store
-            .collection("tasks")
-            .doc(tuid)
-            .get()
-            .then((doc) => {
-                const creatorId = doc.data().creator.id;
-                const refArray = [];
-                refArray.push(creatorId);
-                doc.data().users.forEach((query) => {
-                    refArray.push(query.id);
-                });
-
-                refArray.forEach((id, index) => {
-                    if (index > 0 && id === creatorId) {
-                    } else {
-                        store
-                            .collection("users")
-                            .doc(id)
-                            .get()
-                            .then((doc) => {
-                                names.push(doc.data().name);
-                            });
-                    }
-                });
-            });
-
-        setUserNames(names);
+        return tempUsers;
     }
 
     // Updates the "field" of the task (specified by the task uid) in firestore to be true
@@ -455,9 +410,7 @@ export function StoreProvider({ children }) {
         createTask,
         deleteTask,
         completeTask,
-        getUsers,
-        getNames,
-        userNames,
+        getTeamUsers,
     };
 
     return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
