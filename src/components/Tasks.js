@@ -14,13 +14,13 @@ import {
     Tooltip,
     Modal,
 } from "react-bootstrap";
-import MultiSelect from "react-multi-select-component";
 import { FaEye, FaCheck, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 import PageHeader from "./PageHeader";
+import Multiselect from "react-widgets/Multiselect";
 
 export default function Tasks() {
     const { teams, tasks, createTask, deleteTask, completeTask, getUsers, taskTeamUsers } =
@@ -194,7 +194,7 @@ export default function Tasks() {
         if (afterEffect.length === 0) {
             return <div className="my-2">Please select Team Involved </div>;
         } else {
-            return <MultiSelect options={afterEffect} value={selected} onChange={setSelected} />;
+            return <Multiselect options={afterEffect} value={selected} onChange={setSelected} />;
         }
     }
 
