@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useStore } from "../contexts/StoreContext";
 import {
@@ -23,16 +23,7 @@ import Localization from "react-widgets/esm/Localization";
 import DatePicker from "react-widgets/DatePicker";
 
 export default function Tasks() {
-    const {
-        teams,
-        tasks,
-        createTask,
-        deleteTask,
-        completeTask,
-        getTeamUsers,
-        getUsers,
-        taskTeamUsers,
-    } = useStore();
+    const { teams, tasks, createTask, deleteTask, completeTask, getTeamUsers } = useStore();
 
     const [showCreate, setShowCreate] = useState(false);
     const [error, setError] = useState("");
@@ -110,10 +101,7 @@ export default function Tasks() {
                                     <td>
                                         <OverlayTrigger overlay={<Tooltip>View</Tooltip>}>
                                             <span className="d-inline-block me-md-2 my-1">
-                                                <Link
-                                                    to={`/task/${task.uid}/${index}`}
-                                                    target="_blank"
-                                                >
+                                                <Link to={`/task/${task.uid}`}>
                                                     <Button variant="primary" size="sm">
                                                         <FaEye />
                                                     </Button>
@@ -312,7 +300,6 @@ export default function Tasks() {
                                                     <DatePicker
                                                         value={taskDate}
                                                         onChange={(date) => setTaskDate(date)}
-                                                        dateFormat="dd/MM/yyyy"
                                                     />
                                                 </Col>
                                             </Form.Group>

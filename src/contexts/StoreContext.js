@@ -1,7 +1,6 @@
 import firebase from "firebase/app";
 
 import React, { useContext, useState, useEffect } from "react";
-import { FaSuperscript } from "react-icons/fa";
 import { store } from "../firebase";
 import { useAuth } from "./AuthContext";
 
@@ -361,41 +360,6 @@ export function StoreProvider({ children }) {
         return tempUsers;
     }
 
-    const [userNames, setUserNames] = useState([]);
-
-    // Retrieves the names of the users involved in a task specified by the task uid
-    // Used in TaskDetails.js
-    function getNames(tuid) {
-        const names = [];
-        store
-            .collection("tasks")
-            .doc(tuid)
-            .get()
-            .then((doc) => {
-                const creatorId = doc.data().creator.id;
-                const refArray = [];
-                refArray.push(creatorId);
-                doc.data().users.forEach((query) => {
-                    refArray.push(query.id);
-                });
-
-                refArray.forEach((id, index) => {
-                    if (index > 0 && id === creatorId) {
-                    } else {
-                        store
-                            .collection("users")
-                            .doc(id)
-                            .get()
-                            .then((doc) => {
-                                names.push(doc.data().name);
-                            });
-                    }
-                });
-            });
-
-        setUserNames(names);
-    }
-
     // Updates the "field" of the task (specified by the task uid) in firestore to be true
     // Used in Tasks.js
     function completeTask(tuid) {
@@ -447,8 +411,6 @@ export function StoreProvider({ children }) {
         deleteTask,
         completeTask,
         getTeamUsers,
-        getNames,
-        userNames,
     };
 
     return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
