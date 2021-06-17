@@ -23,8 +23,17 @@ import PageHeader from "./PageHeader";
 import Multiselect from "react-widgets/Multiselect";
 
 export default function Tasks() {
-    const { teams, tasks, createTask, deleteTask, completeTask, getUsers, taskTeamUsers } =
-        useStore();
+    const {
+        teams,
+        tasks,
+        createTask,
+        deleteTask,
+        completeTask,
+        getTeamUsers,
+        getUsers,
+        taskTeamUsers,
+    } = useStore();
+
     const [showCreate, setShowCreate] = useState(false);
     const [error, setError] = useState("");
 
@@ -158,43 +167,32 @@ export default function Tasks() {
     const taskNameRef = useRef();
     const taskDescRef = useRef();
     const taskTeamRef = useRef();
-    const [teamName, setTeamName] = useState([]);
-    // afterEffect is to ensure that the component does not re-render until the array has been populated
-    const [afterEffect, setAfterEffect] = useState([]);
+    const [teamUsers, setTeamUsers] = useState([]);
     const [taskDate, setTaskDate] = useState(new Date());
-    const [selected, setSelected] = useState([]);
+    const [selectedUsers, setSelectedUsers] = useState([]);
 
     // stores the selected team into the teamName state
-    function handleSelect(event) {
-        const value = event.target.value;
+    async function handleSelect(e) {
+        const teamName = e.target.value;
 
         const tuid = teams.filter((t) => {
-            return t.name === value;
+            return t.name === teamName;
         })[0].uid;
 
-        setTeamName(getUsers(tuid));
+        setTeamUsers(await getTeamUsers(tuid));
     }
 
-    // Ensures that teamName's value is updated, sets the afterEffect value and resets selected
-    // setTimeout 500ms can be reduced after further testing
-    useEffect(() => {
-        setTimeout(() => setAfterEffect(teamName), 500);
-        console.log(teamName);
-        setSelected([]);
-    }, [teamName]);
-
-    // Ensures that the afterEffect value is updated
-    useEffect(() => {}, [afterEffect]);
-
-    // Ensures that the selected value is updated
-    useEffect(() => {}, [selected]);
-
-    // Renders the mutliselect dropdown bar with options dependent on afterEffect
     function renderMultiSelect() {
-        if (afterEffect.length === 0) {
+        if (teamUsers.length === 0) {
             return <div className="my-2">Please select Team Involved </div>;
         } else {
-            return <Multiselect options={afterEffect} value={selected} onChange={setSelected} />;
+            return (
+                <Multiselect
+                    data={teamUsers}
+                    textField="name"
+                    onChange={(val) => setSelectedUsers(val)}
+                />
+            );
         }
     }
 
@@ -206,14 +204,15 @@ export default function Tasks() {
             return t.name === taskTeamRef.current.value;
         })[0].uid;
 
-        const userIds = [];
+        createTask(
+            taskNameRef.current.value,
+            selectedUsers.map((user) => user.uid),
+            taskDescRef.current.value,
+            tuid,
+            taskDate
+        );
 
-        selected.forEach((user) => {
-            userIds.push(user.value);
-        });
-
-        createTask(taskNameRef.current.value, userIds, taskDescRef.current.value, tuid, taskDate);
-
+        taskNameRef.current.value = "";
         taskDescRef.current.value = "";
         setTaskDate(new Date());
         setShowCreate(false);

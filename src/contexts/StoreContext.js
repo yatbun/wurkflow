@@ -1,6 +1,7 @@
 import firebase from "firebase/app";
 
 import React, { useContext, useState, useEffect } from "react";
+import { FaSuperscript } from "react-icons/fa";
 import { store } from "../firebase";
 import { useAuth } from "./AuthContext";
 
@@ -309,15 +310,15 @@ export function StoreProvider({ children }) {
     }
 
     function createTask(name, users, desc, tuid, dueDate) {
-        const refUsers = [];
+        const userRefs = [];
 
-        users.forEach((id) => {
-            refUsers.push(store.collection("users").doc(id));
+        users.forEach((uid) => {
+            userRefs.push(store.collection("users").doc(uid));
         });
 
         const newTask = {
             name: name,
-            users: refUsers,
+            users: userRefs,
             desc: desc,
             team: store.collection("teams").doc(tuid),
             due: firebase.firestore.Timestamp.fromDate(dueDate),
@@ -343,31 +344,21 @@ export function StoreProvider({ children }) {
             });
     }
 
-    // Retrieves the names of the users involved in the team specificed with the input team uid
-    // Used in Tasks.js
-    function getUsers(tuid) {
-        const userNames = [];
-        store
+    async function getTeamUsers(tuid) {
+        const tempUsers = [];
+
+        await store
             .collection("users")
-            .where("teams", "array-contains-any", [store.collection("teams").doc(tuid)])
+            .where("teams", "array-contains", store.collection("teams").doc(tuid))
             .get()
             .then((querySnapshot) => {
                 querySnapshot.forEach((doc) => {
-                    let userName;
-                    store
-                        .collection("users")
-                        .doc(doc.id)
-                        .get()
-                        .then((doc) => {
-                            userName = doc.data().name;
-                            userNames.push({
-                                label: userName,
-                                value: doc.id,
-                            });
-                        });
+                    const tempUser = doc.data();
+                    tempUser.uid = doc.id;
+                    tempUsers.push(tempUser);
                 });
             });
-        return userNames;
+        return tempUsers;
     }
 
     const [userNames, setUserNames] = useState([]);
@@ -455,7 +446,7 @@ export function StoreProvider({ children }) {
         createTask,
         deleteTask,
         completeTask,
-        getUsers,
+        getTeamUsers,
         getNames,
         userNames,
     };
