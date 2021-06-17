@@ -12,6 +12,7 @@ import ForgotPassword from "./ForgotPassword";
 import Signup from "./Signup";
 import UserSettings from "./UserSettings";
 import UpdateProfile from "./UpdateProfile";
+import ViewTask from "./ViewTask";
 import ManageOrganisation from "./ManageOrganisation";
 
 import Workflows from "./Workflows";
@@ -28,17 +29,21 @@ export default function App() {
                         <Switch>
                             <Route exact path="/" component={Homepage} />
                             <Route path="/home" component={Home} />
+
                             <LoggedOutRoute path="/login" component={Login} />
                             <LoggedOutRoute path="/forgot-password" component={ForgotPassword} />
                             <LoggedOutRoute path="/signup" component={Signup} />
+
                             <LoggedInRoute path="/user-settings" component={UserSettings} />
                             <LoggedInRoute path="/update-profile" component={UpdateProfile} />
 
+                            <LoggedInRoute exact path={`/task/:id`} component={ViewTask} />
+                            <LoggedInRoute path="/tasks" component={Tasks} />
+
                             <LoggedInRoute path="/workflows" component={Workflows} />
                             <LoggedInRoute path="/new-workflow" component={NewWorkflow} />
-                            <LoggedInRoute path="/tasks" component={Tasks} />
-                            <LoggedInRoute path="/teams" component={Teams} />
 
+                            <LoggedInRoute path="/teams" component={Teams} />
                             <LoggedInRoute
                                 path="/manage-organisation"
                                 component={ManageOrganisation}

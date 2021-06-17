@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useStore } from "../contexts/StoreContext";
 import {
     Container,
@@ -14,14 +15,15 @@ import {
     Modal,
 } from "react-bootstrap";
 import { FaEye, FaCheck, FaTrash, FaExclamationTriangle } from "react-icons/fa";
-
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { DateLocalizer } from "react-widgets/IntlLocalizer";
 
 import PageHeader from "./PageHeader";
+import Multiselect from "react-widgets/Multiselect";
+import Localization from "react-widgets/esm/Localization";
+import DatePicker from "react-widgets/DatePicker";
 
 export default function Tasks() {
-    const { teams, tasks, createTask, deleteTask } = useStore();
+    const { teams, tasks, createTask, deleteTask, completeTask, getTeamUsers } = useStore();
 
     const [showCreate, setShowCreate] = useState(false);
     const [error, setError] = useState("");
@@ -33,6 +35,8 @@ export default function Tasks() {
     function modalAction() {
         if (action === "delete") {
             deleteTask(actionTask);
+        } else if (action === "complete") {
+            completeTask(actionTask);
         }
         closeModal();
     }
@@ -97,14 +101,31 @@ export default function Tasks() {
                                     <td>
                                         <OverlayTrigger overlay={<Tooltip>View</Tooltip>}>
                                             <span className="d-inline-block me-md-2 my-1">
-                                                <Button variant="primary" size="sm" disabled>
-                                                    <FaEye />
-                                                </Button>
+                                                <Link to={`/task/${task.uid}`}>
+                                                    <Button variant="primary" size="sm">
+                                                        <FaEye />
+                                                    </Button>
+                                                </Link>
                                             </span>
                                         </OverlayTrigger>
-                                        <OverlayTrigger overlay={<Tooltip>Complete</Tooltip>}>
+                                        <OverlayTrigger
+                                            overlay={
+                                                task.completed ? (
+                                                    <Tooltip>
+                                                        Task has already been marked as completed
+                                                    </Tooltip>
+                                                ) : (
+                                                    <Tooltip>Complete</Tooltip>
+                                                )
+                                            }
+                                        >
                                             <span className="d-inline-block me-md-2 my-1">
-                                                <Button variant="success" size="sm" disabled>
+                                                <Button
+                                                    onClick={() => openModal(task.uid, "complete")}
+                                                    variant="success"
+                                                    size="sm"
+                                                    disabled={task.completed}
+                                                >
                                                     <FaCheck />
                                                 </Button>
                                             </span>
@@ -134,8 +155,36 @@ export default function Tasks() {
     const taskNameRef = useRef();
     const taskDescRef = useRef();
     const taskTeamRef = useRef();
+    const [teamUsers, setTeamUsers] = useState([]);
     const [taskDate, setTaskDate] = useState(new Date());
+    const [selectedUsers, setSelectedUsers] = useState([]);
 
+    // stores the selected team into the teamName state
+    async function handleSelect(e) {
+        const teamName = e.target.value;
+
+        const tuid = teams.filter((t) => {
+            return t.name === teamName;
+        })[0].uid;
+
+        setTeamUsers(await getTeamUsers(tuid));
+    }
+
+    function renderMultiSelect() {
+        if (teamUsers.length === 0) {
+            return <div className="my-2">Please select a team</div>;
+        } else {
+            return (
+                <Multiselect
+                    data={teamUsers}
+                    textField="name"
+                    onChange={(val) => setSelectedUsers(val)}
+                />
+            );
+        }
+    }
+
+    // Handles the creation of a task once the submit button is clicked
     function handleCreate(e) {
         e.preventDefault();
 
@@ -143,7 +192,13 @@ export default function Tasks() {
             return t.name === taskTeamRef.current.value;
         })[0].uid;
 
-        createTask(taskNameRef.current.value, taskDescRef.current.value, tuid, taskDate);
+        createTask(
+            taskNameRef.current.value,
+            selectedUsers.map((user) => user.uid),
+            taskDescRef.current.value,
+            tuid,
+            taskDate
+        );
 
         taskNameRef.current.value = "";
         taskDescRef.current.value = "";
@@ -173,62 +228,90 @@ export default function Tasks() {
                         <Collapse in={showCreate}>
                             <div>
                                 <Container className="mt-5 col-10" style={{ maxWidth: "600px" }}>
-                                    <Form onSubmit={handleCreate}>
-                                        <Form.Group as={Row} className="mb-3">
-                                            <Form.Label column sm="3">
-                                                Task Name
-                                            </Form.Label>
-                                            <Col sm="9">
-                                                <Form.Control
-                                                    type="text"
-                                                    ref={taskNameRef}
-                                                    required
-                                                />
-                                            </Col>
-                                        </Form.Group>
+                                    <Localization
+                                        date={
+                                            new DateLocalizer({ culture: "en-GB", firstOfWeek: 7 })
+                                        }
+                                    >
+                                        <Form onSubmit={handleCreate}>
+                                            <Form.Group as={Row} className="mb-3">
+                                                <Form.Label column sm="3">
+                                                    Task Name
+                                                </Form.Label>
+                                                <Col sm="9">
+                                                    <Form.Control
+                                                        type="text"
+                                                        ref={taskNameRef}
+                                                        required
+                                                    />
+                                                </Col>
+                                            </Form.Group>
 
-                                        <Form.Group as={Row} className="mb-3">
-                                            <Form.Label column sm="3">
-                                                Task Description
-                                            </Form.Label>
-                                            <Col sm="9">
-                                                <Form.Control as="textarea" ref={taskDescRef} />
-                                            </Col>
-                                        </Form.Group>
+                                            <Form.Group as={Row} className="mb-3">
+                                                <Form.Label column sm="3">
+                                                    Task Description
+                                                </Form.Label>
+                                                <Col sm="9">
+                                                    <Form.Control as="textarea" ref={taskDescRef} />
+                                                </Col>
+                                            </Form.Group>
 
-                                        <Form.Group as={Row} className="mb-3">
-                                            <Form.Label column sm="3">
-                                                Team Involved
-                                            </Form.Label>
-                                            <Col sm="9">
-                                                <Form.Control
-                                                    as="select"
-                                                    ref={taskTeamRef}
-                                                    className="form-select"
-                                                >
-                                                    {teams.map((team) => (
-                                                        <option key={team.uid}>{team.name}</option>
-                                                    ))}
-                                                </Form.Control>
-                                            </Col>
-                                        </Form.Group>
+                                            <Form.Group as={Row} className="mb-3">
+                                                <Form.Label column sm="3">
+                                                    Team Involved
+                                                </Form.Label>
+                                                <Col sm="9">
+                                                    <Form.Control
+                                                        as="select"
+                                                        ref={taskTeamRef}
+                                                        onChange={handleSelect}
+                                                        placeholder="Team"
+                                                        className="form-select"
+                                                    >
+                                                        <option value={-1} selected disabled>
+                                                            {" "}
+                                                            Please select a team{" "}
+                                                        </option>
+                                                        {teams.map((team) => (
+                                                            <option key={team.uid}>
+                                                                {team.name}
+                                                            </option>
+                                                        ))}
+                                                    </Form.Control>
+                                                </Col>
+                                            </Form.Group>
 
-                                        <Form.Group as={Row} className="mb-3">
-                                            <Form.Label column sm="3">
-                                                Date Due
-                                            </Form.Label>
-                                            <Col sm="9">
-                                                <DatePicker
-                                                    selected={taskDate}
-                                                    onChange={(date) => setTaskDate(date)}
-                                                    dateFormat="dd/MM/yyyy"
-                                                />
-                                            </Col>
-                                        </Form.Group>
-                                        <Button disabled={loading} className="w-100" type="submit">
-                                            Create
-                                        </Button>
-                                    </Form>
+                                            <Form.Group
+                                                as={Row}
+                                                controlId="my_multiselect_field"
+                                                className="mb-3"
+                                            >
+                                                <Form.Label column sm="3">
+                                                    Users Involved
+                                                </Form.Label>
+                                                <Col sm="9">{renderMultiSelect()}</Col>
+                                            </Form.Group>
+
+                                            <Form.Group as={Row} className="mb-3">
+                                                <Form.Label column sm="3">
+                                                    Date Due
+                                                </Form.Label>
+                                                <Col sm="9">
+                                                    <DatePicker
+                                                        value={taskDate}
+                                                        onChange={(date) => setTaskDate(date)}
+                                                    />
+                                                </Col>
+                                            </Form.Group>
+                                            <Button
+                                                disabled={loading}
+                                                className="w-100"
+                                                type="submit"
+                                            >
+                                                Create
+                                            </Button>
+                                        </Form>
+                                    </Localization>
                                 </Container>
                             </div>
                         </Collapse>
