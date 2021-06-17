@@ -15,12 +15,12 @@ import {
     Modal,
 } from "react-bootstrap";
 import { FaEye, FaCheck, FaTrash, FaExclamationTriangle } from "react-icons/fa";
-
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { DateLocalizer } from "react-widgets/IntlLocalizer";
 
 import PageHeader from "./PageHeader";
 import Multiselect from "react-widgets/Multiselect";
+import Localization from "react-widgets/esm/Localization";
+import DatePicker from "react-widgets/DatePicker";
 
 export default function Tasks() {
     const {
@@ -184,7 +184,7 @@ export default function Tasks() {
 
     function renderMultiSelect() {
         if (teamUsers.length === 0) {
-            return <div className="my-2">Please select Team Involved </div>;
+            return <div className="my-2">Please select a team</div>;
         } else {
             return (
                 <Multiselect
@@ -240,79 +240,91 @@ export default function Tasks() {
                         <Collapse in={showCreate}>
                             <div>
                                 <Container className="mt-5 col-10" style={{ maxWidth: "600px" }}>
-                                    <Form onSubmit={handleCreate}>
-                                        <Form.Group as={Row} className="mb-3">
-                                            <Form.Label column sm="3">
-                                                Task Name
-                                            </Form.Label>
-                                            <Col sm="9">
-                                                <Form.Control
-                                                    type="text"
-                                                    ref={taskNameRef}
-                                                    required
-                                                />
-                                            </Col>
-                                        </Form.Group>
+                                    <Localization
+                                        date={
+                                            new DateLocalizer({ culture: "en-GB", firstOfWeek: 7 })
+                                        }
+                                    >
+                                        <Form onSubmit={handleCreate}>
+                                            <Form.Group as={Row} className="mb-3">
+                                                <Form.Label column sm="3">
+                                                    Task Name
+                                                </Form.Label>
+                                                <Col sm="9">
+                                                    <Form.Control
+                                                        type="text"
+                                                        ref={taskNameRef}
+                                                        required
+                                                    />
+                                                </Col>
+                                            </Form.Group>
 
-                                        <Form.Group as={Row} className="mb-3">
-                                            <Form.Label column sm="3">
-                                                Task Description
-                                            </Form.Label>
-                                            <Col sm="9">
-                                                <Form.Control as="textarea" ref={taskDescRef} />
-                                            </Col>
-                                        </Form.Group>
+                                            <Form.Group as={Row} className="mb-3">
+                                                <Form.Label column sm="3">
+                                                    Task Description
+                                                </Form.Label>
+                                                <Col sm="9">
+                                                    <Form.Control as="textarea" ref={taskDescRef} />
+                                                </Col>
+                                            </Form.Group>
 
-                                        <Form.Group as={Row} className="mb-3">
-                                            <Form.Label column sm="3">
-                                                Team Involved
-                                            </Form.Label>
-                                            <Col sm="9">
-                                                <Form.Control
-                                                    as="select"
-                                                    ref={taskTeamRef}
-                                                    onChange={handleSelect}
-                                                    placeholder="Team"
-                                                    className="form-select"
-                                                >
-                                                    <option value={-1} selected disabled>
-                                                        {" "}
-                                                        Please select a team{" "}
-                                                    </option>
-                                                    {teams.map((team) => (
-                                                        <option key={team.uid}>{team.name}</option>
-                                                    ))}
-                                                </Form.Control>
-                                            </Col>
-                                        </Form.Group>
+                                            <Form.Group as={Row} className="mb-3">
+                                                <Form.Label column sm="3">
+                                                    Team Involved
+                                                </Form.Label>
+                                                <Col sm="9">
+                                                    <Form.Control
+                                                        as="select"
+                                                        ref={taskTeamRef}
+                                                        onChange={handleSelect}
+                                                        placeholder="Team"
+                                                        className="form-select"
+                                                    >
+                                                        <option value={-1} selected disabled>
+                                                            {" "}
+                                                            Please select a team{" "}
+                                                        </option>
+                                                        {teams.map((team) => (
+                                                            <option key={team.uid}>
+                                                                {team.name}
+                                                            </option>
+                                                        ))}
+                                                    </Form.Control>
+                                                </Col>
+                                            </Form.Group>
 
-                                        <Form.Group
-                                            as={Row}
-                                            controlId="my_multiselect_field"
-                                            className="mb-3"
-                                        >
-                                            <Form.Label column sm="3">
-                                                Users Involved
-                                            </Form.Label>
-                                            <Col sm="9">{renderMultiSelect()}</Col>
-                                        </Form.Group>
+                                            <Form.Group
+                                                as={Row}
+                                                controlId="my_multiselect_field"
+                                                className="mb-3"
+                                            >
+                                                <Form.Label column sm="3">
+                                                    Users Involved
+                                                </Form.Label>
+                                                <Col sm="9">{renderMultiSelect()}</Col>
+                                            </Form.Group>
 
-                                        <Form.Group as={Row} className="mb-3">
-                                            <Form.Label column sm="3">
-                                                Date Due
-                                            </Form.Label>
-                                            <Col sm="9">
-                                                <DatePicker
-                                                    selected={taskDate}
-                                                    onChange={(date) => setTaskDate(date)}
-                                                    dateFormat="dd/MM/yyyy"
-                                                />
-                                            </Col>
-                                        </Form.Group>
-                                        <Button disabled={loading} className="w-100" type="submit">
-                                            Create
-                                        </Button>
-                                    </Form>
+                                            <Form.Group as={Row} className="mb-3">
+                                                <Form.Label column sm="3">
+                                                    Date Due
+                                                </Form.Label>
+                                                <Col sm="9">
+                                                    <DatePicker
+                                                        value={taskDate}
+                                                        onChange={(date) => setTaskDate(date)}
+                                                        dateFormat="dd/MM/yyyy"
+                                                    />
+                                                </Col>
+                                            </Form.Group>
+                                            <Button
+                                                disabled={loading}
+                                                className="w-100"
+                                                type="submit"
+                                            >
+                                                Create
+                                            </Button>
+                                        </Form>
+                                    </Localization>
                                 </Container>
                             </div>
                         </Collapse>
