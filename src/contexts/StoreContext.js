@@ -244,31 +244,55 @@ export function StoreProvider({ children }) {
             );
         }
 
-        Promise.all(promises).then(() => {
-            allTasks.sort((a, b) => {
-                const da = a.dueDate;
-                const db = b.dueDate;
+        let completedTasks = [];
+        let incompleteTasks = [];
 
-                if (da < db) {
-                    return -1;
-                }
-                if (da > db) {
-                    return 1;
-                }
-                return 0;
+        Promise.all(promises).then(() => {
+            completedTasks = allTasks.filter((arr) => {
+                return arr.completed === true;
             });
 
-            setTasks(allTasks);
+            if (completeTask.length < allTasks.length) {
+                incompleteTasks = allTasks.filter((arr) => {
+                    return arr.completed === false;
+                });
+            }
+
+            if (incompleteTasks.length > 0) {
+                incompleteTasks.sort((a, b) => {
+                    const da = a.dueDate;
+                    const db = b.dueDate;
+
+                    if (da < db) {
+                        return -1;
+                    }
+                    if (da > db) {
+                        return 1;
+                    }
+                    return 0;
+                });
+            }
+            const combinedTasks = incompleteTasks.concat(completedTasks);
+
+            setTasks(combinedTasks);
         });
     }
 
-    function createTask(name, desc, tuid, dueDate) {
+    function createTask(name, users, desc, tuid, dueDate) {
+        const refUsers = [];
+
+        users.forEach((id) => {
+            refUsers.push(store.collection("users").doc(id));
+        });
+
         const newTask = {
             name: name,
+            users: refUsers,
             desc: desc,
             team: store.collection("teams").doc(tuid),
             due: firebase.firestore.Timestamp.fromDate(dueDate),
             completed: false,
+            creator: store.collection("users").doc(currentUser.uid),
         };
 
         store
@@ -289,6 +313,70 @@ export function StoreProvider({ children }) {
             });
     }
 
+    // Retrieves the names of the users involved in the team specificed with the input team uid
+    // Used in Tasks.js
+    function getUsers(tuid) {
+        const userNames = [];
+        store
+            .collection("users")
+            .where("teams", "array-contains-any", [store.collection("teams").doc(tuid)])
+            .get()
+            .then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    let userName;
+                    store
+                        .collection("users")
+                        .doc(doc.id)
+                        .get()
+                        .then((doc) => {
+                            userName = doc.data().name;
+                            userNames.push({
+                                label: userName,
+                                value: doc.id,
+                            });
+                        });
+                });
+            });
+        return userNames;
+    }
+
+    const [userNames, setUserNames] = useState([]);
+
+    // Retrieves the names of the users involved in a task specified by the task uid
+    // Used in TaskDetails.js
+    function getNames(tuid) {
+        const names = [];
+        store
+            .collection("tasks")
+            .doc(tuid)
+            .get()
+            .then((doc) => {
+                const creatorId = doc.data().creator.id;
+                const refArray = [];
+                refArray.push(creatorId);
+                doc.data().users.forEach((query) => {
+                    refArray.push(query.id);
+                });
+
+                refArray.forEach((id, index) => {
+                    if (index > 0 && id === creatorId) {
+                    } else {
+                        store
+                            .collection("users")
+                            .doc(id)
+                            .get()
+                            .then((doc) => {
+                                names.push(doc.data().name);
+                            });
+                    }
+                });
+            });
+
+        setUserNames(names);
+    }
+
+    // Updates the "field" of the task (specified by the task uid) in firestore to be true
+    // Used in Tasks.js
     function completeTask(tuid) {
         store
             .collection("tasks")
@@ -299,22 +387,6 @@ export function StoreProvider({ children }) {
             .then(() => {
                 getTasks();
             });
-    }
-
-    function getUniqueTask(tuid) {
-        let data;
-        store
-            .collection("tasks")
-            .doc(tuid)
-            .get()
-            .then((doc) => {
-                const newTask = doc.data();
-                newTask.uid = doc.id;
-                newTask.dueDate = newTask.due.toDate();
-
-                data = newTask;
-            });
-        return data;
     }
 
     useEffect(() => {
@@ -349,7 +421,9 @@ export function StoreProvider({ children }) {
         createTask,
         deleteTask,
         completeTask,
-        getUniqueTask,
+        getUsers,
+        getNames,
+        userNames,
     };
 
     return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

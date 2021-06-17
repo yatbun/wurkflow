@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
         return auth.createUserWithEmailAndPassword(email, password).then((res) => {
             const user = firebase.auth().currentUser;
 
-            store.collection("users").doc(user.uid).set({ orgs: [], groups: [] });
+            store.collection("users").doc(user.uid).set({ name: name, orgs: [], groups: [] });
 
             return user.updateProfile({
                 displayName: name,

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useStore } from "../contexts/StoreContext";
 import {
@@ -14,6 +14,7 @@ import {
     Tooltip,
     Modal,
 } from "react-bootstrap";
+import MultiSelect from "react-multi-select-component";
 import { FaEye, FaCheck, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 
 import DatePicker from "react-datepicker";
@@ -22,8 +23,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import PageHeader from "./PageHeader";
 
 export default function Tasks() {
-    const { teams, tasks, createTask, deleteTask, completeTask } = useStore();
-
+    const { teams, tasks, createTask, deleteTask, completeTask, getUsers, taskTeamUsers } =
+        useStore();
     const [showCreate, setShowCreate] = useState(false);
     const [error, setError] = useState("");
 
@@ -114,8 +115,7 @@ export default function Tasks() {
                                             overlay={
                                                 task.completed ? (
                                                     <Tooltip>
-                                                        {" "}
-                                                        Task has already been marked as completed{" "}
+                                                        Task has already been marked as completed
                                                     </Tooltip>
                                                 ) : (
                                                     <Tooltip>Complete</Tooltip>
@@ -158,8 +158,47 @@ export default function Tasks() {
     const taskNameRef = useRef();
     const taskDescRef = useRef();
     const taskTeamRef = useRef();
+    const [teamName, setTeamName] = useState([]);
+    // afterEffect is to ensure that the component does not re-render until the array has been populated
+    const [afterEffect, setAfterEffect] = useState([]);
     const [taskDate, setTaskDate] = useState(new Date());
+    const [selected, setSelected] = useState([]);
 
+    // stores the selected team into the teamName state
+    function handleSelect(event) {
+        const value = event.target.value;
+
+        const tuid = teams.filter((t) => {
+            return t.name === value;
+        })[0].uid;
+
+        setTeamName(getUsers(tuid));
+    }
+
+    // Ensures that teamName's value is updated, sets the afterEffect value and resets selected
+    // setTimeout 500ms can be reduced after further testing
+    useEffect(() => {
+        setTimeout(() => setAfterEffect(teamName), 500);
+        console.log(teamName);
+        setSelected([]);
+    }, [teamName]);
+
+    // Ensures that the afterEffect value is updated
+    useEffect(() => {}, [afterEffect]);
+
+    // Ensures that the selected value is updated
+    useEffect(() => {}, [selected]);
+
+    // Renders the mutliselect dropdown bar with options dependent on afterEffect
+    function renderMultiSelect() {
+        if (afterEffect.length === 0) {
+            return <div className="my-2">Please select Team Involved </div>;
+        } else {
+            return <MultiSelect options={afterEffect} value={selected} onChange={setSelected} />;
+        }
+    }
+
+    // Handles the creation of a task once the submit button is clicked
     function handleCreate(e) {
         e.preventDefault();
 
@@ -167,9 +206,14 @@ export default function Tasks() {
             return t.name === taskTeamRef.current.value;
         })[0].uid;
 
-        createTask(taskNameRef.current.value, taskDescRef.current.value, tuid, taskDate);
+        const userIds = [];
 
-        taskNameRef.current.value = "";
+        selected.forEach((user) => {
+            userIds.push(user.value);
+        });
+
+        createTask(taskNameRef.current.value, userIds, taskDescRef.current.value, tuid, taskDate);
+
         taskDescRef.current.value = "";
         setTaskDate(new Date());
         setShowCreate(false);
@@ -228,13 +272,30 @@ export default function Tasks() {
                                                 <Form.Control
                                                     as="select"
                                                     ref={taskTeamRef}
+                                                    onChange={handleSelect}
+                                                    placeholder="Team"
                                                     className="form-select"
                                                 >
+                                                    <option value={-1} selected disabled>
+                                                        {" "}
+                                                        Please select a team{" "}
+                                                    </option>
                                                     {teams.map((team) => (
                                                         <option key={team.uid}>{team.name}</option>
                                                     ))}
                                                 </Form.Control>
                                             </Col>
+                                        </Form.Group>
+
+                                        <Form.Group
+                                            as={Row}
+                                            controlId="my_multiselect_field"
+                                            className="mb-3"
+                                        >
+                                            <Form.Label column sm="3">
+                                                Users Involved
+                                            </Form.Label>
+                                            <Col sm="9">{renderMultiSelect()}</Col>
                                         </Form.Group>
 
                                         <Form.Group as={Row} className="mb-3">
