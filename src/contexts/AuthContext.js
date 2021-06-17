@@ -11,11 +11,33 @@ export function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState();
     const [loading, setLoading] = useState(true);
 
-    function signup(name, email, password) {
-        return auth.createUserWithEmailAndPassword(email, password).then((res) => {
+    function signup(name, email, password, ouid) {
+        return auth.createUserWithEmailAndPassword(email, password).then(() => {
             const user = firebase.auth().currentUser;
 
-            store.collection("users").doc(user.uid).set({ name: name, orgs: [], groups: [] });
+            const o = store.collection("orgs").doc(ouid);
+
+            store
+                .collection("users")
+                .doc(user.uid)
+                .set({ currentOrg: o, orgs: [o], teams: [] });
+
+            return user.updateProfile({
+                displayName: name,
+            });
+        });
+    }
+
+    function signupMakeAdmin(name, email, password, ouid) {
+        return auth.createUserWithEmailAndPassword(email, password).then(() => {
+            const user = firebase.auth().currentUser;
+
+            const o = store.collection("orgs").doc(ouid);
+
+            store
+                .collection("users")
+                .doc(user.uid)
+                .set({ currentOrg: o, orgAdmin: o, orgs: [o], teams: [] });
 
             return user.updateProfile({
                 displayName: name,
@@ -61,6 +83,7 @@ export function AuthProvider({ children }) {
     const value = {
         currentUser,
         signup,
+        signupMakeAdmin,
         login,
         logout,
         resetPassword,

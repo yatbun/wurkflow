@@ -13,6 +13,7 @@ import Signup from "./Signup";
 import UserSettings from "./UserSettings";
 import UpdateProfile from "./UpdateProfile";
 import TaskDetails from "./TaskDetails";
+import ManageOrganisation from "./ManageOrganisation";
 
 import Tasks from "./Tasks";
 import Teams from "./Teams";
@@ -38,6 +39,11 @@ export default function App() {
                             />
                             <LoggedInRoute path="/tasks" component={Tasks} />
                             <LoggedInRoute path="/teams" component={Teams} />
+
+                            <LoggedInRoute
+                                path="/manage-organisation"
+                                component={ManageOrganisation}
+                            />
                         </Switch>
                     </StoreProvider>
                 </AuthProvider>
