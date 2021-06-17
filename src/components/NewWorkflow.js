@@ -7,6 +7,7 @@ import { DateLocalizer } from "react-widgets/IntlLocalizer";
 import { Container, Form, Button, ButtonGroup, Badge, Card, Spinner } from "react-bootstrap";
 
 import PageHeader from "./PageHeader";
+import DropdownList from "react-widgets/DropdownList";
 import Multiselect from "react-widgets/Multiselect";
 import Localization from "react-widgets/esm/Localization";
 import DatePicker from "react-widgets/DatePicker";
@@ -17,20 +18,17 @@ export default function NewWorkflow() {
 
     const wfNameRef = useRef();
     const wfDescRef = useRef();
-    const wfTeamRef = useRef();
     const [wfDate, setWfDate] = useState(new Date());
-    const [wfTeam, setWfTeam] = useState("");
+    const [wfTeam, setWfTeam] = useState(null);
 
     const [teamUsers, setTeamUsers] = useState([]);
 
     async function getTeamUsers() {
-        if (wfTeam === "") {
+        if (wfTeam === null) {
             return;
         }
 
-        const tuid = teams.filter((t) => {
-            return t.name === wfTeam;
-        })[0].uid;
+        const tuid = wfTeam.uid;
 
         const users = [];
 
@@ -133,19 +131,12 @@ export default function NewWorkflow() {
 
                                 <Form.Group className="mt-4">
                                     <Form.Label>Team Involved</Form.Label>
-                                    <Form.Control
-                                        as="select"
-                                        ref={wfTeamRef}
-                                        className="form-select"
-                                        defaultValue=""
-                                        onChange={(e) => {
-                                            setWfTeam(e.target.value);
-                                        }}
-                                    >
-                                        {teams.map((team) => (
-                                            <option key={team.uid}>{team.name}</option>
-                                        ))}
-                                    </Form.Control>
+                                    <DropdownList
+                                        defaultValue="Select a team"
+                                        data={teams}
+                                        textField="name"
+                                        onChange={(val) => setWfTeam(val)}
+                                    />
                                 </Form.Group>
 
                                 <Form.Group className="mt-4">
@@ -190,7 +181,7 @@ export default function NewWorkflow() {
                                 {taskData.map((val, idx) => {
                                     const nameId = `name-${idx}`;
                                     const descId = `desc-${idx}`;
-                                    const usersId = `users-${idx}`;
+
                                     return (
                                         <Card key={idx} className="p-4 mt-4">
                                             <Card.Title>Task {idx + 1}</Card.Title>
