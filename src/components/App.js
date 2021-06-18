@@ -15,6 +15,9 @@ import UpdateProfile from "./UpdateProfile";
 import ViewTask from "./ViewTask";
 import ManageOrganisation from "./ManageOrganisation";
 
+import Workflows from "./Workflows";
+import KickstartWorkflow from "./KickstartWorkflow";
+import NewWorkflow from "./NewWorkflow";
 import Tasks from "./Tasks";
 import Teams from "./Teams";
 
@@ -37,6 +40,13 @@ export default function App() {
 
                             <LoggedInRoute exact path={`/task/:id`} component={ViewTask} />
                             <LoggedInRoute path="/tasks" component={Tasks} />
+
+                            <LoggedInRoute path="/workflows" component={Workflows} />
+                            <LoggedInRoute
+                                path="/kickstart-workflow"
+                                component={KickstartWorkflow}
+                            />
+                            <LoggedInRoute path="/new-workflow" component={NewWorkflow} />
 
                             <LoggedInRoute path="/teams" component={Teams} />
                             <LoggedInRoute

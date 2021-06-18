@@ -30,9 +30,7 @@ export default function PageHeader() {
         return (
             <>
                 <LinkContainer to="/workflows">
-                    <Nav.Link eventKey={2} disabled>
-                        Workflows
-                    </Nav.Link>
+                    <Nav.Link eventKey={2}>Workflows</Nav.Link>
                 </LinkContainer>
 
                 <LinkContainer to="/tasks">

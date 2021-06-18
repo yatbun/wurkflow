@@ -3,6 +3,7 @@ import firebase from "firebase/app";
 import React, { useContext, useState, useEffect } from "react";
 import { store } from "../firebase";
 import { useAuth } from "./AuthContext";
+import { sub } from "date-fns";
 
 const StoreContext = React.createContext();
 
@@ -258,6 +259,12 @@ export function StoreProvider({ children }) {
                 store
                     .collection("tasks")
                     .where("team", "==", store.collection("teams").doc(team.uid))
+                    .where("hidden", "==", false)
+                    .where(
+                        "users",
+                        "array-contains",
+                        store.collection("users").doc(currentUser.uid)
+                    )
                     .get()
                     .then((querySnapshot) => {
                         if (!querySnapshot.empty) {
@@ -308,12 +315,8 @@ export function StoreProvider({ children }) {
         });
     }
 
-    function createTask(name, users, desc, tuid, dueDate) {
-        const userRefs = [];
-
-        users.forEach((uid) => {
-            userRefs.push(store.collection("users").doc(uid));
-        });
+    async function createTask(name, uids, desc, tuid, dueDate) {
+        const userRefs = uids.map((uid) => store.collection("users").doc(uid));
 
         const newTask = {
             name: name,
@@ -322,6 +325,7 @@ export function StoreProvider({ children }) {
             team: store.collection("teams").doc(tuid),
             due: firebase.firestore.Timestamp.fromDate(dueDate),
             completed: false,
+            hidden: false,
             creator: store.collection("users").doc(currentUser.uid),
         };
 
@@ -333,7 +337,7 @@ export function StoreProvider({ children }) {
             });
     }
 
-    function deleteTask(tuid) {
+    async function deleteTask(tuid) {
         store
             .collection("tasks")
             .doc(tuid)
@@ -360,18 +364,144 @@ export function StoreProvider({ children }) {
         return tempUsers;
     }
 
-    // Updates the "field" of the task (specified by the task uid) in firestore to be true
-    // Used in Tasks.js
-    function completeTask(tuid) {
+    async function completeTask(tuid) {
         store
             .collection("tasks")
             .doc(tuid)
-            .update({
-                completed: true,
+            .get()
+            .then((doc) => {
+                store.collection("tasks").doc(tuid).update({
+                    completed: true,
+                });
+
+                const tempDoc = doc.data();
+
+                if (tempDoc.workflow) {
+                    store
+                        .collection("tasks")
+                        .doc(tuid)
+                        .update({
+                            hidden: true,
+                        })
+                        .then(() => {
+                            if (tempDoc.nextTask) {
+                                store
+                                    .collection("tasks")
+                                    .doc(tempDoc.nextTask.id)
+                                    .update({
+                                        hidden: false,
+                                    })
+                                    .then(() => {
+                                        getTasks();
+                                    });
+                            }
+                            getTasks();
+                        });
+                    store
+                        .collection("workflows")
+                        .doc(tempDoc.workflow.id)
+                        .update({
+                            currentTask: firebase.firestore.FieldValue.increment(1),
+                        });
+                } else {
+                }
             })
             .then(() => {
                 getTasks();
             });
+    }
+
+    async function createWorkflowTemplate(name, desc, tuid, data) {
+        for (let i = 0; i < data.length; ++i) {
+            delete data[i].dueDate;
+            data[i].users = data[i].users.map((user) => store.collection("users").doc(user.uid));
+        }
+
+        await store
+            .collection("teams")
+            .doc(tuid)
+            .get()
+            .then(async (doc) => {
+                const newTemplate = {
+                    name: doc.data().name + ": " + name,
+                    desc: desc,
+                    team: store.collection("teams").doc(tuid),
+                    data: data,
+                    creator: store.collection("users").doc(currentUser.uid),
+                };
+
+                await store.collection("wfTemplates").add(newTemplate);
+            });
+    }
+
+    async function createWorkflow(name, desc, team, dueDate, data) {
+        const newTemplate = {
+            currentTask: 1,
+            desc: desc,
+            length: data.length,
+            name: name,
+            creator: store.collection("users").doc(currentUser.uid),
+            team: team,
+        };
+
+        let lastUid = "";
+
+        await store
+            .collection("workflows")
+            .add(newTemplate)
+            .then(async (docRef) => {
+                for (let i = data.length; i > 0; --i) {
+                    const task = data[i - 1];
+
+                    const newTask = {
+                        completed: false,
+                        hidden: i === 1 ? false : true,
+                        desc: task.desc,
+                        due: firebase.firestore.Timestamp.fromDate(
+                            sub(dueDate, { days: task.daysBefore })
+                        ),
+                        name: task.name,
+                        order: i,
+                        team: team,
+                        users: task.users,
+                        creator: store.collection("users").doc(currentUser.uid),
+                        workflow: store.collection("workflows").doc(docRef.id),
+                    };
+
+                    if (lastUid !== "") {
+                        newTask.nextTask = store.collection("tasks").doc(lastUid);
+                    }
+
+                    await store
+                        .collection("tasks")
+                        .add(newTask)
+                        .then((docRef) => {
+                            lastUid = docRef.id;
+                        });
+                }
+            })
+            .finally(() => {
+                getTasks();
+            });
+    }
+
+    async function deleteWorkflow(wuid) {
+        var batch = store.batch();
+
+        store
+            .collection("tasks")
+            .where("workflow", "==", store.collection("workflows").doc(wuid))
+            .get()
+            .then((querySnapshot) => {
+                querySnapshot.docs.forEach((doc) => {
+                    batch.delete(store.collection("tasks").doc(doc.id));
+                });
+            })
+            .finally(() => {
+                batch.commit();
+            });
+
+        store.collection("workflows").doc(wuid).delete();
     }
 
     useEffect(() => {
@@ -411,6 +541,9 @@ export function StoreProvider({ children }) {
         deleteTask,
         completeTask,
         getTeamUsers,
+        createWorkflowTemplate,
+        createWorkflow,
+        deleteWorkflow,
     };
 
     return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
