@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useHistory } from "react-router-dom";
 import { useStore } from "../contexts/StoreContext";
 import { DateLocalizer } from "react-widgets/IntlLocalizer";
 import { Container, Button, Form, InputGroup, FormControl, Spinner } from "react-bootstrap";
@@ -7,6 +8,8 @@ import Localization from "react-widgets/esm/Localization";
 import DatePicker from "react-widgets/DatePicker";
 
 export default function TemplateListItem({ template }) {
+    const history = useHistory();
+
     const tp = template.data();
     const instanceNameRef = useRef();
     const { createWorkflow } = useStore();
@@ -21,6 +24,7 @@ export default function TemplateListItem({ template }) {
 
         instanceNameRef.current.value = "";
         setLoading(false);
+        history.push("/workflows");
     }
 
     return (
