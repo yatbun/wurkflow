@@ -259,6 +259,12 @@ export function StoreProvider({ children }) {
                 store
                     .collection("tasks")
                     .where("team", "==", store.collection("teams").doc(team.uid))
+                    .where("hidden", "==", false)
+                    .where(
+                        "users",
+                        "array-contains",
+                        store.collection("users").doc(currentUser.uid)
+                    )
                     .get()
                     .then((querySnapshot) => {
                         if (!querySnapshot.empty) {
@@ -358,14 +364,47 @@ export function StoreProvider({ children }) {
         return tempUsers;
     }
 
-    // Updates the "field" of the task (specified by the task uid) in firestore to be true
-    // Used in Tasks.js
     async function completeTask(tuid) {
         store
             .collection("tasks")
             .doc(tuid)
-            .update({
-                completed: true,
+            .get()
+            .then((doc) => {
+                store.collection("tasks").doc(tuid).update({
+                    completed: true,
+                });
+
+                const tempDoc = doc.data();
+
+                if (tempDoc.workflow) {
+                    store
+                        .collection("tasks")
+                        .doc(tuid)
+                        .update({
+                            hidden: true,
+                        })
+                        .then(() => {
+                            if (tempDoc.nextTask) {
+                                store
+                                    .collection("tasks")
+                                    .doc(tempDoc.nextTask.id)
+                                    .update({
+                                        hidden: false,
+                                    })
+                                    .then(() => {
+                                        getTasks();
+                                    });
+                            }
+                            getTasks();
+                        });
+                    store
+                        .collection("workflows")
+                        .doc(tempDoc.workflow.id)
+                        .update({
+                            currentTask: firebase.firestore.FieldValue.increment(1),
+                        });
+                } else {
+                }
             })
             .then(() => {
                 getTasks();
@@ -446,6 +485,25 @@ export function StoreProvider({ children }) {
             });
     }
 
+    async function deleteWorkflow(wuid) {
+        var batch = store.batch();
+
+        store
+            .collection("tasks")
+            .where("workflow", "==", store.collection("workflows").doc(wuid))
+            .get()
+            .then((querySnapshot) => {
+                querySnapshot.docs.forEach((doc) => {
+                    batch.delete(store.collection("tasks").doc(doc.id));
+                });
+            })
+            .finally(() => {
+                batch.commit();
+            });
+
+        store.collection("workflows").doc(wuid).delete();
+    }
+
     useEffect(() => {
         getUserData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -485,6 +543,7 @@ export function StoreProvider({ children }) {
         getTeamUsers,
         createWorkflowTemplate,
         createWorkflow,
+        deleteWorkflow,
     };
 
     return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

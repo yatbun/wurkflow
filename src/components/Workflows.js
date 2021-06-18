@@ -73,7 +73,11 @@ export default function Workflows() {
                             <h2>Active Workflows</h2>
                         )}
                         {workflows.map((workflow) => (
-                            <WorkflowListItem workflow={workflow} key={workflow.id} />
+                            <WorkflowListItem
+                                workflow={workflow}
+                                refreshFn={getWorkflows}
+                                key={workflow.id}
+                            />
                         ))}
                     </Container>
                 </Container>

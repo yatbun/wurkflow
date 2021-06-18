@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import { store } from "../firebase";
+import { useStore } from "../contexts/StoreContext";
 
-import { Container, ListGroup } from "react-bootstrap";
+import { Container, ListGroup, Badge, Button } from "react-bootstrap";
 
-export default function WorkflowListItem({ workflow }) {
+export default function WorkflowListItem({ workflow, refreshFn }) {
+    const { deleteWorkflow } = useStore();
+
     const wf = workflow.data();
     wf.uid = workflow.id;
+    const completed = wf.currentTask > wf.length;
 
     const [wfTasks, setWfTasks] = useState([]);
 
@@ -35,8 +39,22 @@ export default function WorkflowListItem({ workflow }) {
     }, []);
 
     return (
-        <Container className="my-5 px-5 py-4 border rounded">
-            <h4>{wf.name}</h4>
+        <Container className="my-5 px-5 py-4 border rounded position-relative">
+            <Button
+                className="position-absolute"
+                variant="danger"
+                style={{ right: 25 }}
+                onClick={async () => {
+                    await deleteWorkflow(wf.uid);
+                    await refreshFn();
+                }}
+                disabled={!completed}
+            >
+                Delete
+            </Button>
+            <h4>
+                {wf.name} {completed && <Badge variant="success">Complete</Badge>}
+            </h4>
             <p>{wf.desc}</p>
             <br />
             <ListGroup horizontal>
