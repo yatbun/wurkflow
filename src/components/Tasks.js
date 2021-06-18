@@ -24,9 +24,11 @@ import Localization from "react-widgets/esm/Localization";
 import DatePicker from "react-widgets/DatePicker";
 
 export default function Tasks() {
-    const { teams, tasks, createTask, deleteTask, completeTask, getTeamUsers } = useStore();
+    const { teams, tasks, completedTasks, createTask, deleteTask, completeTask, getTeamUsers } =
+        useStore();
 
     const [showCreate, setShowCreate] = useState(false);
+    const [showCompletedTasks, setShowCompletedTasks] = useState(false);
     const [error, setError] = useState("");
 
     const [action, setAction] = useState("");
@@ -54,103 +56,78 @@ export default function Tasks() {
         setShowModal(false);
     }
 
-    const renderTasks = () => {
-        if (tasks && tasks.length === 0) {
-            return <h2>You do not have any active tasks right now.</h2>;
-        } else {
-            return (
-                <>
-                    <h2>Your tasks</h2>
+    const renderTasks = (t) => {
+        return (
+            <Table striped bordered hover responsive className="mt-3">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Date Due</th>
+                        <th>Team</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
 
-                    <Modal show={showModal} onHide={closeModal}>
-                        <Modal.Header>
-                            <Modal.Title>
-                                <FaExclamationTriangle />
-                            </Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>Are you sure?</Modal.Body>
-                        <Modal.Footer>
-                            <Button variant="secondary" onClick={closeModal}>
-                                Cancel
-                            </Button>
-                            <Button variant="warning" onClick={modalAction}>
-                                I AM SURE
-                            </Button>
-                        </Modal.Footer>
-                    </Modal>
-
-                    <Table striped bordered hover responsive className="mt-3">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Date Due</th>
-                                <th>Team</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {tasks.map((task, index) => (
-                                <tr key={index}>
-                                    <td>{index + 1}</td>
-                                    <td>{task.name}</td>
-                                    <td>{task.desc}</td>
-                                    <td>{task.dueDate.toLocaleDateString("en-GB")}</td>
-                                    <td>{task.teamName}</td>
-                                    <td>
-                                        <OverlayTrigger overlay={<Tooltip>View</Tooltip>}>
-                                            <span className="d-inline-block me-md-2 my-1">
-                                                <Link to={`/task/${task.uid}`}>
-                                                    <Button variant="primary" size="sm">
-                                                        <FaEye />
-                                                    </Button>
-                                                </Link>
-                                            </span>
-                                        </OverlayTrigger>
-                                        <OverlayTrigger
-                                            overlay={
-                                                task.completed ? (
-                                                    <Tooltip>
-                                                        Task has already been marked as completed
-                                                    </Tooltip>
-                                                ) : (
-                                                    <Tooltip>Complete</Tooltip>
-                                                )
-                                            }
+                <tbody>
+                    {t.map((task, index) => (
+                        <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>{task.name}</td>
+                            <td>{task.desc}</td>
+                            <td>{task.dueDate.toLocaleDateString("en-GB")}</td>
+                            <td>{task.teamName}</td>
+                            <td>
+                                <OverlayTrigger overlay={<Tooltip>View</Tooltip>}>
+                                    <span className="d-inline-block me-md-2 my-1">
+                                        <Link to={`/task/${task.uid}`}>
+                                            <Button variant="primary" size="sm">
+                                                <FaEye />
+                                            </Button>
+                                        </Link>
+                                    </span>
+                                </OverlayTrigger>
+                                <OverlayTrigger
+                                    overlay={
+                                        task.completed ? (
+                                            <Tooltip>
+                                                Task has already been marked as completed
+                                            </Tooltip>
+                                        ) : (
+                                            <Tooltip>Complete</Tooltip>
+                                        )
+                                    }
+                                >
+                                    <span className="d-inline-block me-md-2 my-1">
+                                        <Button
+                                            onClick={() => openModal(task.uid, "complete")}
+                                            variant="success"
+                                            size="sm"
+                                            disabled={task.completed}
                                         >
-                                            <span className="d-inline-block me-md-2 my-1">
-                                                <Button
-                                                    onClick={() => openModal(task.uid, "complete")}
-                                                    variant="success"
-                                                    size="sm"
-                                                    disabled={task.completed}
-                                                >
-                                                    <FaCheck />
-                                                </Button>
-                                            </span>
-                                        </OverlayTrigger>
-                                        <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
-                                            <span className="d-inline-block my-1">
-                                                <Button
-                                                    onClick={() => openModal(task.uid, "delete")}
-                                                    variant="danger"
-                                                    size="sm"
-                                                    disabled={task.workflow}
-                                                >
-                                                    <FaTrash />
-                                                </Button>
-                                            </span>
-                                        </OverlayTrigger>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </Table>
-                </>
-            );
-        }
+                                            <FaCheck />
+                                        </Button>
+                                    </span>
+                                </OverlayTrigger>
+                                <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
+                                    <span className="d-inline-block my-1">
+                                        <Button
+                                            onClick={() => openModal(task.uid, "delete")}
+                                            variant="danger"
+                                            size="sm"
+                                            disabled={task.workflow}
+                                        >
+                                            <FaTrash />
+                                        </Button>
+                                    </span>
+                                </OverlayTrigger>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </Table>
+        );
     };
 
     const [loading, setLoading] = useState(false);
@@ -224,6 +201,14 @@ export default function Tasks() {
                             size="lg"
                         >
                             Create a Task
+                        </Button>
+                        <Button
+                            onClick={() => setShowCompletedTasks(!showCompletedTasks)}
+                            variant="outline-secondary"
+                            size="lg"
+                            className="mx-3"
+                        >
+                            {showCompletedTasks ? "Hide Completed" : "Show Completed"}
                         </Button>
                         <Collapse in={showCreate}>
                             <div>
@@ -307,9 +292,47 @@ export default function Tasks() {
                             </div>
                         </Collapse>
                     </Container>
+
+                    <Modal show={showModal} onHide={closeModal}>
+                        <Modal.Header>
+                            <Modal.Title>
+                                <FaExclamationTriangle />
+                            </Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>Are you sure?</Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={closeModal}>
+                                Cancel
+                            </Button>
+                            <Button variant="warning" onClick={modalAction}>
+                                I AM SURE
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
+
                     <Container className="col-sm-12 mx-auto mt-2 mb-5 pt-5">
-                        {renderTasks()}
+                        {tasks && tasks.length === 0 ? (
+                            <h2>You do not have any active tasks right now.</h2>
+                        ) : (
+                            <>
+                                <h2>Your tasks</h2>
+                                {renderTasks(tasks)}
+                            </>
+                        )}
                     </Container>
+
+                    <Collapse in={showCompletedTasks}>
+                        <Container className="col-sm-12 mx-auto mt-2 mb-5 pt-5">
+                            {completedTasks && completedTasks.length === 0 ? (
+                                <h2>You do not have any completed tasks.</h2>
+                            ) : (
+                                <>
+                                    <h2>Your completed tasks</h2>
+                                    {renderTasks(completedTasks)}
+                                </>
+                            )}
+                        </Container>
+                    </Collapse>
                 </Container>
             </Container>
         </>

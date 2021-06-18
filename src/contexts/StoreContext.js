@@ -244,6 +244,7 @@ export function StoreProvider({ children }) {
     // Gets the list of tasks for the user's teams
 
     const [tasks, setTasks] = useState([]);
+    const [completedTasks, setCompletedTasks] = useState([]);
 
     async function getTasks() {
         if (teams.length === 0) {
@@ -281,37 +282,21 @@ export function StoreProvider({ children }) {
             );
         }
 
-        let completedTasks = [];
-        let incompleteTasks = [];
-
         Promise.all(promises).then(() => {
-            completedTasks = allTasks.filter((arr) => {
-                return arr.completed === true;
+            allTasks.sort((a, b) => {
+                const da = a.dueDate;
+                const db = b.dueDate;
+
+                if (da < db) {
+                    return -1;
+                }
+                if (da > db) {
+                    return 1;
+                }
+                return 0;
             });
-
-            if (completeTask.length < allTasks.length) {
-                incompleteTasks = allTasks.filter((arr) => {
-                    return arr.completed === false;
-                });
-            }
-
-            if (incompleteTasks.length > 0) {
-                incompleteTasks.sort((a, b) => {
-                    const da = a.dueDate;
-                    const db = b.dueDate;
-
-                    if (da < db) {
-                        return -1;
-                    }
-                    if (da > db) {
-                        return 1;
-                    }
-                    return 0;
-                });
-            }
-            const combinedTasks = incompleteTasks.concat(completedTasks);
-
-            setTasks(combinedTasks);
+            setTasks(allTasks.filter((task) => !task.completed));
+            setCompletedTasks(allTasks.filter((task) => task.completed));
         });
     }
 
@@ -377,34 +362,26 @@ export function StoreProvider({ children }) {
                 const tempDoc = doc.data();
 
                 if (tempDoc.workflow) {
-                    store
-                        .collection("tasks")
-                        .doc(tuid)
-                        .update({
-                            hidden: true,
-                        })
-                        .then(() => {
-                            if (tempDoc.nextTask) {
-                                store
-                                    .collection("tasks")
-                                    .doc(tempDoc.nextTask.id)
-                                    .update({
-                                        hidden: false,
-                                    })
-                                    .then(() => {
-                                        getTasks();
-                                    });
-                            }
-                            getTasks();
-                        });
-                    store
-                        .collection("workflows")
-                        .doc(tempDoc.workflow.id)
-                        .update({
-                            currentTask: firebase.firestore.FieldValue.increment(1),
-                        });
-                } else {
+                    if (tempDoc.nextTask) {
+                        store
+                            .collection("tasks")
+                            .doc(tempDoc.nextTask.id)
+                            .update({
+                                hidden: false,
+                            })
+                            .then(() => {
+                                getTasks();
+                            });
+                    }
+                    getTasks();
                 }
+
+                store
+                    .collection("workflows")
+                    .doc(tempDoc.workflow.id)
+                    .update({
+                        currentTask: firebase.firestore.FieldValue.increment(1),
+                    });
             })
             .then(() => {
                 getTasks();
@@ -537,6 +514,7 @@ export function StoreProvider({ children }) {
         joinTeam,
         createTeam,
         tasks,
+        completedTasks,
         createTask,
         deleteTask,
         completeTask,
