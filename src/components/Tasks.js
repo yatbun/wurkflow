@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useStore } from "../contexts/StoreContext";
 import {
@@ -18,6 +18,7 @@ import { FaEye, FaCheck, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import { DateLocalizer } from "react-widgets/IntlLocalizer";
 
 import PageHeader from "./PageHeader";
+import DropdownList from "react-widgets/DropdownList";
 import Multiselect from "react-widgets/Multiselect";
 import Localization from "react-widgets/esm/Localization";
 import DatePicker from "react-widgets/DatePicker";
@@ -154,20 +155,15 @@ export default function Tasks() {
     const [loading, setLoading] = useState(false);
     const taskNameRef = useRef();
     const taskDescRef = useRef();
-    const taskTeamRef = useRef();
+    const [taskTeam, setTaskTeam] = useState(null);
     const [teamUsers, setTeamUsers] = useState([]);
     const [taskDate, setTaskDate] = useState(new Date());
     const [selectedUsers, setSelectedUsers] = useState([]);
 
-    // stores the selected team into the teamName state
-    async function handleSelect(e) {
-        const teamName = e.target.value;
-
-        const tuid = teams.filter((t) => {
-            return t.name === teamName;
-        })[0].uid;
-
-        setTeamUsers(await getTeamUsers(tuid));
+    async function handleTeamChange() {
+        if (taskTeam) {
+            setTeamUsers(await getTeamUsers(taskTeam.uid));
+        }
     }
 
     function renderMultiSelect() {
@@ -188,9 +184,7 @@ export default function Tasks() {
     function handleCreate(e) {
         e.preventDefault();
 
-        const tuid = teams.filter((t) => {
-            return t.name === taskTeamRef.current.value;
-        })[0].uid;
+        const tuid = taskTeam.uid;
 
         createTask(
             taskNameRef.current.value,
@@ -205,6 +199,11 @@ export default function Tasks() {
         setTaskDate(new Date());
         setShowCreate(false);
     }
+
+    useEffect(() => {
+        handleTeamChange();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [taskTeam]);
 
     return (
         <>
@@ -261,23 +260,14 @@ export default function Tasks() {
                                                     Team Involved
                                                 </Form.Label>
                                                 <Col sm="9">
-                                                    <Form.Control
-                                                        as="select"
-                                                        ref={taskTeamRef}
-                                                        onChange={handleSelect}
-                                                        placeholder="Team"
-                                                        className="form-select"
-                                                    >
-                                                        <option value={-1} selected disabled>
-                                                            {" "}
-                                                            Please select a team{" "}
-                                                        </option>
-                                                        {teams.map((team) => (
-                                                            <option key={team.uid}>
-                                                                {team.name}
-                                                            </option>
-                                                        ))}
-                                                    </Form.Control>
+                                                    <DropdownList
+                                                        defaultValue="Select a team"
+                                                        data={teams}
+                                                        textField="name"
+                                                        value={taskTeam}
+                                                        onChange={(val) => setTaskTeam(val)}
+                                                        disabled={taskTeam !== null}
+                                                    />
                                                 </Col>
                                             </Form.Group>
 
