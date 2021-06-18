@@ -3,6 +3,7 @@ import firebase from "firebase/app";
 import React, { useContext, useState, useEffect } from "react";
 import { store } from "../firebase";
 import { useAuth } from "./AuthContext";
+import { sub } from "date-fns";
 
 const StoreContext = React.createContext();
 
@@ -308,12 +309,8 @@ export function StoreProvider({ children }) {
         });
     }
 
-    function createTask(name, users, desc, tuid, dueDate) {
-        const userRefs = [];
-
-        users.forEach((uid) => {
-            userRefs.push(store.collection("users").doc(uid));
-        });
+    async function createTask(name, uids, desc, tuid, dueDate) {
+        const userRefs = uids.map((uid) => store.collection("users").doc(uid));
 
         const newTask = {
             name: name,
@@ -322,6 +319,7 @@ export function StoreProvider({ children }) {
             team: store.collection("teams").doc(tuid),
             due: firebase.firestore.Timestamp.fromDate(dueDate),
             completed: false,
+            hidden: false,
             creator: store.collection("users").doc(currentUser.uid),
         };
 
@@ -333,7 +331,7 @@ export function StoreProvider({ children }) {
             });
     }
 
-    function deleteTask(tuid) {
+    async function deleteTask(tuid) {
         store
             .collection("tasks")
             .doc(tuid)
@@ -362,7 +360,7 @@ export function StoreProvider({ children }) {
 
     // Updates the "field" of the task (specified by the task uid) in firestore to be true
     // Used in Tasks.js
-    function completeTask(tuid) {
+    async function completeTask(tuid) {
         store
             .collection("tasks")
             .doc(tuid)
@@ -370,6 +368,46 @@ export function StoreProvider({ children }) {
                 completed: true,
             })
             .then(() => {
+                getTasks();
+            });
+    }
+
+    async function createWorkflow(name, desc, tuid, dueDate, data) {
+        const newTemplate = {
+            currentTask: 1,
+            desc: desc,
+            length: data.length,
+            name: name,
+            creator: store.collection("users").doc(currentUser.uid),
+            team: store.collection("teams").doc(tuid),
+        };
+
+        await store
+            .collection("workflows")
+            .add(newTemplate)
+            .then(async (docRef) => {
+                for (let i = 0; i < data.length; i++) {
+                    const task = data[i];
+
+                    const newTask = {
+                        completed: false,
+                        hidden: i === 0 ? false : true,
+                        desc: task.desc,
+                        due: firebase.firestore.Timestamp.fromDate(
+                            sub(dueDate, { days: task.daysBefore })
+                        ),
+                        name: task.name,
+                        order: i + 1,
+                        team: store.collection("teams").doc(tuid),
+                        users: task.users.map((user) => store.collection("users").doc(user.uid)),
+                        creator: store.collection("users").doc(currentUser.uid),
+                        workflow: store.collection("workflows").doc(docRef.id),
+                    };
+
+                    await store.collection("tasks").add(newTask);
+                }
+            })
+            .finally(() => {
                 getTasks();
             });
     }
@@ -411,6 +449,7 @@ export function StoreProvider({ children }) {
         deleteTask,
         completeTask,
         getTeamUsers,
+        createWorkflow,
     };
 
     return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

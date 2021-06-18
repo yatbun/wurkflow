@@ -14,7 +14,7 @@ import DatePicker from "react-widgets/DatePicker";
 import NumberPicker from "react-widgets/NumberPicker";
 
 export default function NewWorkflow() {
-    const { teams } = useStore();
+    const { teams, createWorkflow } = useStore();
 
     const [error, setError] = useState("");
     const [continued, setContinued] = useState(false);
@@ -40,7 +40,9 @@ export default function NewWorkflow() {
             .get()
             .then((querySnapshot) => {
                 querySnapshot.docs.forEach((doc) => {
-                    users.push(doc.data());
+                    const tempUser = doc.data();
+                    tempUser.uid = doc.id;
+                    users.push(tempUser);
                 });
             })
             .finally(() => {
@@ -98,13 +100,17 @@ export default function NewWorkflow() {
 
     const [loading, setLoading] = useState(false);
 
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
         e.preventDefault();
         setLoading(true);
 
-        // TODO: To implement creation of tasks
-
-        console.log(taskData);
+        await createWorkflow(
+            wfNameRef.current.value,
+            wfDescRef.current.value,
+            wfTeam.uid,
+            wfDate,
+            taskData
+        );
 
         setLoading(false);
     }
@@ -210,7 +216,8 @@ export default function NewWorkflow() {
                                 <Form.Label>Users Involved</Form.Label>
                                 <Multiselect
                                     defaultValue={[]}
-                                    data={teamUsers.map((user) => user.name)}
+                                    data={teamUsers}
+                                    textField="name"
                                     onChange={(sel) => handleUsersChange(idx, sel)}
                                 />
                             </Form.Group>
