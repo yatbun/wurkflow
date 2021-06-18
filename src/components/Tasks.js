@@ -137,6 +137,7 @@ export default function Tasks() {
                                                     onClick={() => openModal(task.uid, "delete")}
                                                     variant="danger"
                                                     size="sm"
+                                                    disabled={task.workflow}
                                                 >
                                                     <FaTrash />
                                                 </Button>
