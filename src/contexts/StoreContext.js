@@ -405,29 +405,40 @@ export function StoreProvider({ children }) {
             team: team,
         };
 
+        let lastUid = "";
+
         await store
             .collection("workflows")
             .add(newTemplate)
             .then(async (docRef) => {
-                for (let i = 0; i < data.length; i++) {
-                    const task = data[i];
+                for (let i = data.length; i > 0; --i) {
+                    const task = data[i - 1];
 
                     const newTask = {
                         completed: false,
-                        hidden: i === 0 ? false : true,
+                        hidden: i === 1 ? false : true,
                         desc: task.desc,
                         due: firebase.firestore.Timestamp.fromDate(
                             sub(dueDate, { days: task.daysBefore })
                         ),
                         name: task.name,
-                        order: i + 1,
+                        order: i,
                         team: team,
                         users: task.users,
                         creator: store.collection("users").doc(currentUser.uid),
                         workflow: store.collection("workflows").doc(docRef.id),
                     };
 
-                    await store.collection("tasks").add(newTask);
+                    if (lastUid !== "") {
+                        newTask.nextTask = store.collection("tasks").doc(lastUid);
+                    }
+
+                    await store
+                        .collection("tasks")
+                        .add(newTask)
+                        .then((docRef) => {
+                            lastUid = docRef.id;
+                        });
                 }
             })
             .finally(() => {
