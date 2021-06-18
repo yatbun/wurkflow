@@ -372,14 +372,37 @@ export function StoreProvider({ children }) {
             });
     }
 
-    async function createWorkflow(name, desc, tuid, dueDate, data) {
+    async function createWorkflowTemplate(name, desc, tuid, data) {
+        for (let i = 0; i < data.length; ++i) {
+            delete data[i].dueDate;
+            data[i].users = data[i].users.map((user) => store.collection("users").doc(user.uid));
+        }
+
+        await store
+            .collection("teams")
+            .doc(tuid)
+            .get()
+            .then(async (doc) => {
+                const newTemplate = {
+                    name: doc.data().name + ": " + name,
+                    desc: desc,
+                    team: store.collection("teams").doc(tuid),
+                    data: data,
+                    creator: store.collection("users").doc(currentUser.uid),
+                };
+
+                await store.collection("wfTemplates").add(newTemplate);
+            });
+    }
+
+    async function createWorkflow(name, desc, team, dueDate, data) {
         const newTemplate = {
             currentTask: 1,
             desc: desc,
             length: data.length,
             name: name,
             creator: store.collection("users").doc(currentUser.uid),
-            team: store.collection("teams").doc(tuid),
+            team: team,
         };
 
         await store
@@ -398,8 +421,8 @@ export function StoreProvider({ children }) {
                         ),
                         name: task.name,
                         order: i + 1,
-                        team: store.collection("teams").doc(tuid),
-                        users: task.users.map((user) => store.collection("users").doc(user.uid)),
+                        team: team,
+                        users: task.users,
                         creator: store.collection("users").doc(currentUser.uid),
                         workflow: store.collection("workflows").doc(docRef.id),
                     };
@@ -449,6 +472,7 @@ export function StoreProvider({ children }) {
         deleteTask,
         completeTask,
         getTeamUsers,
+        createWorkflowTemplate,
         createWorkflow,
     };
 

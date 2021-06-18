@@ -14,7 +14,7 @@ import DatePicker from "react-widgets/DatePicker";
 import NumberPicker from "react-widgets/NumberPicker";
 
 export default function NewWorkflow() {
-    const { teams, createWorkflow } = useStore();
+    const { teams, createWorkflowTemplate } = useStore();
 
     const [error, setError] = useState("");
     const [continued, setContinued] = useState(false);
@@ -104,11 +104,10 @@ export default function NewWorkflow() {
         e.preventDefault();
         setLoading(true);
 
-        await createWorkflow(
+        await createWorkflowTemplate(
             wfNameRef.current.value,
             wfDescRef.current.value,
             wfTeam.uid,
-            wfDate,
             taskData
         );
 

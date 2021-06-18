@@ -55,9 +55,11 @@ export default function Workflows() {
                             enim tellus. Interdum et malesuada fames ac ante ipsum primis in
                             faucibus.
                         </p>
-                        <Button variant="danger" size="lg">
-                            Kickstart Workflow
-                        </Button>
+                        <Link to="kickstart-workflow">
+                            <Button variant="danger" size="lg">
+                                Kickstart Workflow
+                            </Button>
+                        </Link>
                         <Link to="/new-workflow">
                             <Button variant="outline-danger" size="lg" className="mx-3">
                                 New Workflow
