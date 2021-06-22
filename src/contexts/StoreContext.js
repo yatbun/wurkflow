@@ -5,7 +5,7 @@ import { store } from "../firebase";
 import { useAuth } from "./AuthContext";
 import { sub } from "date-fns";
 
-const StoreContext = React.createContext();
+export const StoreContext = React.createContext();
 
 export function useStore() {
     return useContext(StoreContext);
