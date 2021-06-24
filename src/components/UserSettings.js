@@ -1,22 +1,55 @@
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
 import { useRef, useEffect, useState } from "react";
-import { Container, Alert, Card, Form, Button } from "react-bootstrap";
-import { useStore } from "../contexts/StoreContext";
 import { useHistory } from "react-router-dom";
 
-import PageHeader from "./PageHeader";
+// Styling imports
+import { Container, Alert, Card, Form, Button } from "react-bootstrap";
 
-export default function UserSettings() {
-    const { currentOrg, orgs, updateCurrentOrg, orgExistsFromUid, joinOrg } = useStore();
+// Context imports
+import { useStore } from "../contexts/StoreContext";
+
+// Page component imports
+import PageHeader from "./PageHeader";
+// ----------------------------------------------------------------------------
+
+/**
+ * @classdesc
+ * The user settings page.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function UserSettings() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
+    const { currentOrg, orgs, updateCurrentOrg, orgExistsFromUid, joinOrg } =
+        useStore();
     const history = useHistory();
 
+    // useState declarations
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
 
-    // ---------------------------------
-    // Handle joining a new organisation
-
+    // ------------------------------------------------------------------------
+    // USER SETTINGS FORM DECLARATIONS
+    // ------------------------------------------------------------------------
     const joinRef = useRef();
+    const orgsRef = useRef();
+    // ------------------------------------------------------------------------
 
+    /**
+     * Handles joining of organisation.
+     *
+     * @param {Event} e The `onClick` event of the Join button
+     */
     async function handleJoin(e) {
         e.preventDefault();
         setMessage("");
@@ -33,11 +66,11 @@ export default function UserSettings() {
         }
     }
 
-    // ---------------------------------------
-    // Handle changing of current organisation
-
-    const orgsRef = useRef();
-
+    /**
+     * Handles changing of current active organisation.
+     *
+     * @param {Event} e The `onClick` event of the Change button
+     */
     function handleChange(e) {
         e.preventDefault();
         setMessage("");
@@ -57,12 +90,19 @@ export default function UserSettings() {
         history.push("/");
     }
 
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Sets the current active organisation as the default value in the
+    // organisation picker.
     useEffect(() => {
         if (currentOrg) {
             orgsRef.current.value = currentOrg.name;
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+    // ------------------------------------------------------------------------
 
     return (
         <>
@@ -91,7 +131,11 @@ export default function UserSettings() {
                         <Form onSubmit={handleChange}>
                             <Form.Group className="mt-4">
                                 <Form.Label>Current Organisation: </Form.Label>
-                                <Form.Control as="select" ref={orgsRef} className="form-select">
+                                <Form.Control
+                                    as="select"
+                                    ref={orgsRef}
+                                    className="form-select"
+                                >
                                     {orgs.map((o) => (
                                         <option key={o.uid}>{o.name}</option>
                                     ))}
@@ -107,3 +151,5 @@ export default function UserSettings() {
         </>
     );
 }
+
+export default UserSettings;

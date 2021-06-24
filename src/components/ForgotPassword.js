@@ -1,18 +1,52 @@
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
 import { useRef, useState } from "react";
-import { Form, Button, Card, Alert, Container } from "react-bootstrap";
-import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
 
-import PageHeader from "./PageHeader";
+// Styling imports
+import { Form, Button, Card, Alert, Container } from "react-bootstrap";
 
-export default function ForgotPassword() {
+// Context imports
+import { useAuth } from "../contexts/AuthContext";
+
+// Page component imports
+import PageHeader from "./PageHeader";
+// ----------------------------------------------------------------------------
+
+/**
+ * @classdesc
+ * The forgot password page.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function ForgotPassword() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
     const { resetPassword } = useAuth();
 
+    // useRef declarations
     const emailRef = useRef();
+
+    // useState declarations
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
+    // ------------------------------------------------------------------------
 
+    /**
+     * Calls the `resetPassword` method from `AuthContext`.
+     *
+     * @param {Event} e The `onClick` event from the reset button
+     * @returns {void}
+     */
     async function handleSubmit(e) {
         e.preventDefault();
 
@@ -41,9 +75,17 @@ export default function ForgotPassword() {
                         <Form onSubmit={handleSubmit}>
                             <Form.Group id="email" className="mt-4">
                                 <Form.Label>Email</Form.Label>
-                                <Form.Control type="email" ref={emailRef} required />
+                                <Form.Control
+                                    type="email"
+                                    ref={emailRef}
+                                    required
+                                />
                             </Form.Group>
-                            <Button disabled={loading} className="w-100 mt-4" type="submit">
+                            <Button
+                                disabled={loading}
+                                className="w-100 mt-4"
+                                type="submit"
+                            >
                                 Reset Password
                             </Button>
                         </Form>
@@ -56,3 +98,5 @@ export default function ForgotPassword() {
         </>
     );
 }
+
+export default ForgotPassword;

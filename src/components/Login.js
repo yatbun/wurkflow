@@ -1,18 +1,60 @@
-import { useRef, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { Link, useHistory } from "react-router-dom";
-import { Container, Form, Button, CardGroup, Card, Alert } from "react-bootstrap";
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
 
+// React imports
+import { useRef, useState } from "react";
+import { Link, useHistory } from "react-router-dom";
+
+// Styling imports
+import {
+    Container,
+    Form,
+    Button,
+    CardGroup,
+    Card,
+    Alert,
+} from "react-bootstrap";
+
+// Context imports
+import { useAuth } from "../contexts/AuthContext";
+
+// Page component imports
 import PageHeader from "./PageHeader";
 
-export default function Login() {
-    const emailRef = useRef();
-    const passwordRef = useRef();
+/**
+ * @classdesc
+ * The login page.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function Login() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
     const { login } = useAuth();
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
     const history = useHistory();
 
+    // useState declarations
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    // ------------------------------------------------------------------------
+    // LOG IN FORM DECLARATIONS
+    // ------------------------------------------------------------------------
+    const emailRef = useRef();
+    const passwordRef = useRef();
+    // ------------------------------------------------------------------------
+
+    /**
+     * Handles the logging in of the user.
+     *
+     * @param {Event} e The `onClick` event from the login button
+     */
     async function handleSubmit(e) {
         e.preventDefault();
 
@@ -35,14 +77,19 @@ export default function Login() {
 
                 <Container className="d-flex align-items-center justify-content-center">
                     <CardGroup>
-                        <Card className="d-flex p-4" style={{ minWidth: "300px" }}>
+                        <Card
+                            className="d-flex p-4"
+                            style={{ minWidth: "300px" }}
+                        >
                             <Card.Title className="mb-4">Sign Up</Card.Title>
                             <Card.Text>
-                                Don't have an account on Wurkflow yet? Get one today and start
-                                speeding up your workflows!
+                                Don't have an account on Wurkflow yet? Get one
+                                today and start speeding up your workflows!
                             </Card.Text>
                             <Link to="/signup">
-                                <button className="btn btn-outline-secondary">Sign Up</button>
+                                <button className="btn btn-outline-secondary">
+                                    Sign Up
+                                </button>
                             </Link>
                         </Card>
 
@@ -51,18 +98,32 @@ export default function Login() {
                             <Form onSubmit={handleSubmit}>
                                 <Form.Group id="email" className="mt-4">
                                     <Form.Label>Email</Form.Label>
-                                    <Form.Control type="email" ref={emailRef} required />
+                                    <Form.Control
+                                        type="email"
+                                        ref={emailRef}
+                                        required
+                                    />
                                 </Form.Group>
                                 <Form.Group id="password" className="mt-4">
                                     <Form.Label>Password</Form.Label>
-                                    <Form.Control type="password" ref={passwordRef} required />
+                                    <Form.Control
+                                        type="password"
+                                        ref={passwordRef}
+                                        required
+                                    />
                                 </Form.Group>
-                                <Button disabled={loading} className="w-100 mt-4" type="submit">
+                                <Button
+                                    disabled={loading}
+                                    className="w-100 mt-4"
+                                    type="submit"
+                                >
                                     Log In
                                 </Button>
                             </Form>
                             <div className="w-100 text-center mt-3">
-                                <Link to="/forgot-password">Forgot Password?</Link>
+                                <Link to="/forgot-password">
+                                    Forgot Password?
+                                </Link>
                             </div>
                         </Card>
                     </CardGroup>
@@ -71,3 +132,5 @@ export default function Login() {
         </>
     );
 }
+
+export default Login;

@@ -1,20 +1,55 @@
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
 import { useRef, useState } from "react";
-import { Container, Form, Button, Card, Alert } from "react-bootstrap";
-import { useAuth } from "../contexts/AuthContext";
 import { useHistory } from "react-router-dom";
 
+// Styling imports
+import { Container, Form, Button, Card, Alert } from "react-bootstrap";
+
+// Context imports
+import { useAuth } from "../contexts/AuthContext";
+
+// Page component imports
 import PageHeader from "./PageHeader";
 
-export default function UpdateProfile() {
+/**
+ * @classdesc
+ * The update profile page.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function UpdateProfile() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
+    const { currentUser, updateName, updateEmail, updatePassword } = useAuth();
+    const history = useHistory();
+
+    // useState declarations
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    // ------------------------------------------------------------------------
+    // UPDATE PROFILE FORM DECLARATIONS
+    // ------------------------------------------------------------------------
     const nameRef = useRef();
     const emailRef = useRef();
     const passwordRef = useRef();
     const passwordConfirmRef = useRef();
-    const { currentUser, updateName, updateEmail, updatePassword } = useAuth();
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
-    const history = useHistory();
+    // ------------------------------------------------------------------------
 
+    /**
+     * Handles the updating of the current user profile.
+     *
+     * @param {Event} e The `onClick` event of the Update Profile button
+     */
     function handleSubmit(e) {
         e.preventDefault();
 
@@ -47,6 +82,7 @@ export default function UpdateProfile() {
                 setLoading(false);
             });
     }
+
     return (
         <>
             <PageHeader />
@@ -92,7 +128,11 @@ export default function UpdateProfile() {
                                     placeholder="Leave blank to keep unchanged"
                                 />
                             </Form.Group>
-                            <Button disabled={loading} className="w-100 mt-4" type="submit">
+                            <Button
+                                disabled={loading}
+                                className="w-100 mt-4"
+                                type="submit"
+                            >
                                 Update
                             </Button>
                         </Form>
@@ -102,3 +142,5 @@ export default function UpdateProfile() {
         </>
     );
 }
+
+export default UpdateProfile;
