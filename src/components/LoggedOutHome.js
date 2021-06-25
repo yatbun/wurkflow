@@ -1,11 +1,28 @@
-import { Container, Image } from "react-bootstrap";
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
 import { Link } from "react-router-dom";
 
+// Syling imports
+import { Container, Image } from "react-bootstrap";
+
+// Page component imports
 import IntroPic from "../img/intro.png";
 import TeamsPic from "../img/teams.png";
 import TasksPic from "../img/tasks.png";
+// ----------------------------------------------------------------------------
 
-export default function LoggedOutHome() {
+/**
+ * @classdesc
+ * The landing page and the homepage when the user is not logged in.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function LoggedOutHome() {
     return (
         <>
             <div className="px-4 my-5 text-center border-bottom">
@@ -15,9 +32,10 @@ export default function LoggedOutHome() {
 
                 <div className="col-lg-6 mx-auto">
                     <p className="lead mb-4">
-                        Customise groups, delegate tasks and monitor deadlines. With Wurkflow, you
-                        can now manage your team and the work to be done simulatenously! Never worry
-                        about troublesome deadlines again.
+                        Customise groups, delegate tasks and monitor deadlines.
+                        With Wurkflow, you can now manage your team and the work
+                        to be done simulatenously! Never worry about troublesome
+                        deadlines again.
                     </p>
 
                     <div className="d-grid gap-2 d-sm-flex justify-content-sm-center mb-5">
@@ -52,13 +70,15 @@ export default function LoggedOutHome() {
                 <div className="col-lg-6">
                     <h1 className="display-5 fw-bold lh-1 mb-3">Groups</h1>
                     <p className="lead">
-                        Begin your journey by joining a group - or creating them yourself. With
-                        groups, delegation of work can now be done in a systematic and organised
-                        way.
+                        Begin your journey by joining a group - or creating them
+                        yourself. With groups, delegation of work can now be
+                        done in a systematic and organised way.
                     </p>
 
                     <div className="d-grid gap-2 d-md-flex justify-content-md-start">
-                        <button className="btn btn-danger btn-lg px-4 me-md-2">See More</button>
+                        <button className="btn btn-danger btn-lg px-4 me-md-2">
+                            See More
+                        </button>
                     </div>
                 </div>
             </div>
@@ -88,15 +108,20 @@ export default function LoggedOutHome() {
                 <div className="col-lg-6">
                     <h1 className="display-5 fw-bold lh-1 mb-3">Tasks</h1>
                     <p className="lead">
-                        Create tasks for your team and customise deadlines as you see fit! Let
-                        Wurkflow notify the respective members as you sit back and monitor the task.
+                        Create tasks for your team and customise deadlines as
+                        you see fit! Let Wurkflow notify the respective members
+                        as you sit back and monitor the task.
                     </p>
 
                     <div className="d-grid gap-2 d-md-flex justify-content-md-start">
-                        <button className="btn btn-danger btn-lg px-4 me-md-2">Learn More</button>
+                        <button className="btn btn-danger btn-lg px-4 me-md-2">
+                            Learn More
+                        </button>
                     </div>
                 </div>
             </div>
         </>
     );
 }
+
+export default LoggedOutHome;

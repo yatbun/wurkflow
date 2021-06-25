@@ -1,6 +1,12 @@
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useStore } from "../contexts/StoreContext";
+
+// Styling imports
 import {
     Container,
     Alert,
@@ -15,26 +21,71 @@ import {
     Modal,
 } from "react-bootstrap";
 import { FaEye, FaCheck, FaTrash, FaExclamationTriangle } from "react-icons/fa";
-import { DateLocalizer } from "react-widgets/IntlLocalizer";
 
+// Context imports
+import { useStore } from "../contexts/StoreContext";
+
+// Page component imports
 import PageHeader from "./PageHeader";
 import DropdownList from "react-widgets/DropdownList";
 import Multiselect from "react-widgets/Multiselect";
 import Localization from "react-widgets/esm/Localization";
 import DatePicker from "react-widgets/DatePicker";
 
-export default function Tasks() {
-    const { teams, tasks, completedTasks, createTask, deleteTask, completeTask, getTeamUsers } =
-        useStore();
+// Misc imports
+import { DateLocalizer } from "react-widgets/IntlLocalizer";
 
+/**
+ * @classdesc
+ * Page to display and create tasks.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function Tasks() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
+    const {
+        teams,
+        tasks,
+        completedTasks,
+        createTask,
+        deleteTask,
+        completeTask,
+        getTeamUsers,
+    } = useStore();
+
+    // useState declarations
     const [showCreate, setShowCreate] = useState(false);
     const [showCompletedTasks, setShowCompletedTasks] = useState(false);
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const [action, setAction] = useState("");
     const [actionTask, setActionTask] = useState("");
     const [showModal, setShowModal] = useState(false);
 
+    // ------------------------------------------------------------------------
+    // NEW TASK FORM DECLARATIONS
+    // ------------------------------------------------------------------------
+    const taskNameRef = useRef();
+    const taskDescRef = useRef();
+    const [taskTeam, setTaskTeam] = useState(null);
+    const [teamUsers, setTeamUsers] = useState([]);
+    const [taskDate, setTaskDate] = useState(new Date());
+    const [selectedUsers, setSelectedUsers] = useState([]);
+    // ------------------------------------------------------------------------
+
+    /**
+     * Checks the current modal action and assigns it to `actionTask` for use
+     * by the `Modal`.
+     *
+     * @returns {void}
+     */
     function modalAction() {
         if (action === "delete") {
             deleteTask(actionTask);
@@ -44,18 +95,38 @@ export default function Tasks() {
         closeModal();
     }
 
+    /**
+     * Handles the opening of the `Modal`.
+     *
+     * @param {String} taskUid The unique document id of the Task
+     * @param {String} action The desired action to be applied to the Task
+     *
+     * @returns {void}
+     */
     function openModal(taskUid, action) {
         setAction(action);
         setActionTask(taskUid);
         setShowModal(true);
     }
 
+    /**
+     * Handles the closing of the `Modal`.
+     *
+     * @returns {void}
+     */
     function closeModal() {
         setAction("");
         setActionTask("");
         setShowModal(false);
     }
 
+    /**
+     * The render function to display the user's task in the form of a table
+     *
+     * @param {Object[]} t Array of user's tasks
+     * @returns {Component} A table interface for the display of the user's
+     * tasks
+     */
     const renderTasks = (t) => {
         return (
             <Table striped bordered hover responsive className="mt-3">
@@ -79,7 +150,9 @@ export default function Tasks() {
                             <td>{task.dueDate.toLocaleDateString("en-GB")}</td>
                             <td>{task.teamName}</td>
                             <td>
-                                <OverlayTrigger overlay={<Tooltip>View</Tooltip>}>
+                                <OverlayTrigger
+                                    overlay={<Tooltip>View</Tooltip>}
+                                >
                                     <span className="d-inline-block me-md-2 my-1">
                                         <Link to={`/task/${task.uid}`}>
                                             <Button variant="primary" size="sm">
@@ -92,7 +165,8 @@ export default function Tasks() {
                                     overlay={
                                         task.completed ? (
                                             <Tooltip>
-                                                Task has already been marked as completed
+                                                Task has already been marked as
+                                                completed
                                             </Tooltip>
                                         ) : (
                                             <Tooltip>Complete</Tooltip>
@@ -101,7 +175,9 @@ export default function Tasks() {
                                 >
                                     <span className="d-inline-block me-md-2 my-1">
                                         <Button
-                                            onClick={() => openModal(task.uid, "complete")}
+                                            onClick={() =>
+                                                openModal(task.uid, "complete")
+                                            }
                                             variant="success"
                                             size="sm"
                                             disabled={task.completed}
@@ -110,10 +186,14 @@ export default function Tasks() {
                                         </Button>
                                     </span>
                                 </OverlayTrigger>
-                                <OverlayTrigger overlay={<Tooltip>Delete</Tooltip>}>
+                                <OverlayTrigger
+                                    overlay={<Tooltip>Delete</Tooltip>}
+                                >
                                     <span className="d-inline-block my-1">
                                         <Button
-                                            onClick={() => openModal(task.uid, "delete")}
+                                            onClick={() =>
+                                                openModal(task.uid, "delete")
+                                            }
                                             variant="danger"
                                             size="sm"
                                             disabled={task.workflow}
@@ -130,20 +210,22 @@ export default function Tasks() {
         );
     };
 
-    const [loading, setLoading] = useState(false);
-    const taskNameRef = useRef();
-    const taskDescRef = useRef();
-    const [taskTeam, setTaskTeam] = useState(null);
-    const [teamUsers, setTeamUsers] = useState([]);
-    const [taskDate, setTaskDate] = useState(new Date());
-    const [selectedUsers, setSelectedUsers] = useState([]);
-
+    /**
+     * Gets the list of users within the selected team.
+     *
+     * @returns {void}
+     */
     async function handleTeamChange() {
         if (taskTeam) {
             setTeamUsers(await getTeamUsers(taskTeam.uid));
         }
     }
 
+    /**
+     * Selective renderer for the users `Multiselect`.
+     *
+     * @returns {Component} The `Multiselect` only if a team is selected
+     */
     function renderMultiSelect() {
         if (teamUsers.length === 0) {
             return <div className="my-2">Please select a team</div>;
@@ -158,7 +240,12 @@ export default function Tasks() {
         }
     }
 
-    // Handles the creation of a task once the submit button is clicked
+    /**
+     * Handles the creation of a new task from the information entered by the
+     * user in the New Task form.
+     *
+     * @param {Event} e The `onClick` event from the Create button
+     */
     function handleCreate(e) {
         e.preventDefault();
 
@@ -178,10 +265,17 @@ export default function Tasks() {
         setShowCreate(false);
     }
 
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Updates the the users in the `Multiselect` if the selected team is
+    // changed.
     useEffect(() => {
         handleTeamChange();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [taskTeam]);
+    // ------------------------------------------------------------------------
 
     return (
         <>
@@ -192,8 +286,8 @@ export default function Tasks() {
                     <Container className="col-sm-12 mx-auto bg-light p-5 rounded">
                         <h1>Tasks</h1>
                         <p>
-                            Tasks are events that have been scheduled within the Teams that you are
-                            subcribed to.
+                            Tasks are events that have been scheduled within the
+                            Teams that you are subcribed to.
                         </p>
                         <Button
                             onClick={() => setShowCreate(!showCreate)}
@@ -203,23 +297,36 @@ export default function Tasks() {
                             Create a Task
                         </Button>
                         <Button
-                            onClick={() => setShowCompletedTasks(!showCompletedTasks)}
+                            onClick={() =>
+                                setShowCompletedTasks(!showCompletedTasks)
+                            }
                             variant="outline-secondary"
                             size="lg"
                             className="mx-3"
                         >
-                            {showCompletedTasks ? "Hide Completed" : "Show Completed"}
+                            {showCompletedTasks
+                                ? "Hide Completed"
+                                : "Show Completed"}
                         </Button>
                         <Collapse in={showCreate}>
                             <div>
-                                <Container className="mt-5 col-10" style={{ maxWidth: "600px" }}>
+                                <Container
+                                    className="mt-5 col-10"
+                                    style={{ maxWidth: "600px" }}
+                                >
                                     <Localization
                                         date={
-                                            new DateLocalizer({ culture: "en-GB", firstOfWeek: 7 })
+                                            new DateLocalizer({
+                                                culture: "en-GB",
+                                                firstOfWeek: 7,
+                                            })
                                         }
                                     >
                                         <Form onSubmit={handleCreate}>
-                                            <Form.Group as={Row} className="mb-3">
+                                            <Form.Group
+                                                as={Row}
+                                                className="mb-3"
+                                            >
                                                 <Form.Label column sm="3">
                                                     Task Name
                                                 </Form.Label>
@@ -232,16 +339,25 @@ export default function Tasks() {
                                                 </Col>
                                             </Form.Group>
 
-                                            <Form.Group as={Row} className="mb-3">
+                                            <Form.Group
+                                                as={Row}
+                                                className="mb-3"
+                                            >
                                                 <Form.Label column sm="3">
                                                     Task Description
                                                 </Form.Label>
                                                 <Col sm="9">
-                                                    <Form.Control as="textarea" ref={taskDescRef} />
+                                                    <Form.Control
+                                                        as="textarea"
+                                                        ref={taskDescRef}
+                                                    />
                                                 </Col>
                                             </Form.Group>
 
-                                            <Form.Group as={Row} className="mb-3">
+                                            <Form.Group
+                                                as={Row}
+                                                className="mb-3"
+                                            >
                                                 <Form.Label column sm="3">
                                                     Team Involved
                                                 </Form.Label>
@@ -251,8 +367,12 @@ export default function Tasks() {
                                                         data={teams}
                                                         textField="name"
                                                         value={taskTeam}
-                                                        onChange={(val) => setTaskTeam(val)}
-                                                        disabled={taskTeam !== null}
+                                                        onChange={(val) =>
+                                                            setTaskTeam(val)
+                                                        }
+                                                        disabled={
+                                                            taskTeam !== null
+                                                        }
                                                     />
                                                 </Col>
                                             </Form.Group>
@@ -265,17 +385,24 @@ export default function Tasks() {
                                                 <Form.Label column sm="3">
                                                     Users Involved
                                                 </Form.Label>
-                                                <Col sm="9">{renderMultiSelect()}</Col>
+                                                <Col sm="9">
+                                                    {renderMultiSelect()}
+                                                </Col>
                                             </Form.Group>
 
-                                            <Form.Group as={Row} className="mb-3">
+                                            <Form.Group
+                                                as={Row}
+                                                className="mb-3"
+                                            >
                                                 <Form.Label column sm="3">
                                                     Date Due
                                                 </Form.Label>
                                                 <Col sm="9">
                                                     <DatePicker
                                                         value={taskDate}
-                                                        onChange={(date) => setTaskDate(date)}
+                                                        onChange={(date) =>
+                                                            setTaskDate(date)
+                                                        }
                                                     />
                                                 </Col>
                                             </Form.Group>
@@ -338,3 +465,5 @@ export default function Tasks() {
         </>
     );
 }
+
+export default Tasks;

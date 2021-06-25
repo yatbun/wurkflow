@@ -1,16 +1,47 @@
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
 import { useState, useEffect } from "react";
-import { store } from "../firebase";
-import { useStore } from "../contexts/StoreContext";
 import { Link } from "react-router-dom";
+
+// Styling imports
 import { Container, Button } from "react-bootstrap";
 
+// Context imports
+import { store } from "../firebase";
+import { useStore } from "../contexts/StoreContext";
+
+// Page component imports
 import PageHeader from "./PageHeader";
 import WorkflowListItem from "./WorkflowListItem";
 
-export default function Workflows() {
-    const { teams } = useStore();
-    const [workflows, setWorkflows] = useState([]);
+/**
+ * @classdesc
+ * Page to display user's workflow instances.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function Workflows() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
 
+    // Context declarations
+    const { teams } = useStore();
+
+    // useState declarations
+    const [workflows, setWorkflows] = useState([]);
+    // ------------------------------------------------------------------------
+
+    /**
+     * Acquires workflows that belong to the teams that the user is part of.
+     *
+     * @returns {void}
+     */
     async function getWorkflows() {
         const promises = [];
         const wf = [];
@@ -19,7 +50,11 @@ export default function Workflows() {
             promises.push(
                 store
                     .collection("workflows")
-                    .where("team", "==", store.collection("teams").doc(team.uid))
+                    .where(
+                        "team",
+                        "==",
+                        store.collection("teams").doc(team.uid)
+                    )
                     .get()
                     .then((querySnapshot) => {
                         if (!querySnapshot.empty) {
@@ -33,15 +68,22 @@ export default function Workflows() {
         });
     }
 
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Gets the list of workflows on page load.
     useEffect(() => {
         getWorkflows();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Updates the list of workflows should `teams` state be updated.
     useEffect(() => {
         getWorkflows();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [teams]);
+    // ------------------------------------------------------------------------
 
     return (
         <>
@@ -51,9 +93,9 @@ export default function Workflows() {
                     <Container className="col-sm-12 mx-auto bg-light p-5 rounded">
                         <h1>Workflows</h1>
                         <p>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas luctus
-                            enim tellus. Interdum et malesuada fames ac ante ipsum primis in
-                            faucibus.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing
+                            elit. Maecenas luctus enim tellus. Interdum et
+                            malesuada fames ac ante ipsum primis in faucibus.
                         </p>
                         <Link to="kickstart-workflow">
                             <Button variant="danger" size="lg">
@@ -61,7 +103,11 @@ export default function Workflows() {
                             </Button>
                         </Link>
                         <Link to="/new-workflow">
-                            <Button variant="outline-danger" size="lg" className="mx-3">
+                            <Button
+                                variant="outline-danger"
+                                size="lg"
+                                className="mx-3"
+                            >
                                 New Workflow
                             </Button>
                         </Link>
@@ -85,3 +131,5 @@ export default function Workflows() {
         </>
     );
 }
+
+export default Workflows;
