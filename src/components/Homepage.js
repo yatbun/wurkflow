@@ -1,12 +1,37 @@
-import { useAuth } from "../contexts/AuthContext";
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// Styling imports
 import { Container } from "react-bootstrap";
 
+// Context imports
+import { useAuth } from "../contexts/AuthContext";
+
+// Page Component imports
 import PageHeader from "./PageHeader";
 import Dashboard from "./Dashboard";
 import LoggedOutHome from "./LoggedOutHome";
 
-export default function Homepage() {
+/**
+ * @classdesc
+ * Wrapper page for the home directory.
+ *
+ * If user is logged in, will display the dashboard. Otherwise, the homepage
+ * will be displayed instead.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function Homepage() {
+    // ------------------------------------------------------------------------
+    // DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
     const { currentUser } = useAuth();
+    // ------------------------------------------------------------------------
 
     return (
         <>
@@ -17,3 +42,5 @@ export default function Homepage() {
         </>
     );
 }
+
+export default Homepage;
