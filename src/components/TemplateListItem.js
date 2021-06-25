@@ -4,7 +4,7 @@ import { useStore } from "../contexts/StoreContext";
 import { DateLocalizer } from "react-widgets/IntlLocalizer";
 import { Container, Button, Form, InputGroup, FormControl, Spinner } from "react-bootstrap";
 
-import Localization from "react-widgets/esm/Localization";
+import Localization from "react-widgets/Localization";
 import DatePicker from "react-widgets/DatePicker";
 
 export default function TemplateListItem({ template }) {
@@ -29,8 +29,8 @@ export default function TemplateListItem({ template }) {
 
     return (
         <Container className="my-5 px-5 py-4 border rounded">
-            <h4>{tp.name}</h4>
-            <p>{tp.desc}</p>
+            <h4 data-testid="templateName">{tp.name}</h4>
+            <p data-testid="templateDesc">{tp.desc}</p>
             <Form onSubmit={handleStart} className="mt-4">
                 <Localization date={new DateLocalizer({ culture: "en-GB", firstOfWeek: 7 })}>
                     <InputGroup>
