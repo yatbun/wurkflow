@@ -1,0 +1,255 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> components/Workflows.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">WURKFLOW</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>components/Workflows.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+
+// Styling imports
+import { Container, Button } from "react-bootstrap";
+
+// Context imports
+import { store } from "../firebase";
+import { useStore } from "../contexts/StoreContext";
+
+// Page component imports
+import PageHeader from "./PageHeader";
+import WorkflowListItem from "./WorkflowListItem";
+
+/**
+ * @classdesc
+ * Page to display user's workflow instances.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function Workflows() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
+    const { teams } = useStore();
+
+    // useState declarations
+    const [workflows, setWorkflows] = useState([]);
+    // ------------------------------------------------------------------------
+
+    /**
+     * Acquires workflows that belong to the teams that the user is part of.
+     *
+     * @returns {void}
+     */
+    async function getWorkflows() {
+        const promises = [];
+        const wf = [];
+
+        teams.forEach((team) => {
+            promises.push(
+                store
+                    .collection("workflows")
+                    .where(
+                        "team",
+                        "==",
+                        store.collection("teams").doc(team.uid)
+                    )
+                    .get()
+                    .then((querySnapshot) => {
+                        if (!querySnapshot.empty) {
+                            wf.push.apply(wf, querySnapshot.docs);
+                        }
+                    })
+            );
+        });
+        Promise.all(promises).then(() => {
+            setWorkflows(wf);
+        });
+    }
+
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Gets the list of workflows on page load.
+    useEffect(() => {
+        getWorkflows();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Updates the list of workflows should `teams` state be updated.
+    useEffect(() => {
+        getWorkflows();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [teams]);
+    // ------------------------------------------------------------------------
+
+    return (
+        &lt;>
+            &lt;PageHeader />
+            &lt;Container className="pt-5 mt-5">
+                &lt;Container className="d-flex flex-column">
+                    &lt;Container className="col-sm-12 mx-auto bg-light p-5 rounded">
+                        &lt;h1>Workflows&lt;/h1>
+                        &lt;p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing
+                            elit. Maecenas luctus enim tellus. Interdum et
+                            malesuada fames ac ante ipsum primis in faucibus.
+                        &lt;/p>
+                        &lt;Link to="kickstart-workflow">
+                            &lt;Button variant="danger" size="lg">
+                                Kickstart Workflow
+                            &lt;/Button>
+                        &lt;/Link>
+                        &lt;Link to="/new-workflow">
+                            &lt;Button
+                                variant="outline-danger"
+                                size="lg"
+                                className="mx-3"
+                            >
+                                New Workflow
+                            &lt;/Button>
+                        &lt;/Link>
+                    &lt;/Container>
+                    &lt;Container className="col-sm-12 mx-auto my-5">
+                        {workflows.length === 0 ? (
+                            &lt;h2>No active workflows&lt;/h2>
+                        ) : (
+                            &lt;h2>Active Workflows&lt;/h2>
+                        )}
+                        {workflows.map((workflow) => (
+                            &lt;WorkflowListItem
+                                workflow={workflow}
+                                refreshFn={getWorkflows}
+                                key={workflow.id}
+                            />
+                        ))}
+                    &lt;/Container>
+                &lt;/Container>
+            &lt;/Container>
+        &lt;/>
+    );
+}
+
+export default Workflows;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>

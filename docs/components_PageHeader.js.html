@@ -1,0 +1,281 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> components/PageHeader.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">WURKFLOW</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>components/PageHeader.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
+import { useState } from "react";
+import { Link, useHistory } from "react-router-dom";
+import { LinkContainer } from "react-router-bootstrap";
+
+// Styling imports
+import {
+    Navbar,
+    Nav,
+    NavDropdown,
+    Container,
+    Image,
+    Dropdown,
+} from "react-bootstrap";
+
+// Context imports
+import { useAuth } from "../contexts/AuthContext";
+import { useStore } from "../contexts/StoreContext";
+
+// Page component imports
+import logo from "../img/logo.png";
+
+/**
+ * @classdesc
+ * The navigation bar.
+ *
+ * @category Page Components
+ * @hideconstructor
+ * @component
+ */
+function PageHeader() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
+    const { currentUser, logout } = useAuth();
+    const { userData } = useStore();
+    const history = useHistory();
+
+    // useState declarations
+    const [error, setError] = useState("");
+    // ------------------------------------------------------------------------
+
+    /**
+     * Handles the logging out of the user.
+     *
+     * @returns {void}
+     */
+    async function handleLogout() {
+        setError("");
+
+        try {
+            await logout();
+            history.push("/");
+        } catch {
+            setError("Failed to log out");
+        }
+    }
+
+    /**
+     * Render function for the logged in section of the navigation bar.
+     *
+     * @returns {Component} The logged in section of the navigation bar.
+     */
+    const loggedInMenu = () => {
+        return (
+            &lt;>
+                &lt;LinkContainer to="/workflows">
+                    &lt;Nav.Link eventKey={2}>Workflows&lt;/Nav.Link>
+                &lt;/LinkContainer>
+
+                &lt;LinkContainer to="/tasks">
+                    &lt;Nav.Link eventKey={3}>Tasks&lt;/Nav.Link>
+                &lt;/LinkContainer>
+                &lt;NavDropdown title="Manage" id="nav-dropdown">
+                    {userData &amp;&amp; userData.orgAdmin &amp;&amp; (
+                        &lt;LinkContainer to="/manage-organisation">
+                            &lt;NavDropdown.Item eventKey={4.1}>
+                                My Organisation
+                            &lt;/NavDropdown.Item>
+                        &lt;/LinkContainer>
+                    )}
+                    &lt;LinkContainer to="/teams">
+                        &lt;NavDropdown.Item eventKey={4.2}>
+                            My Teams
+                        &lt;/NavDropdown.Item>
+                    &lt;/LinkContainer>
+                &lt;/NavDropdown>
+            &lt;/>
+        );
+    };
+
+    return (
+        &lt;Navbar fixed="top" bg="white" className="pl-3 border-bottom shadow-sm">
+            &lt;Container>
+                &lt;Navbar.Brand>
+                    &lt;Link to="/">
+                        &lt;Image src={logo} width="187" height="25" />
+                    &lt;/Link>
+                &lt;/Navbar.Brand>
+
+                &lt;Nav className="mx-auto">
+                    &lt;LinkContainer to="/home">
+                        &lt;Nav.Link eventKey={1}> Home&lt;/Nav.Link>
+                    &lt;/LinkContainer>
+
+                    {currentUser &amp;&amp; loggedInMenu()}
+
+                    &lt;Link to="/" className="nav-link px-2 disabled">
+                        About
+                    &lt;/Link>
+                &lt;/Nav>
+
+                {currentUser ? (
+                    &lt;>
+                        &lt;Dropdown alignRight={true}>
+                            &lt;Dropdown.Toggle
+                                variant="outline-success"
+                                id="dd-profile"
+                            >
+                                {currentUser.displayName}
+                            &lt;/Dropdown.Toggle>
+
+                            &lt;Dropdown.Menu>
+                                &lt;Link
+                                    to="/user-settings"
+                                    className="dropdown-item"
+                                >
+                                    User Settings
+                                &lt;/Link>
+                                &lt;Link
+                                    to="/update-profile"
+                                    className="dropdown-item"
+                                >
+                                    Update Profile
+                                &lt;/Link>
+                                &lt;Dropdown.Divider />
+                                &lt;Dropdown.Item onClick={handleLogout}>
+                                    Logout
+                                &lt;/Dropdown.Item>
+                            &lt;/Dropdown.Menu>
+                        &lt;/Dropdown>
+                    &lt;/>
+                ) : (
+                    &lt;Link to="/login">
+                        &lt;button className="btn btn-outline-danger">
+                            Get Started
+                        &lt;/button>
+                    &lt;/Link>
+                )}
+            &lt;/Container>
+        &lt;/Navbar>
+    );
+}
+
+export default PageHeader;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>

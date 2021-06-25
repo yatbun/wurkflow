@@ -1,0 +1,589 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> components/Tasks.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">WURKFLOW</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>components/Tasks.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
+import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
+
+// Styling imports
+import {
+    Container,
+    Alert,
+    Button,
+    Collapse,
+    Form,
+    Row,
+    Col,
+    Table,
+    OverlayTrigger,
+    Tooltip,
+    Modal,
+} from "react-bootstrap";
+import { FaEye, FaCheck, FaTrash, FaExclamationTriangle } from "react-icons/fa";
+
+// Context imports
+import { useStore } from "../contexts/StoreContext";
+
+// Page component imports
+import PageHeader from "./PageHeader";
+import DropdownList from "react-widgets/DropdownList";
+import Multiselect from "react-widgets/Multiselect";
+import Localization from "react-widgets/esm/Localization";
+import DatePicker from "react-widgets/DatePicker";
+
+// Misc imports
+import { DateLocalizer } from "react-widgets/IntlLocalizer";
+
+/**
+ * @classdesc
+ * Page to display and create tasks.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function Tasks() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
+    const {
+        teams,
+        tasks,
+        completedTasks,
+        createTask,
+        deleteTask,
+        completeTask,
+        getTeamUsers,
+    } = useStore();
+
+    // useState declarations
+    const [showCreate, setShowCreate] = useState(false);
+    const [showCompletedTasks, setShowCompletedTasks] = useState(false);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const [action, setAction] = useState("");
+    const [actionTask, setActionTask] = useState("");
+    const [showModal, setShowModal] = useState(false);
+
+    // ------------------------------------------------------------------------
+    // NEW TASK FORM DECLARATIONS
+    // ------------------------------------------------------------------------
+    const taskNameRef = useRef();
+    const taskDescRef = useRef();
+    const [taskTeam, setTaskTeam] = useState(null);
+    const [teamUsers, setTeamUsers] = useState([]);
+    const [taskDate, setTaskDate] = useState(new Date());
+    const [selectedUsers, setSelectedUsers] = useState([]);
+    // ------------------------------------------------------------------------
+
+    /**
+     * Checks the current modal action and assigns it to `actionTask` for use
+     * by the `Modal`.
+     *
+     * @returns {void}
+     */
+    function modalAction() {
+        if (action === "delete") {
+            deleteTask(actionTask);
+        } else if (action === "complete") {
+            completeTask(actionTask);
+        }
+        closeModal();
+    }
+
+    /**
+     * Handles the opening of the `Modal`.
+     *
+     * @param {String} taskUid The unique document id of the Task
+     * @param {String} action The desired action to be applied to the Task
+     *
+     * @returns {void}
+     */
+    function openModal(taskUid, action) {
+        setAction(action);
+        setActionTask(taskUid);
+        setShowModal(true);
+    }
+
+    /**
+     * Handles the closing of the `Modal`.
+     *
+     * @returns {void}
+     */
+    function closeModal() {
+        setAction("");
+        setActionTask("");
+        setShowModal(false);
+    }
+
+    /**
+     * The render function to display the user's task in the form of a table
+     *
+     * @param {Object[]} t Array of user's tasks
+     * @returns {Component} A table interface for the display of the user's
+     * tasks
+     */
+    const renderTasks = (t) => {
+        return (
+            &lt;Table striped bordered hover responsive className="mt-3">
+                &lt;thead>
+                    &lt;tr>
+                        &lt;th>&lt;/th>
+                        &lt;th>Name&lt;/th>
+                        &lt;th>Description&lt;/th>
+                        &lt;th>Date Due&lt;/th>
+                        &lt;th>Team&lt;/th>
+                        &lt;th>Actions&lt;/th>
+                    &lt;/tr>
+                &lt;/thead>
+
+                &lt;tbody>
+                    {t.map((task, index) => (
+                        &lt;tr key={index}>
+                            &lt;td>{index + 1}&lt;/td>
+                            &lt;td>{task.name}&lt;/td>
+                            &lt;td>{task.desc}&lt;/td>
+                            &lt;td>{task.dueDate.toLocaleDateString("en-GB")}&lt;/td>
+                            &lt;td>{task.teamName}&lt;/td>
+                            &lt;td>
+                                &lt;OverlayTrigger
+                                    overlay={&lt;Tooltip>View&lt;/Tooltip>}
+                                >
+                                    &lt;span className="d-inline-block me-md-2 my-1">
+                                        &lt;Link to={`/task/${task.uid}`}>
+                                            &lt;Button variant="primary" size="sm">
+                                                &lt;FaEye />
+                                            &lt;/Button>
+                                        &lt;/Link>
+                                    &lt;/span>
+                                &lt;/OverlayTrigger>
+                                &lt;OverlayTrigger
+                                    overlay={
+                                        task.completed ? (
+                                            &lt;Tooltip>
+                                                Task has already been marked as
+                                                completed
+                                            &lt;/Tooltip>
+                                        ) : (
+                                            &lt;Tooltip>Complete&lt;/Tooltip>
+                                        )
+                                    }
+                                >
+                                    &lt;span className="d-inline-block me-md-2 my-1">
+                                        &lt;Button
+                                            onClick={() =>
+                                                openModal(task.uid, "complete")
+                                            }
+                                            variant="success"
+                                            size="sm"
+                                            disabled={task.completed}
+                                        >
+                                            &lt;FaCheck />
+                                        &lt;/Button>
+                                    &lt;/span>
+                                &lt;/OverlayTrigger>
+                                &lt;OverlayTrigger
+                                    overlay={&lt;Tooltip>Delete&lt;/Tooltip>}
+                                >
+                                    &lt;span className="d-inline-block my-1">
+                                        &lt;Button
+                                            onClick={() =>
+                                                openModal(task.uid, "delete")
+                                            }
+                                            variant="danger"
+                                            size="sm"
+                                            disabled={task.workflow}
+                                        >
+                                            &lt;FaTrash />
+                                        &lt;/Button>
+                                    &lt;/span>
+                                &lt;/OverlayTrigger>
+                            &lt;/td>
+                        &lt;/tr>
+                    ))}
+                &lt;/tbody>
+            &lt;/Table>
+        );
+    };
+
+    /**
+     * Gets the list of users within the selected team.
+     *
+     * @returns {void}
+     */
+    async function handleTeamChange() {
+        if (taskTeam) {
+            setTeamUsers(await getTeamUsers(taskTeam.uid));
+        }
+    }
+
+    /**
+     * Selective renderer for the users `Multiselect`.
+     *
+     * @returns {Component} The `Multiselect` only if a team is selected
+     */
+    function renderMultiSelect() {
+        if (teamUsers.length === 0) {
+            return &lt;div className="my-2">Please select a team&lt;/div>;
+        } else {
+            return (
+                &lt;Multiselect
+                    data={teamUsers}
+                    textField="name"
+                    onChange={(val) => setSelectedUsers(val)}
+                />
+            );
+        }
+    }
+
+    /**
+     * Handles the creation of a new task from the information entered by the
+     * user in the New Task form.
+     *
+     * @param {Event} e The `onClick` event from the Create button
+     */
+    function handleCreate(e) {
+        e.preventDefault();
+
+        const tuid = taskTeam.uid;
+
+        createTask(
+            taskNameRef.current.value,
+            selectedUsers.map((user) => user.uid),
+            taskDescRef.current.value,
+            tuid,
+            taskDate
+        );
+
+        taskNameRef.current.value = "";
+        taskDescRef.current.value = "";
+        setTaskDate(new Date());
+        setShowCreate(false);
+    }
+
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Updates the the users in the `Multiselect` if the selected team is
+    // changed.
+    useEffect(() => {
+        handleTeamChange();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [taskTeam]);
+    // ------------------------------------------------------------------------
+
+    return (
+        &lt;>
+            &lt;PageHeader />
+            &lt;Container className="pt-5 mt-5">
+                {error &amp;&amp; &lt;Alert variant="danger">{error}&lt;/Alert>}
+                &lt;Container className="d-flex flex-column">
+                    &lt;Container className="col-sm-12 mx-auto bg-light p-5 rounded">
+                        &lt;h1>Tasks&lt;/h1>
+                        &lt;p>
+                            Tasks are events that have been scheduled within the
+                            Teams that you are subcribed to.
+                        &lt;/p>
+                        &lt;Button
+                            onClick={() => setShowCreate(!showCreate)}
+                            variant="danger"
+                            size="lg"
+                        >
+                            Create a Task
+                        &lt;/Button>
+                        &lt;Button
+                            onClick={() =>
+                                setShowCompletedTasks(!showCompletedTasks)
+                            }
+                            variant="outline-secondary"
+                            size="lg"
+                            className="mx-3"
+                        >
+                            {showCompletedTasks
+                                ? "Hide Completed"
+                                : "Show Completed"}
+                        &lt;/Button>
+                        &lt;Collapse in={showCreate}>
+                            &lt;div>
+                                &lt;Container
+                                    className="mt-5 col-10"
+                                    style={{ maxWidth: "600px" }}
+                                >
+                                    &lt;Localization
+                                        date={
+                                            new DateLocalizer({
+                                                culture: "en-GB",
+                                                firstOfWeek: 7,
+                                            })
+                                        }
+                                    >
+                                        &lt;Form onSubmit={handleCreate}>
+                                            &lt;Form.Group
+                                                as={Row}
+                                                className="mb-3"
+                                            >
+                                                &lt;Form.Label column sm="3">
+                                                    Task Name
+                                                &lt;/Form.Label>
+                                                &lt;Col sm="9">
+                                                    &lt;Form.Control
+                                                        type="text"
+                                                        ref={taskNameRef}
+                                                        required
+                                                    />
+                                                &lt;/Col>
+                                            &lt;/Form.Group>
+
+                                            &lt;Form.Group
+                                                as={Row}
+                                                className="mb-3"
+                                            >
+                                                &lt;Form.Label column sm="3">
+                                                    Task Description
+                                                &lt;/Form.Label>
+                                                &lt;Col sm="9">
+                                                    &lt;Form.Control
+                                                        as="textarea"
+                                                        ref={taskDescRef}
+                                                    />
+                                                &lt;/Col>
+                                            &lt;/Form.Group>
+
+                                            &lt;Form.Group
+                                                as={Row}
+                                                className="mb-3"
+                                            >
+                                                &lt;Form.Label column sm="3">
+                                                    Team Involved
+                                                &lt;/Form.Label>
+                                                &lt;Col sm="9">
+                                                    &lt;DropdownList
+                                                        defaultValue="Select a team"
+                                                        data={teams}
+                                                        textField="name"
+                                                        value={taskTeam}
+                                                        onChange={(val) =>
+                                                            setTaskTeam(val)
+                                                        }
+                                                        disabled={
+                                                            taskTeam !== null
+                                                        }
+                                                    />
+                                                &lt;/Col>
+                                            &lt;/Form.Group>
+
+                                            &lt;Form.Group
+                                                as={Row}
+                                                controlId="my_multiselect_field"
+                                                className="mb-3"
+                                            >
+                                                &lt;Form.Label column sm="3">
+                                                    Users Involved
+                                                &lt;/Form.Label>
+                                                &lt;Col sm="9">
+                                                    {renderMultiSelect()}
+                                                &lt;/Col>
+                                            &lt;/Form.Group>
+
+                                            &lt;Form.Group
+                                                as={Row}
+                                                className="mb-3"
+                                            >
+                                                &lt;Form.Label column sm="3">
+                                                    Date Due
+                                                &lt;/Form.Label>
+                                                &lt;Col sm="9">
+                                                    &lt;DatePicker
+                                                        value={taskDate}
+                                                        onChange={(date) =>
+                                                            setTaskDate(date)
+                                                        }
+                                                    />
+                                                &lt;/Col>
+                                            &lt;/Form.Group>
+                                            &lt;Button
+                                                disabled={loading}
+                                                className="w-100"
+                                                type="submit"
+                                            >
+                                                Create
+                                            &lt;/Button>
+                                        &lt;/Form>
+                                    &lt;/Localization>
+                                &lt;/Container>
+                            &lt;/div>
+                        &lt;/Collapse>
+                    &lt;/Container>
+
+                    &lt;Modal show={showModal} onHide={closeModal}>
+                        &lt;Modal.Header>
+                            &lt;Modal.Title>
+                                &lt;FaExclamationTriangle />
+                            &lt;/Modal.Title>
+                        &lt;/Modal.Header>
+                        &lt;Modal.Body>Are you sure?&lt;/Modal.Body>
+                        &lt;Modal.Footer>
+                            &lt;Button variant="secondary" onClick={closeModal}>
+                                Cancel
+                            &lt;/Button>
+                            &lt;Button variant="warning" onClick={modalAction}>
+                                I AM SURE
+                            &lt;/Button>
+                        &lt;/Modal.Footer>
+                    &lt;/Modal>
+
+                    &lt;Container className="col-sm-12 mx-auto mt-2 mb-5 pt-5">
+                        {tasks &amp;&amp; tasks.length === 0 ? (
+                            &lt;h2>You do not have any active tasks right now.&lt;/h2>
+                        ) : (
+                            &lt;>
+                                &lt;h2>Your tasks&lt;/h2>
+                                {renderTasks(tasks)}
+                            &lt;/>
+                        )}
+                    &lt;/Container>
+
+                    &lt;Collapse in={showCompletedTasks}>
+                        &lt;Container className="col-sm-12 mx-auto mt-2 mb-5 pt-5">
+                            {completedTasks &amp;&amp; completedTasks.length === 0 ? (
+                                &lt;h2>You do not have any completed tasks.&lt;/h2>
+                            ) : (
+                                &lt;>
+                                    &lt;h2>Your completed tasks&lt;/h2>
+                                    {renderTasks(completedTasks)}
+                                &lt;/>
+                            )}
+                        &lt;/Container>
+                    &lt;/Collapse>
+                &lt;/Container>
+            &lt;/Container>
+        &lt;/>
+    );
+}
+
+export default Tasks;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>

@@ -1,0 +1,247 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> components/LoggedOutHome.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">WURKFLOW</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>components/LoggedOutHome.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
+import { Link } from "react-router-dom";
+
+// Syling imports
+import { Container, Image } from "react-bootstrap";
+
+// Page component imports
+import IntroPic from "../img/intro.png";
+import TeamsPic from "../img/teams.png";
+import TasksPic from "../img/tasks.png";
+// ----------------------------------------------------------------------------
+
+/**
+ * @classdesc
+ * The landing page and the homepage when the user is not logged in.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function LoggedOutHome() {
+    return (
+        &lt;>
+            &lt;div className="px-4 my-5 text-center border-bottom">
+                &lt;h1 className="display-4">
+                    &lt;strong>Be ahead of the game&lt;/strong>
+                &lt;/h1>
+
+                &lt;div className="col-lg-6 mx-auto">
+                    &lt;p className="lead mb-4">
+                        Customise groups, delegate tasks and monitor deadlines.
+                        With Wurkflow, you can now manage your team and the work
+                        to be done simulatenously! Never worry about troublesome
+                        deadlines again.
+                    &lt;/p>
+
+                    &lt;div className="d-grid gap-2 d-sm-flex justify-content-sm-center mb-5">
+                        &lt;Link to="/signup">
+                            &lt;button className="btn btn-danger btn-lg px-4 mx-3 my-2">
+                                Create Account
+                            &lt;/button>
+                        &lt;/Link>
+                        &lt;button className="btn btn-outline-danger btn-lg px-4 my-2">
+                            See It In Action
+                        &lt;/button>
+                    &lt;/div>
+                &lt;/div>
+
+                &lt;div className="overflow-hidden" style={{ maxHeight: "30vh" }}>
+                    &lt;Container className="px-5">
+                        &lt;Image src={IntroPic} width={700} height={270} />
+                    &lt;/Container>
+                &lt;/div>
+            &lt;/div>
+
+            &lt;div className="row flex-lg-row-reverse align-items-center g-5 py-5">
+                &lt;div className="col-10 col-sm-8 col-lg-6">
+                    &lt;Image
+                        src={TeamsPic}
+                        width={500}
+                        height={270}
+                        className="border shadow-lg rounded"
+                    />
+                &lt;/div>
+
+                &lt;div className="col-lg-6">
+                    &lt;h1 className="display-5 fw-bold lh-1 mb-3">Groups&lt;/h1>
+                    &lt;p className="lead">
+                        Begin your journey by joining a group - or creating them
+                        yourself. With groups, delegation of work can now be
+                        done in a systematic and organised way.
+                    &lt;/p>
+
+                    &lt;div className="d-grid gap-2 d-md-flex justify-content-md-start">
+                        &lt;button className="btn btn-danger btn-lg px-4 me-md-2">
+                            See More
+                        &lt;/button>
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>
+
+            {/* &lt;div className="row p-4 pb-0 pe-lg-0 pt-lg-5 align-items-center rounded-3 border shadow-lg">
+                &lt;div className="p-3">
+                    &lt;h1 className="display-4 fw-bold lh-1 mb-4">See what others say&lt;/h1>
+                    &lt;p className="lead mb-4">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. In eu dui semper,
+                        volutpat velit non, sagittis ex. Vivamus elementum dui diam, ac pharetra
+                        augue sodales id. Pellentesque id arcu diam. Vestibulum fermentum justo
+                        sapien, quis viverra dolor feugiat ac. Ut vitae lacus mi.
+                    &lt;/p>
+                &lt;/div>
+            &lt;/div> */}
+
+            &lt;div className="row flex-lg-row align-items-center g-5 py-5">
+                &lt;div className="col-10 col-sm-8 col-lg-6">
+                    &lt;Image
+                        src={TasksPic}
+                        width={500}
+                        height={270}
+                        className="border shadow-lg rounded"
+                    />
+                &lt;/div>
+
+                &lt;div className="col-lg-6">
+                    &lt;h1 className="display-5 fw-bold lh-1 mb-3">Tasks&lt;/h1>
+                    &lt;p className="lead">
+                        Create tasks for your team and customise deadlines as
+                        you see fit! Let Wurkflow notify the respective members
+                        as you sit back and monitor the task.
+                    &lt;/p>
+
+                    &lt;div className="d-grid gap-2 d-md-flex justify-content-md-start">
+                        &lt;button className="btn btn-danger btn-lg px-4 me-md-2">
+                            Learn More
+                        &lt;/button>
+                    &lt;/div>
+                &lt;/div>
+            &lt;/div>
+        &lt;/>
+    );
+}
+
+export default LoggedOutHome;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>
