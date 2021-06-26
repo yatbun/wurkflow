@@ -43,7 +43,7 @@ export function AuthProvider({ children }) {
             store
                 .collection("users")
                 .doc(user.uid)
-                .set({ currentOrg: o, orgs: [o], teams: [] });
+                .set({ name: name, currentOrg: o, orgs: [o], teams: [] });
 
             return user.updateProfile({
                 displayName: name,
@@ -70,7 +70,13 @@ export function AuthProvider({ children }) {
             store
                 .collection("users")
                 .doc(user.uid)
-                .set({ currentOrg: o, orgAdmin: o, orgs: [o], teams: [] });
+                .set({
+                    name: name,
+                    currentOrg: o,
+                    orgAdmin: o,
+                    orgs: [o],
+                    teams: [],
+                });
 
             return user.updateProfile({
                 displayName: name,
@@ -133,6 +139,9 @@ export function AuthProvider({ children }) {
      * @returns {void}
      */
     function updateName(name) {
+        store.collection("users").doc(currentUser.uid).update({
+            name: name,
+        });
         return currentUser.updateProfile({
             displayName: name,
         });
