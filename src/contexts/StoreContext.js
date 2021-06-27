@@ -505,12 +505,17 @@ export function StoreProvider({ children }) {
         store
             .collection("tasks")
             .doc(tuid)
+            .update({
+                completed: true,
+            })
+            .then(() => {
+                getTasks();
+            });
+        store
+            .collection("tasks")
+            .doc(tuid)
             .get()
             .then((doc) => {
-                store.collection("tasks").doc(tuid).update({
-                    completed: true,
-                });
-
                 const tempDoc = doc.data();
 
                 if (tempDoc.workflow) {
@@ -525,18 +530,17 @@ export function StoreProvider({ children }) {
                                 getTasks();
                             });
                     }
-                    getTasks();
+                    store
+                        .collection("workflows")
+                        .doc(tempDoc.workflow.id)
+                        .update({
+                            currentTask:
+                                firebase.firestore.FieldValue.increment(1),
+                        })
+                        .then(() => {
+                            getTasks();
+                        });
                 }
-
-                store
-                    .collection("workflows")
-                    .doc(tempDoc.workflow.id)
-                    .update({
-                        currentTask: firebase.firestore.FieldValue.increment(1),
-                    });
-            })
-            .then(() => {
-                getTasks();
             });
     }
 
