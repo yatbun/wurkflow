@@ -371,9 +371,9 @@ function NewWorkflow() {
                     <Container className="col-sm-12 mx-auto bg-light p-5 rounded">
                         <h1>New Workflow Template</h1>
                         <p>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                            elit. Maecenas luctus enim tellus. Interdum et
-                            malesuada fames ac ante ipsum primis in faucibus.
+                            Create a new workflow template for common repetitive
+                            tasks. You can then kickstart instances of it
+                            whenever!
                         </p>
                     </Container>
                     <Container className="col-sm-8 mx-auto my-5">

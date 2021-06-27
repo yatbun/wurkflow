@@ -93,9 +93,9 @@ function Workflows() {
                     <Container className="col-sm-12 mx-auto bg-light p-5 rounded">
                         <h1>Workflows</h1>
                         <p>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                            elit. Maecenas luctus enim tellus. Interdum et
-                            malesuada fames ac ante ipsum primis in faucibus.
+                            Manage your active workflows here! Create new ones
+                            to cater to your teams' processes and kickstart them
+                            whenever you require.
                         </p>
                         <Link to="kickstart-workflow">
                             <Button variant="danger" size="lg">
