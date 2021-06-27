@@ -1,0 +1,538 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> components/Teams.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">WURKFLOW</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>components/Teams.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
+import { useState, useRef, useEffect } from "react";
+
+// Styling imports
+import {
+    Container,
+    Alert,
+    Button,
+    Row,
+    Col,
+    Tab,
+    Nav,
+    Collapse,
+    InputGroup,
+    FormControl,
+    Form,
+    Modal,
+} from "react-bootstrap";
+import { FaExclamationTriangle } from "react-icons/fa";
+
+// Context imports
+import { useStore } from "../contexts/StoreContext";
+
+// Page component imports
+import PageHeader from "./PageHeader";
+
+/**
+ * @classdesc
+ * Page to manage user's teams.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function Teams() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
+    const {
+        currentOrg,
+        teams,
+        teamsMessage,
+        teamsError,
+        quitTeam,
+        joinTeam,
+        createTeam,
+    } = useStore();
+
+    // useState declarations
+    const [message, setMessage] = useState("");
+    const [error, setError] = useState("");
+
+    // ------------------------------------------------------------------------
+    // TEAM QUITTING FORM DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    const [teamQuit, setTeamQuit] = useState("");
+    const [showModal, setShowModal] = useState(false);
+
+    /**
+     * Handles the closing of the quit team `Modal`.
+     * @returns {void}
+     */
+    const closeModal = () => setShowModal(false);
+
+    /**
+     * Handles the opening of the quit team `Modal`.
+     * @returns {void}
+     */
+    const openModal = (tuid) => {
+        setMessage("");
+        setTeamQuit(tuid);
+        setShowModal(true);
+    };
+
+    /**
+     * Handles the quitting of the selected team.
+     *
+     * @returns {void}
+     */
+    async function quitHandler() {
+        setError("");
+        quitTeam(teamQuit);
+        setTeamQuit("");
+        setShowModal(false);
+    }
+
+    // ------------------------------------------------------------------------
+    // TEAM JOINING AND CREATING FORM DECLARATIONS
+    // ------------------------------------------------------------------------
+    const [joinOpen, setJoinOpen] = useState(false);
+    const [createOpen, setCreateOpen] = useState(false);
+
+    const [currentOrgName, setCurrentOrgName] = useState("");
+    const joinGroupIdRef = useRef();
+    const groupNameRef = useRef();
+    const groupIdRef = useRef();
+    const groupDescRef = useRef();
+    const [groupId, setGroupId] = useState();
+
+    /**
+     * Handles the toggling of the join team form.
+     *
+     * @returns {void}
+     */
+    function joinToggle() {
+        if (!joinOpen &amp;&amp; createOpen) {
+            setCreateOpen(false);
+        }
+        setJoinOpen(!joinOpen);
+        setMessage("");
+        setError("");
+        clearFields();
+    }
+
+    /**
+     * Handles the toggling of the create team form.
+     *
+     * @returns {void}
+     */
+    function createToggle() {
+        if (!createOpen &amp;&amp; joinOpen) {
+            setJoinOpen(false);
+        }
+        setCreateOpen(!createOpen);
+        setMessage("");
+        setError("");
+        clearFields();
+    }
+    // ------------------------------------------------------------------------
+
+    /**
+     * Render function for the user's teams.
+     *
+     * @returns {Component} The user's teams `Tab` view interface.
+     */
+    const renderTeams = () => {
+        if (teams &amp;&amp; teams.length === 0) {
+            return &lt;h2>You are currently not in any team right now.&lt;/h2>;
+        } else {
+            return (
+                &lt;>
+                    &lt;h2>Teams you are part of&lt;/h2>
+
+                    &lt;Modal show={showModal} onHide={closeModal}>
+                        &lt;Modal.Header>
+                            &lt;Modal.Title>
+                                &lt;FaExclamationTriangle />
+                            &lt;/Modal.Title>
+                        &lt;/Modal.Header>
+                        &lt;Modal.Body>
+                            Are you sure you want to leave this group?
+                        &lt;/Modal.Body>
+                        &lt;Modal.Footer>
+                            &lt;Button variant="secondary" onClick={closeModal}>
+                                Cancel
+                            &lt;/Button>
+                            &lt;Button variant="warning" onClick={quitHandler}>
+                                I AM SURE
+                            &lt;/Button>
+                        &lt;/Modal.Footer>
+                    &lt;/Modal>
+
+                    &lt;Tab.Container defaultActiveKey={teams[0].id}>
+                        &lt;Row className="mt-5">
+                            &lt;Col sm={3} lg={2} className="border-end">
+                                &lt;Nav variant="pills" className="flex-column">
+                                    {teams.map((t) => (
+                                        &lt;Nav.Item key={t.uid}>
+                                            &lt;Nav.Link eventKey={t.id}>
+                                                {t.name}
+                                            &lt;/Nav.Link>
+                                        &lt;/Nav.Item>
+                                    ))}
+                                &lt;/Nav>
+                            &lt;/Col>
+                            &lt;Col sm={9} lg={10}>
+                                &lt;Tab.Content className="p-5 bg-light rounded border">
+                                    {teams.map((t) => (
+                                        &lt;Tab.Pane key={t.uid} eventKey={t.id}>
+                                            &lt;h2>{t.name}&lt;/h2>
+                                            &lt;h6>Team ID: {t.id}&lt;/h6>
+
+                                            &lt;p className="mt-4">{t.desc}&lt;/p>
+                                            &lt;Button
+                                                variant="warning"
+                                                onClick={() => openModal(t.uid)}
+                                            >
+                                                Quit Team
+                                            &lt;/Button>
+                                        &lt;/Tab.Pane>
+                                    ))}
+                                &lt;/Tab.Content>
+                            &lt;/Col>
+                        &lt;/Row>
+                    &lt;/Tab.Container>
+                &lt;/>
+            );
+        }
+    };
+
+    /**
+     * Clears the form fields
+     *
+     * @returns {void}
+     */
+    function clearFields() {
+        joinGroupIdRef.current.value = "";
+        groupNameRef.current.value = "";
+        groupIdRef.current.value = "";
+        groupDescRef.current.value = "";
+    }
+
+    /**
+     * Handles the joining of teams using the team code filled in by the user.
+     *
+     * @param {Event} e The `onClick` event from the Join button
+     */
+    async function handleJoin(e) {
+        e.preventDefault();
+
+        const temp = joinOpen
+            ? joinGroupIdRef.current.value
+            : groupIdRef.current.value;
+        joinTeam(currentOrgName + "-" + temp);
+
+        clearFields();
+        joinToggle();
+    }
+
+    function nameChange() {
+        setGroupId(
+            currentOrgName +
+                "-" +
+                groupNameRef.current.value
+                    .replace(/[^\w\s]/gi, "")
+                    .replace(/\s+/g, "-")
+                    .toLowerCase()
+        );
+    }
+
+    /**
+     * Handles the creation of new a new team using the information filled in
+     * by the user.
+     *
+     * @param {Event} e The `onClick` event from the Create button
+     */
+    async function handleCreate(e) {
+        e.preventDefault();
+
+        setError("");
+        createTeam(
+            groupIdRef.current.value,
+            groupNameRef.current.value,
+            groupDescRef.current.value
+        );
+
+        clearFields();
+        createToggle();
+    }
+
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Sets the current organisation name on page load.
+    useEffect(() => {
+        if (currentOrg) {
+            setCurrentOrgName(currentOrg.id);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Updates the current organisation name if `currentOrg` were to change.
+    useEffect(() => {
+        if (currentOrg) {
+            setCurrentOrgName(currentOrg.id);
+        }
+    }, [currentOrg]);
+
+    // Retrieves success messages from `teamsMessage` from `StoreContext` and
+    // displays them.
+    useEffect(() => {
+        setMessage(teamsMessage);
+    }, [teamsMessage]);
+
+    // Retrieves failure warnings from `teamsError` in `StoreContext` and
+    // displays them.
+    useEffect(() => {
+        setError(teamsError);
+    }, [teamsError]);
+    // ------------------------------------------------------------------------
+
+    return (
+        &lt;>
+            &lt;PageHeader />
+            &lt;Container className="pt-5 mt-5">
+                {message &amp;&amp; &lt;Alert variant="success">{message}&lt;/Alert>}
+                {error &amp;&amp; &lt;Alert variant="danger">{error}&lt;/Alert>}
+                &lt;Container className="d-flex flex-column">
+                    &lt;Container className="col-sm-12 mx-auto bg-light p-5 rounded">
+                        &lt;h1>Teams&lt;/h1>
+                        &lt;p>
+                            You can choose to be part of any number of teams!
+                            You will be subscribed to all the tasks that are
+                            ongoing in the teams you are part of.
+                        &lt;/p>
+                        &lt;Button onClick={joinToggle} variant="danger" size="lg">
+                            Join a Team
+                        &lt;/Button>
+                        &lt;Button
+                            onClick={createToggle}
+                            variant="outline-danger"
+                            size="lg"
+                            className="mx-3"
+                        >
+                            Create a new Team
+                        &lt;/Button>
+                        &lt;Collapse in={joinOpen}>
+                            &lt;div>
+                                &lt;Container
+                                    className="mt-5 col-md-8 col-lg-5"
+                                    stlye={{ maxWidth: "300px" }}
+                                >
+                                    &lt;Form onSubmit={handleJoin}>
+                                        &lt;InputGroup className="mb-3">
+                                            &lt;InputGroup.Prepend>
+                                                &lt;InputGroup.Text>
+                                                    {currentOrgName + "-"}
+                                                &lt;/InputGroup.Text>
+                                            &lt;/InputGroup.Prepend>
+                                            &lt;FormControl
+                                                type="text"
+                                                ref={joinGroupIdRef}
+                                                placeholder="Team ID"
+                                            />
+                                            &lt;Button
+                                                variant="outline-success"
+                                                type="submit"
+                                            >
+                                                Join Group!
+                                            &lt;/Button>
+                                        &lt;/InputGroup>
+                                    &lt;/Form>
+                                &lt;/Container>
+                            &lt;/div>
+                        &lt;/Collapse>
+                        &lt;Collapse in={createOpen}>
+                            &lt;div>
+                                &lt;Container
+                                    className="mt-5 col-8"
+                                    stlye={{ maxWidth: "300px" }}
+                                >
+                                    &lt;Form onSubmit={handleCreate}>
+                                        &lt;Form.Group as={Row} className="mb-3">
+                                            &lt;Form.Label column sm="2">
+                                                Team Name
+                                            &lt;/Form.Label>
+                                            &lt;Col sm="10">
+                                                &lt;Form.Control
+                                                    type="text"
+                                                    ref={groupNameRef}
+                                                    onChange={nameChange}
+                                                    required
+                                                />
+                                            &lt;/Col>
+                                        &lt;/Form.Group>
+
+                                        &lt;Form.Group as={Row} className="mb-3">
+                                            &lt;Form.Label column sm="2">
+                                                Team ID
+                                            &lt;/Form.Label>
+                                            &lt;Col sm="10">
+                                                &lt;Form.Control
+                                                    ref={groupIdRef}
+                                                    value={groupId}
+                                                    readOnly
+                                                    required
+                                                />
+                                            &lt;/Col>
+                                        &lt;/Form.Group>
+
+                                        &lt;Form.Group as={Row} className="mb-3">
+                                            &lt;Form.Label column sm="2">
+                                                Description
+                                            &lt;/Form.Label>
+                                            &lt;Col sm="10">
+                                                &lt;Form.Control
+                                                    as="textarea"
+                                                    ref={groupDescRef}
+                                                    required
+                                                />
+                                            &lt;/Col>
+                                        &lt;/Form.Group>
+                                        &lt;Button className="w-100" type="submit">
+                                            Create
+                                        &lt;/Button>
+                                    &lt;/Form>
+                                &lt;/Container>
+                            &lt;/div>
+                        &lt;/Collapse>
+                    &lt;/Container>
+                    &lt;Container className="col-sm-12 mx-auto mt-2 p-5">
+                        {renderTeams()}
+                    &lt;/Container>
+                &lt;/Container>
+            &lt;/Container>
+        &lt;/>
+    );
+}
+
+export default Teams;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>

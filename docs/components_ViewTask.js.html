@@ -1,0 +1,329 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> components/ViewTask.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">WURKFLOW</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>components/ViewTask.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
+import { useState, useEffect } from "react";
+import { useParams, Link, useHistory } from "react-router-dom";
+
+// Styling imports
+import { Container, Row, Col, Badge, ListGroup } from "react-bootstrap";
+
+// Context imports
+import { store } from "../firebase";
+
+// Page component imports
+import PageHeader from "./PageHeader";
+// ----------------------------------------------------------------------------
+
+/**
+ * @classdesc
+ * Page to display each task's detail. Takes in the task ID as the first param.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function ViewTask() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
+    const { id } = useParams();
+    const history = useHistory();
+
+    // useState declarations
+    const [task, setTask] = useState(null);
+    const [taskUsers, setTaskUsers] = useState([]);
+    const [taskCreator, setTaskCreator] = useState(null);
+
+    /**
+     * Gets the data for the provided ID and sets it to the `task` state.
+     *
+     * @returns {void}
+     */
+    async function getTask() {
+        store
+            .collection("tasks")
+            .doc(id)
+            .get()
+            .then((doc) => {
+                if (doc.exists) {
+                    setTask(doc.data());
+                } else {
+                    history.push("/");
+                }
+            });
+    }
+
+    /**
+     * Gets the list of users involved in the task and updates the `TaskUsers`
+     * state.
+     *
+     * @returns {void}
+     */
+    async function getTaskUsers() {
+        const promises = [];
+        const tempUsers = [];
+
+        task.users.forEach((user) => {
+            promises.push(
+                user.get().then((doc) => {
+                    const tempUser = doc.data();
+                    tempUser.uid = doc.id;
+                    tempUsers.push(tempUser);
+                })
+            );
+        });
+        Promise.all(promises).then(() => {
+            setTaskUsers(tempUsers);
+        });
+    }
+
+    /**
+     * Gets the name of the task creator and saves it into the `TaskCreator`
+     * state.
+     *
+     * @returns {void}
+     */
+    async function getTaskCreator() {
+        Promise.resolve(
+            task.creator.get().then((doc) => {
+                return doc.data();
+            })
+        ).then((data) => {
+            setTaskCreator(data);
+        });
+    }
+
+    /**
+     * Render function for the task.
+     *
+     * @returns {Component} The interface view of the task
+     */
+    const renderTasks = () => {
+        if (task) {
+            return (
+                &lt;>
+                    &lt;Container className="col-sm-12 mx-auto bg-light p-5 rounded">
+                        &lt;Link
+                            to="/edit-task"
+                            className="position-absolute text-muted"
+                            style={{ color: "black", top: 3, left: "96%" }}
+                        >
+                            &lt;p>Edit&lt;/p>
+                        &lt;/Link>
+                        &lt;h1>
+                            {task &amp;&amp; task.name}
+                            {task &amp;&amp; task.completed ? (
+                                &lt;Badge
+                                    variant="success"
+                                    className="align-top my-2 mx-3"
+                                >
+                                    &lt;h6 className="my-0"> Completed &lt;/h6>
+                                &lt;/Badge>
+                            ) : (
+                                &lt;Badge
+                                    variant="warning"
+                                    className="align-middle my-2 mx-3"
+                                >
+                                    &lt;h6 className="my-0"> In Progress &lt;/h6>
+                                &lt;/Badge>
+                            )}
+                        &lt;/h1>
+                        &lt;p className="mx-1"> {task &amp;&amp; task.desc} &lt;/p>
+                    &lt;/Container>
+
+                    &lt;Container className="my-4">
+                        &lt;Row>
+                            &lt;Col>
+                                &lt;h5> Checklist &lt;/h5>
+                            &lt;/Col>
+
+                            &lt;Col>
+                                &lt;h5> Users involved &lt;/h5>
+                                &lt;ListGroup variant="secondary">
+                                    &lt;ListGroup.Item variant="secondary">
+                                        &lt;Row>
+                                            &lt;Col>
+                                                {taskCreator &amp;&amp;
+                                                    taskCreator.name}
+                                            &lt;/Col>
+                                            &lt;Col className="text-right font-weight-bold">
+                                                Creator
+                                            &lt;/Col>
+                                        &lt;/Row>
+                                    &lt;/ListGroup.Item>
+                                    {taskUsers &amp;&amp;
+                                        taskUsers.map((user) => (
+                                            &lt;ListGroup.Item
+                                                variant="light"
+                                                key={user.uid}
+                                            >
+                                                {user.name}
+                                            &lt;/ListGroup.Item>
+                                        ))}
+                                &lt;/ListGroup>
+                            &lt;/Col>
+                        &lt;/Row>
+                    &lt;/Container>
+                &lt;/>
+            );
+        }
+    };
+
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Get the task data on page load.
+    useEffect(() => {
+        getTask();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Get the users involved in the task and the task creator once the task is
+    // obtained.
+    useEffect(() => {
+        if (task) {
+            getTaskUsers();
+            getTaskCreator();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [task]);
+    // ------------------------------------------------------------------------
+
+    return (
+        &lt;div>
+            &lt;PageHeader />
+            &lt;Container className="pt-5 mt-5">
+                &lt;Container className="d-flex flex-column">
+                    {renderTasks()}
+                &lt;/Container>
+            &lt;/Container>
+        &lt;/div>
+    );
+}
+
+export default ViewTask;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>

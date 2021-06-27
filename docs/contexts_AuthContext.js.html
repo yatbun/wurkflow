@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> contexts/AuthContext.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">WURKFLOW</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>contexts/AuthContext.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// General imports
+import React, { useContext, useState, useEffect } from "react";
+import firebase, { auth, store } from "../firebase";
+
+const AuthContext = React.createContext();
+
+export function useAuth() {
+    return useContext(AuthContext);
+}
+
+/**
+ * @classdesc
+ * A global context for the handling of authentication.
+ *
+ * Exports all the methods for authenticating and interfacing with firebase.
+ *
+ * Exports `CurrentUser` of type `firebase.auth.UserCredential`.
+ *
+ * @category Contexts
+ * @hideconstructor
+ * @component
+ */
+export function AuthProvider({ children }) {
+    const [currentUser, setCurrentUser] = useState();
+    const [loading, setLoading] = useState(true);
+
+    /**
+     * Creates a new user account with the provided information and adds the user to
+     * the provided organisation.
+     *
+     * @param {string} name The display name of the user
+     * @param {string} email The email address of the user
+     * @param {string} password The password used by the user
+     * @param {string} ouid The unique document ID of the organisation to add the user to
+     * @returns {Promise&lt;firebase.auth.UserCredential>} The user credentials
+     */
+    function signup(name, email, password, ouid) {
+        return auth.createUserWithEmailAndPassword(email, password).then(() => {
+            const user = firebase.auth().currentUser;
+
+            const o = store.collection("orgs").doc(ouid);
+
+            store
+                .collection("users")
+                .doc(user.uid)
+                .set({ currentOrg: o, orgs: [o], teams: [] });
+
+            return user.updateProfile({
+                displayName: name,
+            });
+        });
+    }
+
+    /**
+     * Creates a new user account with the provided information and make it the owner of the organisation.
+     * Used in the cases when the user creates an organisation on sign up.
+     *
+     * @param {string} name The display name of the user
+     * @param {string} email The email address of the user
+     * @param {string} password The password used by the user
+     * @param {string} ouid The uniuqe ID of the organisation to make the user the owner of
+     * @returns {Promise&lt;firebase.auth.UserCredential>} The user credentials
+     */
+    function signupMakeAdmin(name, email, password, ouid) {
+        return auth.createUserWithEmailAndPassword(email, password).then(() => {
+            const user = firebase.auth().currentUser;
+
+            const o = store.collection("orgs").doc(ouid);
+
+            store
+                .collection("users")
+                .doc(user.uid)
+                .set({ currentOrg: o, orgAdmin: o, orgs: [o], teams: [] });
+
+            return user.updateProfile({
+                displayName: name,
+            });
+        });
+    }
+
+    /**
+     * Logs in the user using the provided email and password.
+     * @param {string} email The email address of the user
+     * @param {string} password The password of the user
+     * @returns {Promise&lt;firebase.auth.UserCredential>} The user credentials
+     */
+    function login(email, password) {
+        return auth.signInWithEmailAndPassword(email, password);
+    }
+
+    /**
+     * Logs out the current user.
+     *
+     * @returns {void}
+     */
+    function logout() {
+        return auth.signOut();
+    }
+
+    /**
+     * Sends a reset password link to the provided email if an account is associated
+     * with the email.
+     *
+     * @param {string} email The email address to send the password reset link to
+     * @returns {void}
+     */
+    function resetPassword(email) {
+        return auth.sendPasswordResetEmail(email);
+    }
+
+    /**
+     * Updates the currentUser's email to the one provided.
+     *
+     * @param {string} email The new email address to be updated to
+     * @returns {void}
+     */
+    function updateEmail(email) {
+        return currentUser.updateEmail(email);
+    }
+
+    /**
+     * Update the currentUser's password to the one provided.
+     * @param {string} password The new password to be updated to
+     * @returns {void}
+     */
+    function updatePassword(password) {
+        return currentUser.updatePassword(password);
+    }
+
+    /**
+     * Update the currentUser's displayName to the one provided.
+     * @param {string} name The new name to be updated to
+     * @returns {void}
+     */
+    function updateName(name) {
+        return currentUser.updateProfile({
+            displayName: name,
+        });
+    }
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            setCurrentUser(user);
+            setLoading(false);
+        });
+
+        return unsubscribe;
+    }, []);
+
+    const value = {
+        currentUser,
+        signup,
+        signupMakeAdmin,
+        login,
+        logout,
+        resetPassword,
+        updateEmail,
+        updatePassword,
+        updateName,
+    };
+
+    return (
+        &lt;AuthContext.Provider value={value}>
+            {!loading &amp;&amp; children}
+        &lt;/AuthContext.Provider>
+    );
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>

@@ -5,6 +5,6 @@
     "workbench.tree.indent": 4,
     "editor.stickyTabStops": true,
     "prettier.vueIndentScriptAndStyle": true,
-    "prettier.printWidth": 100,
+    "prettier.printWidth": 80,
     "prettier.tabWidth": 4
 }

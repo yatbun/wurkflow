@@ -1,30 +1,51 @@
-import { Container, Image } from "react-bootstrap";
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
 import { Link } from "react-router-dom";
 
+// Syling imports
+import { Container, Image } from "react-bootstrap";
+
+// Page component imports
 import IntroPic from "../img/intro.png";
+import WorkflowsPic from "../img/workflows.png";
 import TeamsPic from "../img/teams.png";
 import TasksPic from "../img/tasks.png";
+// ----------------------------------------------------------------------------
 
-export default function LoggedOutHome() {
+/**
+ * @classdesc
+ * The landing page and the homepage when the user is not logged in.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function LoggedOutHome() {
     return (
         <>
             <div className="px-4 my-5 text-center border-bottom">
-                <h1 className="display-4 fw-bold">Be ahead of the game</h1>
+                <h1 className="display-4">
+                    <strong>Be ahead of the game</strong>
+                </h1>
 
                 <div className="col-lg-6 mx-auto">
                     <p className="lead mb-4">
-                        Customise groups, delegate tasks and monitor deadlines. With Wurkflow, you
-                        can now manage your team and the work to be done simulatenously! Never worry
-                        about troublesome deadlines again.
+                        Customise groups, delegate tasks and monitor deadlines.
+                        With Wurkflow, you can now manage your team and the work
+                        to be done simulatenously! Never worry about troublesome
+                        deadlines again.
                     </p>
 
                     <div className="d-grid gap-2 d-sm-flex justify-content-sm-center mb-5">
                         <Link to="/signup">
-                            <button className="btn btn-danger btn-lg px-4 me-sm-3">
+                            <button className="btn btn-danger btn-lg px-4 mx-3 my-2">
                                 Create Account
                             </button>
                         </Link>
-                        <button className="btn btn-outline-danger btn-lg px-4">
+                        <button className="btn btn-outline-danger btn-lg px-4 my-2">
                             See It In Action
                         </button>
                     </div>
@@ -40,7 +61,7 @@ export default function LoggedOutHome() {
             <div className="row flex-lg-row-reverse align-items-center g-5 py-5">
                 <div className="col-10 col-sm-8 col-lg-6">
                     <Image
-                        src={TeamsPic}
+                        src={WorkflowsPic}
                         width={500}
                         height={270}
                         className="border shadow-lg rounded"
@@ -48,15 +69,21 @@ export default function LoggedOutHome() {
                 </div>
 
                 <div className="col-lg-6">
-                    <h1 className="display-5 fw-bold lh-1 mb-3">Groups</h1>
+                    <h1 className="display-5 fw-bold lh-1 mb-3">Workflows</h1>
                     <p className="lead">
-                        Begin your journey by joining a group - or creating them yourself. With
-                        groups, delegation of work can now be done in a systematic and organised
-                        way.
+                        Customize your projects with our new Workflow feature.
+                        Templates can be created and managed for future use!
+                        Begin by clicking on Kickstart Workflow and you're off
+                        to go.
                     </p>
 
                     <div className="d-grid gap-2 d-md-flex justify-content-md-start">
-                        <button className="btn btn-danger btn-lg px-4 me-md-2">See More</button>
+                        <button
+                            className="btn btn-danger btn-lg px-4 me-md-2"
+                            disabled
+                        >
+                            See More
+                        </button>
                     </div>
                 </div>
             </div>
@@ -86,15 +113,52 @@ export default function LoggedOutHome() {
                 <div className="col-lg-6">
                     <h1 className="display-5 fw-bold lh-1 mb-3">Tasks</h1>
                     <p className="lead">
-                        Create tasks for your team and customise deadlines as you see fit! Let
-                        Wurkflow notify the respective members as you sit back and monitor the task.
+                        Create tasks for your team and customise deadlines as
+                        you see fit! Let Wurkflow notify the respective members
+                        as you sit back and monitor the task.
                     </p>
 
                     <div className="d-grid gap-2 d-md-flex justify-content-md-start">
-                        <button className="btn btn-danger btn-lg px-4 me-md-2">Learn More</button>
+                        <button
+                            className="btn btn-danger btn-lg px-4 me-md-2"
+                            disabled
+                        >
+                            Learn More
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="row flex-lg-row-reverse align-items-center g-5 py-5">
+                <div className="col-10 col-sm-8 col-lg-6">
+                    <Image
+                        src={TeamsPic}
+                        width={500}
+                        height={270}
+                        className="border shadow-lg rounded"
+                    />
+                </div>
+
+                <div className="col-lg-6">
+                    <h1 className="display-5 fw-bold lh-1 mb-3">Teams</h1>
+                    <p className="lead">
+                        Begin your journey by joining a team - or creating them
+                        yourself. With teams, delegation of work can now be done
+                        in a systematic and organised way.
+                    </p>
+
+                    <div className="d-grid gap-2 d-md-flex justify-content-md-start">
+                        <button
+                            className="btn btn-danger btn-lg px-4 me-md-2"
+                            disabled
+                        >
+                            See More
+                        </button>
                     </div>
                 </div>
             </div>
         </>
     );
 }
+
+export default LoggedOutHome;
