@@ -1,0 +1,275 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> components/UserSettings.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">WURKFLOW</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>components/UserSettings.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
+import { useRef, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
+
+// Styling imports
+import { Container, Alert, Card, Form, Button } from "react-bootstrap";
+
+// Context imports
+import { useStore } from "../contexts/StoreContext";
+
+// Page component imports
+import PageHeader from "./PageHeader";
+// ----------------------------------------------------------------------------
+
+/**
+ * @classdesc
+ * The user settings page.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function UserSettings() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
+    const { currentOrg, orgs, updateCurrentOrg, orgExistsFromUid, joinOrg } =
+        useStore();
+    const history = useHistory();
+
+    // useState declarations
+    const [message, setMessage] = useState("");
+    const [error, setError] = useState("");
+
+    // ------------------------------------------------------------------------
+    // USER SETTINGS FORM DECLARATIONS
+    // ------------------------------------------------------------------------
+    const joinRef = useRef();
+    const orgsRef = useRef();
+    // ------------------------------------------------------------------------
+
+    /**
+     * Handles joining of organisation.
+     *
+     * @param {Event} e The `onClick` event of the Join button
+     */
+    async function handleJoin(e) {
+        e.preventDefault();
+        setMessage("");
+        setError("");
+
+        // Check if organisation exists
+        const res = await orgExistsFromUid(joinRef.current.value);
+        if (res) {
+            await joinOrg(joinRef.current.value);
+
+            history.push("/");
+        } else {
+            setError("No organisation with such code exists.");
+        }
+    }
+
+    /**
+     * Handles changing of current active organisation.
+     *
+     * @param {Event} e The `onClick` event of the Change button
+     */
+    function handleChange(e) {
+        e.preventDefault();
+        setMessage("");
+        setError("");
+
+        // Get the unique ID of the selected organisation
+        const ouid = orgs.filter((o) => {
+            return o.name === orgsRef.current.value;
+        })[0].uid;
+
+        try {
+            updateCurrentOrg(ouid);
+        } catch {
+            setError("Failed to change current organisation. Try again.");
+        }
+
+        history.push("/");
+    }
+
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Sets the current active organisation as the default value in the
+    // organisation picker.
+    useEffect(() => {
+        if (currentOrg) {
+            orgsRef.current.value = currentOrg.name;
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    // ------------------------------------------------------------------------
+
+    return (
+        &lt;>
+            &lt;PageHeader />
+            &lt;Container className="pt-5 mt-5">
+                {message &amp;&amp; &lt;Alert variant="success">{message}&lt;/Alert>}
+                {error &amp;&amp; &lt;Alert variant="danger">{error}&lt;/Alert>}
+                &lt;Container className="d-flex align-items-center justify-content-center">
+                    &lt;Card className="p-4" style={{ minWidth: "400px" }}>
+                        &lt;Card.Title>User Settings&lt;/Card.Title>
+
+                        &lt;Form onSubmit={handleJoin}>
+                            &lt;Form.Group className="mt-4">
+                                &lt;Form.Label>Join Organisation:&lt;/Form.Label>
+                                &lt;Form.Control
+                                    type="text"
+                                    ref={joinRef}
+                                    placeholder="Organisation Code"
+                                />
+                            &lt;/Form.Group>
+                            &lt;Button className="w-100 mt-4" type="submit">
+                                Join
+                            &lt;/Button>
+                        &lt;/Form>
+
+                        &lt;Form onSubmit={handleChange}>
+                            &lt;Form.Group className="mt-4">
+                                &lt;Form.Label>Current Organisation: &lt;/Form.Label>
+                                &lt;Form.Control
+                                    as="select"
+                                    ref={orgsRef}
+                                    className="form-select"
+                                >
+                                    {orgs.map((o) => (
+                                        &lt;option key={o.uid}>{o.name}&lt;/option>
+                                    ))}
+                                &lt;/Form.Control>
+                            &lt;/Form.Group>
+                            &lt;Button className="w-100 mt-4" type="submit">
+                                Set
+                            &lt;/Button>
+                        &lt;/Form>
+                    &lt;/Card>
+                &lt;/Container>
+            &lt;/Container>
+        &lt;/>
+    );
+}
+
+export default UserSettings;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>

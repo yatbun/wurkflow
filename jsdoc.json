@@ -1,0 +1,25 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "source": {
+        "include": ["./src"]
+    },
+    "plugins": [
+        "plugins/markdown",
+        "node_modules/better-docs/component",
+        "node_modules/better-docs/category"
+    ],
+    "opts": {
+        "encoding": "utf8",
+        "destination": "docs/",
+        "recurse": true,
+        "verbose": true,
+        "template": "./node_modules/better-docs"
+    },
+    "templates": {
+        "better-docs": {
+            "name": "WURKFLOW"
+        }
+    }
+}

@@ -1,5 +1,11 @@
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
 import { useState, useRef, useEffect } from "react";
-import { useStore } from "../contexts/StoreContext";
+
+// Styling imports
 import {
     Container,
     Alert,
@@ -16,14 +22,124 @@ import {
 } from "react-bootstrap";
 import { FaExclamationTriangle } from "react-icons/fa";
 
+// Context imports
+import { useStore } from "../contexts/StoreContext";
+
+// Page component imports
 import PageHeader from "./PageHeader";
 
-export default function Teams() {
-    const { currentOrg, teams, teamsMessage, teamsError, quitTeam, joinTeam, createTeam } =
-        useStore();
+/**
+ * @classdesc
+ * Page to manage user's teams.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function Teams() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
+    const {
+        currentOrg,
+        teams,
+        teamsMessage,
+        teamsError,
+        quitTeam,
+        joinTeam,
+        createTeam,
+    } = useStore();
+
+    // useState declarations
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
 
+    // ------------------------------------------------------------------------
+    // TEAM QUITTING FORM DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    const [teamQuit, setTeamQuit] = useState("");
+    const [showModal, setShowModal] = useState(false);
+
+    /**
+     * Handles the closing of the quit team `Modal`.
+     * @returns {void}
+     */
+    const closeModal = () => setShowModal(false);
+
+    /**
+     * Handles the opening of the quit team `Modal`.
+     * @returns {void}
+     */
+    const openModal = (tuid) => {
+        setMessage("");
+        setTeamQuit(tuid);
+        setShowModal(true);
+    };
+
+    /**
+     * Handles the quitting of the selected team.
+     *
+     * @returns {void}
+     */
+    async function quitHandler() {
+        setError("");
+        quitTeam(teamQuit);
+        setTeamQuit("");
+        setShowModal(false);
+    }
+
+    // ------------------------------------------------------------------------
+    // TEAM JOINING AND CREATING FORM DECLARATIONS
+    // ------------------------------------------------------------------------
+    const [joinOpen, setJoinOpen] = useState(false);
+    const [createOpen, setCreateOpen] = useState(false);
+
+    const [currentOrgName, setCurrentOrgName] = useState("");
+    const joinGroupIdRef = useRef();
+    const groupNameRef = useRef();
+    const groupIdRef = useRef();
+    const groupDescRef = useRef();
+    const [groupId, setGroupId] = useState();
+
+    /**
+     * Handles the toggling of the join team form.
+     *
+     * @returns {void}
+     */
+    function joinToggle() {
+        if (!joinOpen && createOpen) {
+            setCreateOpen(false);
+        }
+        setJoinOpen(!joinOpen);
+        setMessage("");
+        setError("");
+        clearFields();
+    }
+
+    /**
+     * Handles the toggling of the create team form.
+     *
+     * @returns {void}
+     */
+    function createToggle() {
+        if (!createOpen && joinOpen) {
+            setJoinOpen(false);
+        }
+        setCreateOpen(!createOpen);
+        setMessage("");
+        setError("");
+        clearFields();
+    }
+    // ------------------------------------------------------------------------
+
+    /**
+     * Render function for the user's teams.
+     *
+     * @returns {Component} The user's teams `Tab` view interface.
+     */
     const renderTeams = () => {
         if (teams && teams.length === 0) {
             return <h2>You are currently not in any team right now.</h2>;
@@ -38,7 +154,9 @@ export default function Teams() {
                                 <FaExclamationTriangle />
                             </Modal.Title>
                         </Modal.Header>
-                        <Modal.Body>Are you sure you want to leave this group?</Modal.Body>
+                        <Modal.Body>
+                            Are you sure you want to leave this group?
+                        </Modal.Body>
                         <Modal.Footer>
                             <Button variant="secondary" onClick={closeModal}>
                                 Cancel
@@ -55,7 +173,9 @@ export default function Teams() {
                                 <Nav variant="pills" className="flex-column">
                                     {teams.map((t) => (
                                         <Nav.Item key={t.uid}>
-                                            <Nav.Link eventKey={t.id}>{t.name}</Nav.Link>
+                                            <Nav.Link eventKey={t.id}>
+                                                {t.name}
+                                            </Nav.Link>
                                         </Nav.Item>
                                     ))}
                                 </Nav>
@@ -85,58 +205,11 @@ export default function Teams() {
         }
     };
 
-    // -----------------------------
-    // Handles the quitting of teams
-
-    const [teamQuit, setTeamQuit] = useState("");
-    const [showModal, setShowModal] = useState(false);
-    const closeModal = () => setShowModal(false);
-    const openModal = (tuid) => {
-        setMessage("");
-        setTeamQuit(tuid);
-        setShowModal(true);
-    };
-
-    async function quitHandler() {
-        setError("");
-        quitTeam(teamQuit);
-        setTeamQuit("");
-        setShowModal(false);
-    }
-
-    // -----------------------------------------
-    // Handles the joining and creating of teams
-
-    const [joinOpen, setJoinOpen] = useState(false);
-    const [createOpen, setCreateOpen] = useState(false);
-
-    function joinToggle() {
-        if (!joinOpen && createOpen) {
-            setCreateOpen(false);
-        }
-        setJoinOpen(!joinOpen);
-        setMessage("");
-        setError("");
-        clearFields();
-    }
-
-    function createToggle() {
-        if (!createOpen && joinOpen) {
-            setJoinOpen(false);
-        }
-        setCreateOpen(!createOpen);
-        setMessage("");
-        setError("");
-        clearFields();
-    }
-
-    const [currentOrgName, setCurrentOrgName] = useState("");
-    const joinGroupIdRef = useRef();
-    const groupNameRef = useRef();
-    const groupIdRef = useRef();
-    const groupDescRef = useRef();
-    const [groupId, setGroupId] = useState();
-
+    /**
+     * Clears the form fields
+     *
+     * @returns {void}
+     */
     function clearFields() {
         joinGroupIdRef.current.value = "";
         groupNameRef.current.value = "";
@@ -144,10 +217,17 @@ export default function Teams() {
         groupDescRef.current.value = "";
     }
 
+    /**
+     * Handles the joining of teams using the team code filled in by the user.
+     *
+     * @param {Event} e The `onClick` event from the Join button
+     */
     async function handleJoin(e) {
         e.preventDefault();
 
-        const temp = joinOpen ? joinGroupIdRef.current.value : groupIdRef.current.value;
+        const temp = joinOpen
+            ? joinGroupIdRef.current.value
+            : groupIdRef.current.value;
         joinTeam(currentOrgName + "-" + temp);
 
         clearFields();
@@ -165,6 +245,12 @@ export default function Teams() {
         );
     }
 
+    /**
+     * Handles the creation of new a new team using the information filled in
+     * by the user.
+     *
+     * @param {Event} e The `onClick` event from the Create button
+     */
     async function handleCreate(e) {
         e.preventDefault();
 
@@ -179,6 +265,11 @@ export default function Teams() {
         createToggle();
     }
 
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Sets the current organisation name on page load.
     useEffect(() => {
         if (currentOrg) {
             setCurrentOrgName(currentOrg.id);
@@ -186,19 +277,25 @@ export default function Teams() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Updates the current organisation name if `currentOrg` were to change.
     useEffect(() => {
         if (currentOrg) {
             setCurrentOrgName(currentOrg.id);
         }
     }, [currentOrg]);
 
+    // Retrieves success messages from `teamsMessage` from `StoreContext` and
+    // displays them.
     useEffect(() => {
         setMessage(teamsMessage);
     }, [teamsMessage]);
 
+    // Retrieves failure warnings from `teamsError` in `StoreContext` and
+    // displays them.
     useEffect(() => {
         setError(teamsError);
     }, [teamsError]);
+    // ------------------------------------------------------------------------
 
     return (
         <>
@@ -210,8 +307,9 @@ export default function Teams() {
                     <Container className="col-sm-12 mx-auto bg-light p-5 rounded">
                         <h1>Teams</h1>
                         <p>
-                            You can choose to be part of any number of teams! You will be subscribed
-                            to all the tasks that are ongoing in the teams you are part of.
+                            You can choose to be part of any number of teams!
+                            You will be subscribed to all the tasks that are
+                            ongoing in the teams you are part of.
                         </p>
                         <Button onClick={joinToggle} variant="danger" size="lg">
                             Join a Team
@@ -242,7 +340,10 @@ export default function Teams() {
                                                 ref={joinGroupIdRef}
                                                 placeholder="Team ID"
                                             />
-                                            <Button variant="outline-success" type="submit">
+                                            <Button
+                                                variant="outline-success"
+                                                type="submit"
+                                            >
                                                 Join Group!
                                             </Button>
                                         </InputGroup>
@@ -252,7 +353,10 @@ export default function Teams() {
                         </Collapse>
                         <Collapse in={createOpen}>
                             <div>
-                                <Container className="mt-5 col-8" stlye={{ maxWidth: "300px" }}>
+                                <Container
+                                    className="mt-5 col-8"
+                                    stlye={{ maxWidth: "300px" }}
+                                >
                                     <Form onSubmit={handleCreate}>
                                         <Form.Group as={Row} className="mb-3">
                                             <Form.Label column sm="2">
@@ -302,9 +406,13 @@ export default function Teams() {
                             </div>
                         </Collapse>
                     </Container>
-                    <Container className="col-sm-12 mx-auto mt-2 p-5">{renderTeams()}</Container>
+                    <Container className="col-sm-12 mx-auto mt-2 p-5">
+                        {renderTeams()}
+                    </Container>
                 </Container>
             </Container>
         </>
     );
 }
+
+export default Teams;

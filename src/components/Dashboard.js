@@ -1,10 +1,32 @@
-import { useAuth } from "../contexts/AuthContext";
-import { useStore } from "../contexts/StoreContext";
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// Styling imports
 import { Container } from "react-bootstrap";
 
-export default function Dashboard() {
+// Context imports
+import { useAuth } from "../contexts/AuthContext";
+import { useStore } from "../contexts/StoreContext";
+// ----------------------------------------------------------------------------
+
+/**
+ * @classdesc
+ * The dashboard page (logged in homepage).
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function Dashboard() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
     const { currentUser } = useAuth();
     const { tasks } = useStore();
+    // ------------------------------------------------------------------------
 
     return (
         <>
@@ -20,3 +42,5 @@ export default function Dashboard() {
         </>
     );
 }
+
+export default Dashboard;

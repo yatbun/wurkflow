@@ -1,0 +1,256 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> components/Login.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">WURKFLOW</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>components/Login.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
+import { useRef, useState } from "react";
+import { Link, useHistory } from "react-router-dom";
+
+// Styling imports
+import {
+    Container,
+    Form,
+    Button,
+    CardGroup,
+    Card,
+    Alert,
+} from "react-bootstrap";
+
+// Context imports
+import { useAuth } from "../contexts/AuthContext";
+
+// Page component imports
+import PageHeader from "./PageHeader";
+
+/**
+ * @classdesc
+ * The login page.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function Login() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
+    const { login } = useAuth();
+    const history = useHistory();
+
+    // useState declarations
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    // ------------------------------------------------------------------------
+    // LOG IN FORM DECLARATIONS
+    // ------------------------------------------------------------------------
+    const emailRef = useRef();
+    const passwordRef = useRef();
+    // ------------------------------------------------------------------------
+
+    /**
+     * Handles the logging in of the user.
+     *
+     * @param {Event} e The `onClick` event from the login button
+     */
+    async function handleSubmit(e) {
+        e.preventDefault();
+
+        try {
+            setError("");
+            setLoading(true);
+            await login(emailRef.current.value, passwordRef.current.value);
+            history.push("/");
+        } catch {
+            setError("Failed to log in. Check your email and password.");
+        }
+        setLoading(false);
+    }
+
+    return (
+        &lt;>
+            &lt;PageHeader />
+            &lt;Container className="pt-5 mt-5">
+                {error &amp;&amp; &lt;Alert variant="danger">{error}&lt;/Alert>}
+
+                &lt;Container className="d-flex align-items-center justify-content-center">
+                    &lt;CardGroup>
+                        &lt;Card
+                            className="d-flex p-4"
+                            style={{ minWidth: "300px" }}
+                        >
+                            &lt;Card.Title className="mb-4">Sign Up&lt;/Card.Title>
+                            &lt;Card.Text>
+                                Don't have an account on Wurkflow yet? Get one
+                                today and start speeding up your workflows!
+                            &lt;/Card.Text>
+                            &lt;Link to="/signup">
+                                &lt;button className="btn btn-outline-secondary">
+                                    Sign Up
+                                &lt;/button>
+                            &lt;/Link>
+                        &lt;/Card>
+
+                        &lt;Card className="p-4" style={{ minWidth: "400px" }}>
+                            &lt;Card.Title>Log In&lt;/Card.Title>
+                            &lt;Form onSubmit={handleSubmit}>
+                                &lt;Form.Group id="email" className="mt-4">
+                                    &lt;Form.Label>Email&lt;/Form.Label>
+                                    &lt;Form.Control
+                                        type="email"
+                                        ref={emailRef}
+                                        required
+                                    />
+                                &lt;/Form.Group>
+                                &lt;Form.Group id="password" className="mt-4">
+                                    &lt;Form.Label>Password&lt;/Form.Label>
+                                    &lt;Form.Control
+                                        type="password"
+                                        ref={passwordRef}
+                                        required
+                                    />
+                                &lt;/Form.Group>
+                                &lt;Button
+                                    disabled={loading}
+                                    className="w-100 mt-4"
+                                    type="submit"
+                                >
+                                    Log In
+                                &lt;/Button>
+                            &lt;/Form>
+                            &lt;div className="w-100 text-center mt-3">
+                                &lt;Link to="/forgot-password">
+                                    Forgot Password?
+                                &lt;/Link>
+                            &lt;/div>
+                        &lt;/Card>
+                    &lt;/CardGroup>
+                &lt;/Container>
+            &lt;/Container>
+        &lt;/>
+    );
+}
+
+export default Login;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>
