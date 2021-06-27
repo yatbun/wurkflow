@@ -10,6 +10,7 @@ import { Container, Image } from "react-bootstrap";
 
 // Page component imports
 import IntroPic from "../img/intro.png";
+import WorkflowsPic from "../img/workflows.png";
 import TeamsPic from "../img/teams.png";
 import TasksPic from "../img/tasks.png";
 // ----------------------------------------------------------------------------
@@ -60,7 +61,7 @@ function LoggedOutHome() {
             <div className="row flex-lg-row-reverse align-items-center g-5 py-5">
                 <div className="col-10 col-sm-8 col-lg-6">
                     <Image
-                        src={TeamsPic}
+                        src={WorkflowsPic}
                         width={500}
                         height={270}
                         className="border shadow-lg rounded"
@@ -68,15 +69,19 @@ function LoggedOutHome() {
                 </div>
 
                 <div className="col-lg-6">
-                    <h1 className="display-5 fw-bold lh-1 mb-3">Groups</h1>
+                    <h1 className="display-5 fw-bold lh-1 mb-3">Workflows</h1>
                     <p className="lead">
-                        Begin your journey by joining a group - or creating them
-                        yourself. With groups, delegation of work can now be
-                        done in a systematic and organised way.
+                        Customize your projects with our new Workflow feature.
+                        Templates can be created and managed for future use!
+                        Begin by clicking on Kickstart Workflow and you're off
+                        to go.
                     </p>
 
                     <div className="d-grid gap-2 d-md-flex justify-content-md-start">
-                        <button className="btn btn-danger btn-lg px-4 me-md-2">
+                        <button
+                            className="btn btn-danger btn-lg px-4 me-md-2"
+                            disabled
+                        >
                             See More
                         </button>
                     </div>
@@ -114,8 +119,40 @@ function LoggedOutHome() {
                     </p>
 
                     <div className="d-grid gap-2 d-md-flex justify-content-md-start">
-                        <button className="btn btn-danger btn-lg px-4 me-md-2">
+                        <button
+                            className="btn btn-danger btn-lg px-4 me-md-2"
+                            disabled
+                        >
                             Learn More
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="row flex-lg-row-reverse align-items-center g-5 py-5">
+                <div className="col-10 col-sm-8 col-lg-6">
+                    <Image
+                        src={TeamsPic}
+                        width={500}
+                        height={270}
+                        className="border shadow-lg rounded"
+                    />
+                </div>
+
+                <div className="col-lg-6">
+                    <h1 className="display-5 fw-bold lh-1 mb-3">Teams</h1>
+                    <p className="lead">
+                        Begin your journey by joining a team - or creating them
+                        yourself. With teams, delegation of work can now be done
+                        in a systematic and organised way.
+                    </p>
+
+                    <div className="d-grid gap-2 d-md-flex justify-content-md-start">
+                        <button
+                            className="btn btn-danger btn-lg px-4 me-md-2"
+                            disabled
+                        >
+                            See More
                         </button>
                     </div>
                 </div>
