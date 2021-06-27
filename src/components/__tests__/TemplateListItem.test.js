@@ -13,7 +13,7 @@ const template = {
     },
 };
 
-describe("Homepage", () => {
+describe("TemplateListItem", () => {
     beforeEach(() => {
         const createWorkflow = jest.fn();
         jest.spyOn(StoreContext, "useStore").mockImplementation(() => createWorkflow);

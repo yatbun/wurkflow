@@ -15,7 +15,7 @@ const workflow = {
 
 const refreshFn = jest.fn();
 
-describe("Homepage", () => {
+describe("WorkflowListItem", () => {
     beforeEach(() => {
         const deleteWorkflow = jest.fn();
         jest.spyOn(StoreContext, "useStore").mockImplementation(() => deleteWorkflow);
