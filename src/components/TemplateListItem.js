@@ -78,8 +78,8 @@ function TemplateListItem({ template }) {
 
     return (
         <Container className="my-5 px-5 py-4 border rounded">
-            <h4>{tp.name}</h4>
-            <p>{tp.desc}</p>
+            <h4 data-testid="templateName">{tp.name}</h4>
+            <p data-testid="templateDesc">{tp.desc}</p>
             <Form onSubmit={handleStart} className="mt-4">
                 <Localization
                     date={

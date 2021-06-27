@@ -85,11 +85,10 @@ function WorkflowListItem({ workflow, refreshFn }) {
             >
                 Delete
             </Button>
-            <h4>
-                {wf.name}{" "}
-                {completed && <Badge variant="success">Complete</Badge>}
+            <h4 data-testid="wfName">
+                {wf.name} {completed && <Badge variant="success">Complete</Badge>}
             </h4>
-            <p>{wf.desc}</p>
+            <p data-testid="wfDesc">{wf.desc}</p>
             <br />
             <ListGroup horizontal>
                 {wfTasks.map((task) => (
