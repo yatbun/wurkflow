@@ -121,6 +121,7 @@ function UserSettings() {
                                     type="text"
                                     ref={joinRef}
                                     placeholder="Organisation Code"
+                                    required
                                 />
                             </Form.Group>
                             <Button className="w-100 mt-4" type="submit">

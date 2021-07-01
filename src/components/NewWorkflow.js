@@ -20,6 +20,7 @@ import {
 // Context imports
 import { store } from "../firebase";
 import { useStore } from "../contexts/StoreContext";
+import { useHistory } from "react-router-dom";
 
 // Page component imports
 import PageHeader from "./PageHeader";
@@ -49,6 +50,7 @@ function NewWorkflow() {
 
     // Context declarations
     const { teams, createWorkflowTemplate } = useStore();
+    const history = useHistory();
 
     // useState declarations
     const [error, setError] = useState("");
@@ -209,6 +211,7 @@ function NewWorkflow() {
         );
 
         setLoading(false);
+        history.push("/kickstart-workflow");
     }
 
     /**
