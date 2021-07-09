@@ -13,6 +13,7 @@ import Signup from "./Signup";
 import UserSettings from "./UserSettings";
 import UpdateProfile from "./UpdateProfile";
 import ViewTask from "./ViewTask";
+import EditTask from "./EditTask";
 import ManageOrganisation from "./ManageOrganisation";
 
 import Workflows from "./Workflows";
@@ -39,6 +40,7 @@ export default function App() {
                             <LoggedInRoute path="/update-profile" component={UpdateProfile} />
 
                             <LoggedInRoute exact path={`/task/:id`} component={ViewTask} />
+                            <LoggedInRoute exact path={`/edit-task/:id`} component={EditTask} />
                             <LoggedInRoute path="/tasks" component={Tasks} />
 
                             <LoggedInRoute path="/workflows" component={Workflows} />
