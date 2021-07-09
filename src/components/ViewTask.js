@@ -61,7 +61,7 @@ export default function ViewTask() {
                 <>
                     <Container className="col-sm-12 mx-auto bg-light p-5 rounded">
                         <Link
-                            to="/edit-task"
+                            to={`/edit-task/${id}`}
                             className="position-absolute text-muted"
                             style={{ color: "black", top: 3, left: "96%" }}
                         >
