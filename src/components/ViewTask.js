@@ -34,7 +34,6 @@ import PageHeader from "./PageHeader";
 
 dayjs.extend(relativeTime);
 
-export default function ViewTask() {
 /**
  * @classdesc
  * Page to display each task's detail. Takes in the task ID as the first param.
@@ -188,13 +187,18 @@ function ViewTask() {
                     const replies = [];
                     store
                         .collection("replies")
-                        .where("commentId", "==", store.collection("comments").doc(comment.id))
+                        .where(
+                            "commentId",
+                            "==",
+                            store.collection("comments").doc(comment.id)
+                        )
                         .get()
                         .then((snapShot) => {
                             snapShot.forEach((doc) => {
                                 const newReply = doc.data();
                                 newReply.id = doc.id;
-                                newReply.dateCreated = newReply.createdAt.toDate();
+                                newReply.dateCreated =
+                                    newReply.createdAt.toDate();
                                 replies.push(newReply);
                             });
                         });
@@ -417,11 +421,17 @@ function ViewTask() {
                                                         {comment.body}{" "}
                                                         <p
                                                             className="text-muted"
-                                                            style={{ fontSize: 14 }}
+                                                            style={{
+                                                                fontSize: 14,
+                                                            }}
                                                         >
                                                             {" "}
-                                                            {dayjs(comment.createdAt.toDate()).from(
-                                                                dayjs(new Date())
+                                                            {dayjs(
+                                                                comment.createdAt.toDate()
+                                                            ).from(
+                                                                dayjs(
+                                                                    new Date()
+                                                                )
                                                             )}
                                                         </p>{" "}
                                                         <svg
@@ -437,15 +447,27 @@ function ViewTask() {
                                                         <Button
                                                             variant="link"
                                                             size="sm"
-                                                            style={{ textDecoration: "none" }}
+                                                            style={{
+                                                                textDecoration:
+                                                                    "none",
+                                                            }}
                                                             onClick={() => {
-                                                                const newComments = [...comments];
+                                                                const newComments =
+                                                                    [
+                                                                        ...comments,
+                                                                    ];
                                                                 const bool =
-                                                                    newComments[index]
+                                                                    newComments[
+                                                                        index
+                                                                    ]
                                                                         .showReplyForm;
-                                                                newComments[index].showReplyForm =
+                                                                newComments[
+                                                                    index
+                                                                ].showReplyForm =
                                                                     !bool;
-                                                                setComments(newComments);
+                                                                setComments(
+                                                                    newComments
+                                                                );
                                                             }}
                                                         >
                                                             <p
@@ -462,7 +484,8 @@ function ViewTask() {
                                                     </Col>
 
                                                     <Col>
-                                                        {currentUser.uid === comment.userId.id ? (
+                                                        {currentUser.uid ===
+                                                        comment.userId.id ? (
                                                             <Button
                                                                 variant="danger"
                                                                 size="sm"
@@ -480,11 +503,17 @@ function ViewTask() {
                                                             <div></div>
                                                         )}
                                                     </Col>
-                                                    <Collapse in={comment.showReplyForm}>
+                                                    <Collapse
+                                                        in={
+                                                            comment.showReplyForm
+                                                        }
+                                                    >
                                                         <Col>
                                                             <Form
                                                                 className="mx-5"
-                                                                onSubmit={(event) => {
+                                                                onSubmit={(
+                                                                    event
+                                                                ) => {
                                                                     handleReply(
                                                                         comment.id,
                                                                         event,
@@ -495,8 +524,12 @@ function ViewTask() {
                                                                 <Col>
                                                                     <InputGroup>
                                                                         <Form.Control
-                                                                            value={replyValue}
-                                                                            onChange={handleChange}
+                                                                            value={
+                                                                                replyValue
+                                                                            }
+                                                                            onChange={
+                                                                                handleChange
+                                                                            }
                                                                             type="text"
                                                                             placeholder="Enter your Reply here..."
                                                                         ></Form.Control>
@@ -525,81 +558,97 @@ function ViewTask() {
                                                     View Replies
                                                 </Button>
 
-                                                <Collapse in={comment.showReplies}>
+                                                <Collapse
+                                                    in={comment.showReplies}
+                                                >
                                                     <Col>
                                                         <ListGroup variant="flush">
                                                             {reply[index] &&
-                                                                reply[index].map((reply) => (
-                                                                    <ListGroup.Item>
-                                                                        <Row>
-                                                                            <Col>
-                                                                                <svg
-                                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                                    width="16"
-                                                                                    height="16"
-                                                                                    fill="currentColor"
-                                                                                    class="bi bi-person-circle"
-                                                                                    viewBox="0 0 16 16"
-                                                                                    className="mx-1"
-                                                                                >
-                                                                                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-                                                                                    <path
-                                                                                        fill-rule="evenodd"
-                                                                                        d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"
-                                                                                    />
-                                                                                </svg>
-                                                                            </Col>
-                                                                            <Col xs={8}>
-                                                                                <p
-                                                                                    className="font-weight-bold my-1"
-                                                                                    style={{
-                                                                                        fontSize: 14,
-                                                                                    }}
-                                                                                >
-                                                                                    {" "}
-                                                                                    {reply.name}
-                                                                                </p>
-                                                                                {reply.body}{" "}
-                                                                                <p
-                                                                                    className="text-muted"
-                                                                                    style={{
-                                                                                        fontSize: 12,
-                                                                                    }}
-                                                                                >
-                                                                                    {" "}
-                                                                                    {dayjs(
-                                                                                        reply.createdAt.toDate()
-                                                                                    ).from(
-                                                                                        dayjs(
-                                                                                            new Date()
-                                                                                        )
-                                                                                    )}
-                                                                                </p>{" "}
-                                                                            </Col>
-
-                                                                            <Col>
-                                                                                {currentUser.uid ===
-                                                                                reply.userId.id ? (
-                                                                                    <Button
-                                                                                        variant="danger"
-                                                                                        size="sm"
-                                                                                        onClick={() =>
-                                                                                            openModal(
-                                                                                                "removeReply",
-                                                                                                reply.id,
-                                                                                                index
-                                                                                            )
-                                                                                        }
+                                                                reply[
+                                                                    index
+                                                                ].map(
+                                                                    (reply) => (
+                                                                        <ListGroup.Item>
+                                                                            <Row>
+                                                                                <Col>
+                                                                                    <svg
+                                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                                        width="16"
+                                                                                        height="16"
+                                                                                        fill="currentColor"
+                                                                                        class="bi bi-person-circle"
+                                                                                        viewBox="0 0 16 16"
+                                                                                        className="mx-1"
                                                                                     >
-                                                                                        <FaTrash />
-                                                                                    </Button>
-                                                                                ) : (
-                                                                                    <div></div>
-                                                                                )}
-                                                                            </Col>
-                                                                        </Row>
-                                                                    </ListGroup.Item>
-                                                                ))}
+                                                                                        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                                                                                        <path
+                                                                                            fill-rule="evenodd"
+                                                                                            d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"
+                                                                                        />
+                                                                                    </svg>
+                                                                                </Col>
+                                                                                <Col
+                                                                                    xs={
+                                                                                        8
+                                                                                    }
+                                                                                >
+                                                                                    <p
+                                                                                        className="font-weight-bold my-1"
+                                                                                        style={{
+                                                                                            fontSize: 14,
+                                                                                        }}
+                                                                                    >
+                                                                                        {" "}
+                                                                                        {
+                                                                                            reply.name
+                                                                                        }
+                                                                                    </p>
+                                                                                    {
+                                                                                        reply.body
+                                                                                    }{" "}
+                                                                                    <p
+                                                                                        className="text-muted"
+                                                                                        style={{
+                                                                                            fontSize: 12,
+                                                                                        }}
+                                                                                    >
+                                                                                        {" "}
+                                                                                        {dayjs(
+                                                                                            reply.createdAt.toDate()
+                                                                                        ).from(
+                                                                                            dayjs(
+                                                                                                new Date()
+                                                                                            )
+                                                                                        )}
+                                                                                    </p>{" "}
+                                                                                </Col>
+
+                                                                                <Col>
+                                                                                    {currentUser.uid ===
+                                                                                    reply
+                                                                                        .userId
+                                                                                        .id ? (
+                                                                                        <Button
+                                                                                            variant="danger"
+                                                                                            size="sm"
+                                                                                            onClick={() =>
+                                                                                                openModal(
+                                                                                                    "removeReply",
+                                                                                                    reply.id,
+                                                                                                    index
+                                                                                                )
+                                                                                            }
+                                                                                        >
+                                                                                            <FaTrash />
+                                                                                        </Button>
+                                                                                    ) : (
+                                                                                        <div></div>
+                                                                                    )}
+                                                                                </Col>
+                                                                            </Row>
+                                                                        </ListGroup.Item>
+                                                                    )
+                                                                )}
                                                         </ListGroup>
                                                     </Col>
                                                 </Collapse>

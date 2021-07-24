@@ -4,7 +4,6 @@
 
 // React imports
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
 
 // Styling imports
 import {
@@ -15,12 +14,7 @@ import {
     Form,
     Row,
     Col,
-    Table,
-    OverlayTrigger,
-    Tooltip,
-    Modal,
 } from "react-bootstrap";
-import { FaEye, FaCheck, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 
 // Context imports
 import { useStore } from "../contexts/StoreContext";
@@ -50,25 +44,14 @@ function Tasks() {
     // ------------------------------------------------------------------------
 
     // Context declarations
-    const {
-        teams,
-        tasks,
-        completedTasks,
-        createTask,
-        deleteTask,
-        completeTask,
-        getTeamUsers,
-    } = useStore();
+    const { teams, tasks, completedTasks, createTask, getTeamUsers } =
+        useStore();
 
     // useState declarations
     const [showCreate, setShowCreate] = useState(false);
     const [showCompletedTasks, setShowCompletedTasks] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-
-    const [action, setAction] = useState("");
-    const [actionTask, setActionTask] = useState("");
-    const [showModal, setShowModal] = useState(false);
 
     // ------------------------------------------------------------------------
     // NEW TASK FORM DECLARATIONS
@@ -80,46 +63,6 @@ function Tasks() {
     const [taskDate, setTaskDate] = useState(new Date());
     const [selectedUsers, setSelectedUsers] = useState([]);
     // ------------------------------------------------------------------------
-
-    /**
-     * Checks the current modal action and assigns it to `actionTask` for use
-     * by the `Modal`.
-     *
-     * @returns {void}
-     */
-    function modalAction() {
-        if (action === "delete") {
-            deleteTask(actionTask);
-        } else if (action === "complete") {
-            completeTask(actionTask);
-        }
-        closeModal();
-    }
-
-    /**
-     * Handles the opening of the `Modal`.
-     *
-     * @param {String} taskUid The unique document id of the Task
-     * @param {String} action The desired action to be applied to the Task
-     *
-     * @returns {void}
-     */
-    function openModal(taskUid, action) {
-        setAction(action);
-        setActionTask(taskUid);
-        setShowModal(true);
-    }
-
-    /**
-     * Handles the closing of the `Modal`.
-     *
-     * @returns {void}
-     */
-    function closeModal() {
-        setAction("");
-        setActionTask("");
-        setShowModal(false);
-    }
 
     /**
      * Gets the list of users within the selected team.
@@ -330,23 +273,6 @@ function Tasks() {
                             </div>
                         </Collapse>
                     </Container>
-
-                    <Modal show={showModal} onHide={closeModal}>
-                        <Modal.Header>
-                            <Modal.Title>
-                                <FaExclamationTriangle />
-                            </Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>Are you sure?</Modal.Body>
-                        <Modal.Footer>
-                            <Button variant="secondary" onClick={closeModal}>
-                                Cancel
-                            </Button>
-                            <Button variant="warning" onClick={modalAction}>
-                                I AM SURE
-                            </Button>
-                        </Modal.Footer>
-                    </Modal>
 
                     <Container className="col-sm-12 mx-auto mt-2 mb-5 pt-5">
                         {tasks && tasks.length === 0 ? (

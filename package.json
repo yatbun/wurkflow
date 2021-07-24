@@ -54,9 +54,9 @@
     },
     "devDependencies": {
         "better-docs": "^2.3.2",
-        "jsdoc": "^3.6.7",
         "enzyme": "^3.11.0",
         "enzyme-adapter-react-16": "^1.15.6",
+        "jsdoc": "^3.6.7",
         "redux-mock-store": "^1.5.4"
     }
 }
