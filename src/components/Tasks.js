@@ -31,6 +31,7 @@ import DropdownList from "react-widgets/DropdownList";
 import Multiselect from "react-widgets/Multiselect";
 import Localization from "react-widgets/esm/Localization";
 import DatePicker from "react-widgets/DatePicker";
+import TaskTableView from "./TaskTableView";
 
 // Misc imports
 import { DateLocalizer } from "react-widgets/IntlLocalizer";
@@ -119,96 +120,6 @@ function Tasks() {
         setActionTask("");
         setShowModal(false);
     }
-
-    /**
-     * The render function to display the user's task in the form of a table
-     *
-     * @param {Object[]} t Array of user's tasks
-     * @returns {Component} A table interface for the display of the user's
-     * tasks
-     */
-    const renderTasks = (t) => {
-        return (
-            <Table striped bordered hover responsive className="mt-3">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Date Due</th>
-                        <th>Team</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {t.map((task, index) => (
-                        <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>{task.name}</td>
-                            <td>{task.desc}</td>
-                            <td>{task.dueDate.toLocaleDateString("en-GB")}</td>
-                            <td>{task.teamName}</td>
-                            <td>
-                                <OverlayTrigger
-                                    overlay={<Tooltip>View</Tooltip>}
-                                >
-                                    <span className="d-inline-block me-md-2 my-1">
-                                        <Link to={`/task/${task.uid}`}>
-                                            <Button variant="primary" size="sm">
-                                                <FaEye />
-                                            </Button>
-                                        </Link>
-                                    </span>
-                                </OverlayTrigger>
-                                <OverlayTrigger
-                                    overlay={
-                                        task.completed ? (
-                                            <Tooltip>
-                                                Task has already been marked as
-                                                completed
-                                            </Tooltip>
-                                        ) : (
-                                            <Tooltip>Complete</Tooltip>
-                                        )
-                                    }
-                                >
-                                    <span className="d-inline-block me-md-2 my-1">
-                                        <Button
-                                            onClick={() =>
-                                                openModal(task.uid, "complete")
-                                            }
-                                            variant="success"
-                                            size="sm"
-                                            disabled={task.completed}
-                                        >
-                                            <FaCheck />
-                                        </Button>
-                                    </span>
-                                </OverlayTrigger>
-                                <OverlayTrigger
-                                    overlay={<Tooltip>Delete</Tooltip>}
-                                >
-                                    <span className="d-inline-block my-1">
-                                        <Button
-                                            onClick={() =>
-                                                openModal(task.uid, "delete")
-                                            }
-                                            variant="danger"
-                                            size="sm"
-                                            disabled={task.workflow}
-                                        >
-                                            <FaTrash />
-                                        </Button>
-                                    </span>
-                                </OverlayTrigger>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
-        );
-    };
 
     /**
      * Gets the list of users within the selected team.
@@ -443,7 +354,7 @@ function Tasks() {
                         ) : (
                             <>
                                 <h2>Your tasks</h2>
-                                {renderTasks(tasks)}
+                                <TaskTableView tasks={tasks} />
                             </>
                         )}
                     </Container>
@@ -455,7 +366,7 @@ function Tasks() {
                             ) : (
                                 <>
                                     <h2>Your completed tasks</h2>
-                                    {renderTasks(completedTasks)}
+                                    <TaskTableView tasks={completedTasks} />
                                 </>
                             )}
                         </Container>
