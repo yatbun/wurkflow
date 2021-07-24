@@ -27,6 +27,14 @@ const localizer = dateFnsLocalizer({
     locales,
 });
 
+/**
+ * @classdesc
+ * Dashboard calendar view.
+ *
+ * @category Page Components
+ * @hideconstructor
+ * @component
+ */
 function CalendarView({ tasks }) {
     // ------------------------------------------------------------------------
     // GLOBAL DECLARATIONS
@@ -36,6 +44,11 @@ function CalendarView({ tasks }) {
     const [events, setEvents] = useState([]);
     // ------------------------------------------------------------------------
 
+    /**
+     * Converts tasks into events.
+     *
+     * @returns {void}
+     */
     function updateEvents() {
         const tempEvents = [];
         if (tasks) {
@@ -52,9 +65,15 @@ function CalendarView({ tasks }) {
         }
     }
 
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Converts tasks to events whenever tasks is updated.
     useEffect(() => {
         updateEvents();
     }, [tasks]);
+    // ------------------------------------------------------------------------
 
     return (
         <div>

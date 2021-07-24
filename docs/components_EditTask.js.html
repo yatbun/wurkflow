@@ -1,4 +1,95 @@
-// ----------------------------------------------------------------------------
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> components/EditTask.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">WURKFLOW</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="CalendarView.html">CalendarView</a></li><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TaskTableItem.html">TaskTableItem</a></li><li><a href="TaskTableView.html">TaskTableView</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li><li><a href="WorkflowListItemTask.html">WorkflowListItemTask</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="EditTask.html">EditTask</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>components/EditTask.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// ----------------------------------------------------------------------------
 // IMPORTS
 // ----------------------------------------------------------------------------
 
@@ -150,7 +241,7 @@ function EditTask() {
         Promise.all(promises).then(() => {
             if (taskUsers.length > 0) {
                 teamUsers.map((user) => {
-                    for (let i = 0; i < taskUsers.length; i++) {
+                    for (let i = 0; i &lt; taskUsers.length; i++) {
                         if (user.uid === taskUsers[i].uid) {
                             break;
                         }
@@ -275,42 +366,42 @@ function EditTask() {
     const Content = () => {
         if (task) {
             return (
-                <>
-                    <Modal show={showModal} onHide={closeModal}>
-                        <Modal.Header>
-                            <Modal.Title>
-                                <FaExclamationTriangle />
-                            </Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>Are you sure?</Modal.Body>
-                        <Modal.Footer>
-                            <Button variant="secondary" onClick={closeModal}>
+                &lt;>
+                    &lt;Modal show={showModal} onHide={closeModal}>
+                        &lt;Modal.Header>
+                            &lt;Modal.Title>
+                                &lt;FaExclamationTriangle />
+                            &lt;/Modal.Title>
+                        &lt;/Modal.Header>
+                        &lt;Modal.Body>Are you sure?&lt;/Modal.Body>
+                        &lt;Modal.Footer>
+                            &lt;Button variant="secondary" onClick={closeModal}>
                                 Cancel
-                            </Button>
-                            <Button variant="warning" onClick={modalAction}>
+                            &lt;/Button>
+                            &lt;Button variant="warning" onClick={modalAction}>
                                 I AM SURE
-                            </Button>
-                        </Modal.Footer>
-                    </Modal>
+                            &lt;/Button>
+                        &lt;/Modal.Footer>
+                    &lt;/Modal>
 
-                    <Modal show={showUserModal} onHide={closeUserModal}>
-                        <Modal.Header closeButton>
-                            <Modal.Title>Add Users</Modal.Title>
-                        </Modal.Header>
+                    &lt;Modal show={showUserModal} onHide={closeUserModal}>
+                        &lt;Modal.Header closeButton>
+                            &lt;Modal.Title>Add Users&lt;/Modal.Title>
+                        &lt;/Modal.Header>
 
-                        <Modal.Body>
-                            <ListGroup variant="flush">
-                                {remainingUsers &&
+                        &lt;Modal.Body>
+                            &lt;ListGroup variant="flush">
+                                {remainingUsers &amp;&amp;
                                     remainingUsers.map((user, index) => (
-                                        <ListGroup.Item
+                                        &lt;ListGroup.Item
                                             variant=""
                                             key={user.uid}
                                         >
-                                            <Row>
-                                                <Col>{user.name}</Col>
-                                                <Col className="text-right">
+                                            &lt;Row>
+                                                &lt;Col>{user.name}&lt;/Col>
+                                                &lt;Col className="text-right">
                                                     {user.added === false ? (
-                                                        <Button
+                                                        &lt;Button
                                                             variant="success"
                                                             size="sm"
                                                             onClick={() =>
@@ -322,44 +413,44 @@ function EditTask() {
                                                         >
                                                             {" "}
                                                             Add{" "}
-                                                        </Button>
+                                                        &lt;/Button>
                                                     ) : (
-                                                        <p className="text-muted">
+                                                        &lt;p className="text-muted">
                                                             {" "}
                                                             Successfully added!{" "}
-                                                        </p>
+                                                        &lt;/p>
                                                     )}
-                                                </Col>
-                                            </Row>
-                                        </ListGroup.Item>
+                                                &lt;/Col>
+                                            &lt;/Row>
+                                        &lt;/ListGroup.Item>
                                     ))}
-                            </ListGroup>
-                        </Modal.Body>
+                            &lt;/ListGroup>
+                        &lt;/Modal.Body>
 
-                        <Modal.Footer>
-                            <Button
+                        &lt;Modal.Footer>
+                            &lt;Button
                                 variant="secondary"
                                 onClick={closeUserModal}
                             >
                                 Close
-                            </Button>
-                        </Modal.Footer>
-                    </Modal>
+                            &lt;/Button>
+                        &lt;/Modal.Footer>
+                    &lt;/Modal>
 
-                    <Container className="col-sm-12 mx-auto bg-light p-5 rounded">
-                        <h1> Edit task: {task && task.name} </h1>
-                        <p>
+                    &lt;Container className="col-sm-12 mx-auto bg-light p-5 rounded">
+                        &lt;h1> Edit task: {task &amp;&amp; task.name} &lt;/h1>
+                        &lt;p>
                             {" "}
                             Change any information with regards to your task
                             here.
-                        </p>
-                    </Container>
+                        &lt;/p>
+                    &lt;/Container>
 
-                    <Container>
-                        <Row>
-                            <Col className="my-3">
-                                <h3> Task Details: </h3>
-                                <Localization
+                    &lt;Container>
+                        &lt;Row>
+                            &lt;Col className="my-3">
+                                &lt;h3> Task Details: &lt;/h3>
+                                &lt;Localization
                                     date={
                                         new DateLocalizer({
                                             culture: "en-GB",
@@ -367,45 +458,45 @@ function EditTask() {
                                         })
                                     }
                                 >
-                                    <Form
+                                    &lt;Form
                                         onSubmit={handleSubmit}
                                         className="my-4"
                                     >
-                                        <Form.Group as={Row} id="taskName">
-                                            <Form.Label column sm="3">
+                                        &lt;Form.Group as={Row} id="taskName">
+                                            &lt;Form.Label column sm="3">
                                                 Task Name
-                                            </Form.Label>
-                                            <Col sm="7">
-                                                <Form.Control
+                                            &lt;/Form.Label>
+                                            &lt;Col sm="7">
+                                                &lt;Form.Control
                                                     ref={taskNameRef}
                                                     type="text"
                                                     required
                                                     defaultValue={task.name}
                                                 />
-                                            </Col>
-                                        </Form.Group>
+                                            &lt;/Col>
+                                        &lt;/Form.Group>
 
-                                        <Form.Group as={Row} id="taskName">
-                                            <Form.Label column sm="3">
+                                        &lt;Form.Group as={Row} id="taskName">
+                                            &lt;Form.Label column sm="3">
                                                 Task Description
-                                            </Form.Label>
-                                            <Col sm="7">
-                                                <Form.Control
+                                            &lt;/Form.Label>
+                                            &lt;Col sm="7">
+                                                &lt;Form.Control
                                                     ref={taskDescRef}
                                                     as="textarea"
                                                     required
                                                     defaultValue={task.desc}
                                                 />
-                                            </Col>
-                                        </Form.Group>
+                                            &lt;/Col>
+                                        &lt;/Form.Group>
 
-                                        <Form.Group as={Row} id="taskName">
-                                            <Form.Label column sm="3">
+                                        &lt;Form.Group as={Row} id="taskName">
+                                            &lt;Form.Label column sm="3">
                                                 Task Status
-                                            </Form.Label>
-                                            <Col sm="4">
+                                            &lt;/Form.Label>
+                                            &lt;Col sm="4">
                                                 {task.completed ? (
-                                                    <Form.Control
+                                                    &lt;Form.Control
                                                         onChange={(value) =>
                                                             setProgress(value)
                                                         }
@@ -413,17 +504,17 @@ function EditTask() {
                                                         defaultValue="Completed"
                                                         custom
                                                     >
-                                                        <option>
+                                                        &lt;option>
                                                             {" "}
                                                             Completed{" "}
-                                                        </option>
-                                                        <option>
+                                                        &lt;/option>
+                                                        &lt;option>
                                                             {" "}
                                                             In Progress{" "}
-                                                        </option>
-                                                    </Form.Control>
+                                                        &lt;/option>
+                                                    &lt;/Form.Control>
                                                 ) : (
-                                                    <Form.Control
+                                                    &lt;Form.Control
                                                         onChange={(value) =>
                                                             setProgress(value)
                                                         }
@@ -431,57 +522,57 @@ function EditTask() {
                                                         defaultValue="In Progress"
                                                         custom
                                                     >
-                                                        <option>
+                                                        &lt;option>
                                                             {" "}
                                                             In Progress{" "}
-                                                        </option>
-                                                        <option>
+                                                        &lt;/option>
+                                                        &lt;option>
                                                             {" "}
                                                             Completed{" "}
-                                                        </option>
-                                                    </Form.Control>
+                                                        &lt;/option>
+                                                    &lt;/Form.Control>
                                                 )}
-                                            </Col>
-                                        </Form.Group>
+                                            &lt;/Col>
+                                        &lt;/Form.Group>
 
-                                        <Form.Group as={Row} id="taskName">
-                                            <Form.Label column sm="3">
+                                        &lt;Form.Group as={Row} id="taskName">
+                                            &lt;Form.Label column sm="3">
                                                 Due Date
-                                            </Form.Label>
-                                            <Col sm="7">
-                                                <DatePicker
+                                            &lt;/Form.Label>
+                                            &lt;Col sm="7">
+                                                &lt;DatePicker
                                                     value={taskDate}
                                                     onChange={(date) =>
                                                         setTaskDate(date)
                                                     }
                                                 />{" "}
-                                            </Col>
-                                        </Form.Group>
-                                        <Button
+                                            &lt;/Col>
+                                        &lt;/Form.Group>
+                                        &lt;Button
                                             disabled={loading}
                                             type="submit"
                                         >
                                             {" "}
                                             Update{" "}
-                                        </Button>
-                                    </Form>
-                                </Localization>
-                            </Col>
+                                        &lt;/Button>
+                                    &lt;/Form>
+                                &lt;/Localization>
+                            &lt;/Col>
 
-                            <Col className="my-3">
-                                <Row>
-                                    <Col xs={8}>
-                                        <h3>Manage Users Involved </h3>{" "}
-                                    </Col>
-                                    <Col>
-                                        <Button
+                            &lt;Col className="my-3">
+                                &lt;Row>
+                                    &lt;Col xs={8}>
+                                        &lt;h3>Manage Users Involved &lt;/h3>{" "}
+                                    &lt;/Col>
+                                    &lt;Col>
+                                        &lt;Button
                                             variant="link"
                                             size="sm"
                                             onClick={openUserModal}
                                             style={{ textDecoration: "none" }}
                                         >
-                                            <p className="text-muted my-1">
-                                                <svg
+                                            &lt;p className="text-muted my-1">
+                                                &lt;svg
                                                     xmlns="http://www.w3.org/2000/svg"
                                                     width="16"
                                                     height="16"
@@ -490,39 +581,39 @@ function EditTask() {
                                                     viewBox="0 0 16 16"
                                                     className="mx-3"
                                                 >
-                                                    <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z" />
-                                                    <path
+                                                    &lt;path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z" />
+                                                    &lt;path
                                                         fill-rule="evenodd"
                                                         d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"
                                                     />
-                                                </svg>
+                                                &lt;/svg>
                                                 Add users
-                                            </p>
-                                        </Button>
-                                    </Col>
-                                </Row>
-                                <ListGroup variant="secondary" className="my-3">
-                                    <ListGroup.Item variant="secondary">
-                                        <Row>
-                                            <Col>
-                                                {taskCreator &&
+                                            &lt;/p>
+                                        &lt;/Button>
+                                    &lt;/Col>
+                                &lt;/Row>
+                                &lt;ListGroup variant="secondary" className="my-3">
+                                    &lt;ListGroup.Item variant="secondary">
+                                        &lt;Row>
+                                            &lt;Col>
+                                                {taskCreator &amp;&amp;
                                                     taskCreator.name}
-                                            </Col>
-                                            <Col className="text-right font-weight-bold">
+                                            &lt;/Col>
+                                            &lt;Col className="text-right font-weight-bold">
                                                 Creator
-                                            </Col>
-                                        </Row>
-                                    </ListGroup.Item>
-                                    {taskUsers &&
+                                            &lt;/Col>
+                                        &lt;/Row>
+                                    &lt;/ListGroup.Item>
+                                    {taskUsers &amp;&amp;
                                         taskUsers.map((user) => (
-                                            <ListGroup.Item
+                                            &lt;ListGroup.Item
                                                 variant="light"
                                                 key={user.uid}
                                             >
-                                                <Row>
-                                                    <Col>{user.name} </Col>
-                                                    <Col>
-                                                        <Button
+                                                &lt;Row>
+                                                    &lt;Col>{user.name} &lt;/Col>
+                                                    &lt;Col>
+                                                        &lt;Button
                                                             className="float-right"
                                                             variant="danger"
                                                             size="sm"
@@ -535,16 +626,16 @@ function EditTask() {
                                                         >
                                                             {" "}
                                                             Remove{" "}
-                                                        </Button>
-                                                    </Col>
-                                                </Row>
-                                            </ListGroup.Item>
+                                                        &lt;/Button>
+                                                    &lt;/Col>
+                                                &lt;/Row>
+                                            &lt;/ListGroup.Item>
                                         ))}
-                                </ListGroup>
-                            </Col>
-                        </Row>
-                    </Container>
-                </>
+                                &lt;/ListGroup>
+                            &lt;/Col>
+                        &lt;/Row>
+                    &lt;/Container>
+                &lt;/>
             );
         }
     };
@@ -576,11 +667,40 @@ function EditTask() {
     // ------------------------------------------------------------------------
 
     return (
-        <div>
-            <PageHeader />
-            <Container className="pt-5 mt-5"> {Content()} </Container>
-        </div>
+        &lt;div>
+            &lt;PageHeader />
+            &lt;Container className="pt-5 mt-5"> {Content()} &lt;/Container>
+        &lt;/div>
     );
 }
 
 export default EditTask;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>

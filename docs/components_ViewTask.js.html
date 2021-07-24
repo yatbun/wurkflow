@@ -72,7 +72,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="CalendarView.html">CalendarView</a></li><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TaskTableItem.html">TaskTableItem</a></li><li><a href="TaskTableView.html">TaskTableView</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li><li><a href="WorkflowListItemTask.html">WorkflowListItemTask</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="EditTask.html">EditTask</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
                 
             </nav>
         </div>
@@ -94,18 +94,36 @@
 // ----------------------------------------------------------------------------
 
 // React imports
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useHistory } from "react-router-dom";
 
 // Styling imports
-import { Container, Row, Col, Badge, ListGroup } from "react-bootstrap";
+import {
+    Container,
+    Row,
+    Col,
+    Badge,
+    ListGroup,
+    Form,
+    Button,
+    InputGroup,
+    Modal,
+    Collapse,
+} from "react-bootstrap";
 
 // Context imports
 import { store } from "../firebase";
+import { useAuth } from "../contexts/AuthContext";
+
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { FaTrash, FaExclamationTriangle } from "react-icons/fa";
 
 // Page component imports
 import PageHeader from "./PageHeader";
 // ----------------------------------------------------------------------------
+
+dayjs.extend(relativeTime);
 
 /**
  * @classdesc
@@ -123,11 +141,39 @@ function ViewTask() {
     // Context declarations
     const { id } = useParams();
     const history = useHistory();
+    const { currentUser } = useAuth();
 
     // useState declarations
     const [task, setTask] = useState(null);
     const [taskUsers, setTaskUsers] = useState([]);
     const [taskCreator, setTaskCreator] = useState(null);
+    const [comments, setComments] = useState([]);
+    const [reply, setReply] = useState([]);
+    const [cid, setCid] = useState();
+    const [action, setAction] = useState();
+    const [showModal, setShowModal] = useState(false);
+    const [replyValue, setReplyValue] = useState("");
+
+    const commentRef = useRef();
+
+    function modalAction() {
+        if (action === "remove") {
+            deleteComment(cid);
+        } else if (action === "removeReply") {
+            removeReply();
+        }
+        closeModal();
+    }
+
+    function openModal(action, cid, index) {
+        setShowModal(true);
+        setCid(cid);
+        setAction(action);
+    }
+
+    function closeModal() {
+        setShowModal(false);
+    }
 
     /**
      * Gets the data for the provided ID and sets it to the `task` state.
@@ -188,6 +234,175 @@ function ViewTask() {
         });
     }
 
+    async function getComments() {
+        const comments = [];
+        const promise = [];
+        promise.push(
+            store
+                .collection("comments")
+                .where("taskId", "==", store.collection("tasks").doc(id))
+                .get()
+                .then((snapshot) => {
+                    snapshot.forEach((doc) => {
+                        const newComment = doc.data();
+                        newComment.dateCreated = newComment.createdAt.toDate();
+                        newComment.id = doc.id;
+                        newComment.showReplyForm = false;
+                        newComment.showReplies = false;
+                        comments.push(newComment);
+                    });
+                })
+        );
+        Promise.all(promise).then(() => {
+            comments.sort((a, b) => {
+                const na = a.dateCreated;
+                const nb = b.dateCreated;
+
+                if (na &lt; nb) {
+                    return 1;
+                }
+                if (na > nb) {
+                    return -1;
+                }
+                return 0;
+            });
+
+            setComments(comments);
+            console.log(comments);
+
+            const promises = [];
+            const allReplies = [];
+
+            promises.push(
+                comments.forEach((comment) => {
+                    const replies = [];
+                    store
+                        .collection("replies")
+                        .where(
+                            "commentId",
+                            "==",
+                            store.collection("comments").doc(comment.id)
+                        )
+                        .get()
+                        .then((snapShot) => {
+                            snapShot.forEach((doc) => {
+                                const newReply = doc.data();
+                                newReply.id = doc.id;
+                                newReply.dateCreated =
+                                    newReply.createdAt.toDate();
+                                replies.push(newReply);
+                            });
+                        });
+                    allReplies.push(replies);
+                })
+            );
+
+            Promise.all(promises).then(() => {
+                if (allReplies.length === 0) {
+                    console.log(2);
+                    setReply([]);
+                } else {
+                    allReplies.forEach((replies) => {
+                        replies.sort((a, b) => {
+                            const na = a.dateCreated;
+                            const nb = b.dateCreated;
+
+                            if (na &lt; nb) {
+                                return 1;
+                            }
+                            if (na > nb) {
+                                return -1;
+                            }
+                            return 0;
+                        });
+                    });
+                    setReply(allReplies);
+                    console.log(reply);
+                }
+            });
+        });
+    }
+
+    function showReplies(index) {
+        const newComments = [...comments];
+        const bool = newComments[index].showReplies;
+        newComments[index].showReplies = !bool;
+        setComments(newComments);
+    }
+
+    async function removeReply() {
+        store
+            .collection("replies")
+            .doc(cid)
+            .delete()
+            .then(() => {
+                getComments();
+            });
+    }
+    async function handleComment(e) {
+        e.preventDefault();
+
+        if (commentRef.current.value === "") {
+        }
+
+        const newComment = {
+            taskId: store.collection("tasks").doc(id),
+            userId: store.collection("users").doc(currentUser.uid),
+            name: currentUser.displayName,
+            body: commentRef.current.value,
+            createdAt: new Date(),
+        };
+
+        store
+            .collection("comments")
+            .add(newComment)
+            .then(() => {
+                getComments();
+            });
+    }
+
+    async function deleteComment(cid) {
+        store
+            .collection("replies")
+            .where("commentId", "==", store.collection("comments").doc(cid))
+            .get()
+            .then((snapShot) => {
+                snapShot.forEach((doc) => {
+                    doc.ref.delete();
+                });
+            });
+        store
+            .collection("comments")
+            .doc(cid)
+            .delete()
+            .then(() => {
+                getComments();
+            });
+    }
+
+    async function handleReply(cid, event, index) {
+        event.preventDefault();
+
+        const newReply = {
+            createdAt: new Date(),
+            userId: store.collection("users").doc(currentUser.uid),
+            commentId: store.collection("comments").doc(cid),
+            name: currentUser.displayName,
+            body: replyValue,
+        };
+
+        store
+            .collection("replies")
+            .add(newReply)
+            .then(() => {
+                getComments();
+            });
+    }
+
+    function handleChange(event) {
+        setReplyValue(event.target.value);
+    }
+
     /**
      * Render function for the task.
      *
@@ -197,9 +412,26 @@ function ViewTask() {
         if (task) {
             return (
                 &lt;>
+                    &lt;Modal show={showModal} onHide={closeModal}>
+                        &lt;Modal.Header>
+                            &lt;Modal.Title>
+                                &lt;FaExclamationTriangle />
+                            &lt;/Modal.Title>
+                        &lt;/Modal.Header>
+                        &lt;Modal.Body>Are you sure?&lt;/Modal.Body>
+                        &lt;Modal.Footer>
+                            &lt;Button variant="secondary" onClick={closeModal}>
+                                Cancel
+                            &lt;/Button>
+                            &lt;Button variant="warning" onClick={modalAction}>
+                                I AM SURE
+                            &lt;/Button>
+                        &lt;/Modal.Footer>
+                    &lt;/Modal>
+
                     &lt;Container className="col-sm-12 mx-auto bg-light p-5 rounded">
                         &lt;Link
-                            to="/edit-task"
+                            to={`/edit-task/${id}`}
                             className="position-absolute text-muted"
                             style={{ color: "black", top: 3, left: "96%" }}
                         >
@@ -229,7 +461,291 @@ function ViewTask() {
                     &lt;Container className="my-4">
                         &lt;Row>
                             &lt;Col>
-                                &lt;h5> Checklist &lt;/h5>
+                                &lt;h5> Comments &lt;/h5>
+
+                                &lt;Form className="my-0" onSubmit={handleComment}>
+                                    &lt;InputGroup>
+                                        &lt;Form.Control
+                                            ref={commentRef}
+                                            type="text"
+                                            placeholder="Enter your Comment here..."
+                                        >&lt;/Form.Control>
+                                        &lt;Button
+                                            type="submit"
+                                            variant="light"
+                                            size="sm"
+                                            className=""
+                                        >
+                                            {" "}
+                                            Comment{" "}
+                                        &lt;/Button>
+                                    &lt;/InputGroup>
+                                &lt;/Form>
+
+                                &lt;ListGroup variant="flush" className="my-5">
+                                    {comments &amp;&amp;
+                                        comments.map((comment, index) => (
+                                            &lt;ListGroup.Item>
+                                                &lt;Row>
+                                                    &lt;Col>
+                                                        &lt;svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            width="20"
+                                                            height="20"
+                                                            fill="currentColor"
+                                                            class="bi bi-person-circle"
+                                                            viewBox="0 0 16 16"
+                                                            className="mx-1"
+                                                        >
+                                                            &lt;path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                                                            &lt;path
+                                                                fill-rule="evenodd"
+                                                                d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"
+                                                            />
+                                                        &lt;/svg>
+                                                    &lt;/Col>
+                                                    &lt;Col xs={9}>
+                                                        &lt;p className="font-weight-bold">
+                                                            {" "}
+                                                            {comment.name}
+                                                        &lt;/p>
+                                                        {comment.body}{" "}
+                                                        &lt;p
+                                                            className="text-muted"
+                                                            style={{
+                                                                fontSize: 14,
+                                                            }}
+                                                        >
+                                                            {" "}
+                                                            {dayjs(
+                                                                comment.createdAt.toDate()
+                                                            ).from(
+                                                                dayjs(
+                                                                    new Date()
+                                                                )
+                                                            )}
+                                                        &lt;/p>{" "}
+                                                        &lt;svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            width="20"
+                                                            height="20"
+                                                            fill="currentColor"
+                                                            class="bi bi-reply"
+                                                            viewBox="0 0 16 16"
+                                                        >
+                                                            &lt;path d="M6.598 5.013a.144.144 0 0 1 .202.134V6.3a.5.5 0 0 0 .5.5c.667 0 2.013.005 3.3.822.984.624 1.99 1.76 2.595 3.876-1.02-.983-2.185-1.516-3.205-1.799a8.74 8.74 0 0 0-1.921-.306 7.404 7.404 0 0 0-.798.008h-.013l-.005.001h-.001L7.3 9.9l-.05-.498a.5.5 0 0 0-.45.498v1.153c0 .108-.11.176-.202.134L2.614 8.254a.503.503 0 0 0-.042-.028.147.147 0 0 1 0-.252.499.499 0 0 0 .042-.028l3.984-2.933zM7.8 10.386c.068 0 .143.003.223.006.434.02 1.034.086 1.7.271 1.326.368 2.896 1.202 3.94 3.08a.5.5 0 0 0 .933-.305c-.464-3.71-1.886-5.662-3.46-6.66-1.245-.79-2.527-.942-3.336-.971v-.66a1.144 1.144 0 0 0-1.767-.96l-3.994 2.94a1.147 1.147 0 0 0 0 1.946l3.994 2.94a1.144 1.144 0 0 0 1.767-.96v-.667z" />
+                                                        &lt;/svg>
+                                                        &lt;Button
+                                                            variant="link"
+                                                            size="sm"
+                                                            style={{
+                                                                textDecoration:
+                                                                    "none",
+                                                            }}
+                                                            onClick={() => {
+                                                                const newComments =
+                                                                    [
+                                                                        ...comments,
+                                                                    ];
+                                                                const bool =
+                                                                    newComments[
+                                                                        index
+                                                                    ]
+                                                                        .showReplyForm;
+                                                                newComments[
+                                                                    index
+                                                                ].showReplyForm =
+                                                                    !bool;
+                                                                setComments(
+                                                                    newComments
+                                                                );
+                                                            }}
+                                                        >
+                                                            &lt;p
+                                                                style={{
+                                                                    color: "black",
+                                                                    fontSize: 12,
+                                                                }}
+                                                                className="my-2"
+                                                            >
+                                                                {" "}
+                                                                REPLY{" "}
+                                                            &lt;/p>
+                                                        &lt;/Button>
+                                                    &lt;/Col>
+
+                                                    &lt;Col>
+                                                        {currentUser.uid ===
+                                                        comment.userId.id ? (
+                                                            &lt;Button
+                                                                variant="danger"
+                                                                size="sm"
+                                                                onClick={() =>
+                                                                    openModal(
+                                                                        "remove",
+                                                                        comment.id,
+                                                                        0
+                                                                    )
+                                                                }
+                                                            >
+                                                                &lt;FaTrash />
+                                                            &lt;/Button>
+                                                        ) : (
+                                                            &lt;div>&lt;/div>
+                                                        )}
+                                                    &lt;/Col>
+                                                    &lt;Collapse
+                                                        in={
+                                                            comment.showReplyForm
+                                                        }
+                                                    >
+                                                        &lt;Col>
+                                                            &lt;Form
+                                                                className="mx-5"
+                                                                onSubmit={(
+                                                                    event
+                                                                ) => {
+                                                                    handleReply(
+                                                                        comment.id,
+                                                                        event,
+                                                                        index
+                                                                    );
+                                                                }}
+                                                            >
+                                                                &lt;Col>
+                                                                    &lt;InputGroup>
+                                                                        &lt;Form.Control
+                                                                            value={
+                                                                                replyValue
+                                                                            }
+                                                                            onChange={
+                                                                                handleChange
+                                                                            }
+                                                                            type="text"
+                                                                            placeholder="Enter your Reply here..."
+                                                                        >&lt;/Form.Control>
+                                                                        &lt;Button
+                                                                            type="submit"
+                                                                            variant="light"
+                                                                            size="sm"
+                                                                            className=""
+                                                                        >
+                                                                            {" "}
+                                                                            Reply{" "}
+                                                                        &lt;/Button>
+                                                                    &lt;/InputGroup>
+                                                                &lt;/Col>
+                                                            &lt;/Form>
+                                                        &lt;/Col>
+                                                    &lt;/Collapse>
+                                                &lt;/Row>
+                                                &lt;Button
+                                                    variant="link"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        showReplies(index);
+                                                    }}
+                                                >
+                                                    View Replies
+                                                &lt;/Button>
+
+                                                &lt;Collapse
+                                                    in={comment.showReplies}
+                                                >
+                                                    &lt;Col>
+                                                        &lt;ListGroup variant="flush">
+                                                            {reply[index] &amp;&amp;
+                                                                reply[
+                                                                    index
+                                                                ].map(
+                                                                    (reply) => (
+                                                                        &lt;ListGroup.Item>
+                                                                            &lt;Row>
+                                                                                &lt;Col>
+                                                                                    &lt;svg
+                                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                                        width="16"
+                                                                                        height="16"
+                                                                                        fill="currentColor"
+                                                                                        class="bi bi-person-circle"
+                                                                                        viewBox="0 0 16 16"
+                                                                                        className="mx-1"
+                                                                                    >
+                                                                                        &lt;path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                                                                                        &lt;path
+                                                                                            fill-rule="evenodd"
+                                                                                            d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"
+                                                                                        />
+                                                                                    &lt;/svg>
+                                                                                &lt;/Col>
+                                                                                &lt;Col
+                                                                                    xs={
+                                                                                        8
+                                                                                    }
+                                                                                >
+                                                                                    &lt;p
+                                                                                        className="font-weight-bold my-1"
+                                                                                        style={{
+                                                                                            fontSize: 14,
+                                                                                        }}
+                                                                                    >
+                                                                                        {" "}
+                                                                                        {
+                                                                                            reply.name
+                                                                                        }
+                                                                                    &lt;/p>
+                                                                                    {
+                                                                                        reply.body
+                                                                                    }{" "}
+                                                                                    &lt;p
+                                                                                        className="text-muted"
+                                                                                        style={{
+                                                                                            fontSize: 12,
+                                                                                        }}
+                                                                                    >
+                                                                                        {" "}
+                                                                                        {dayjs(
+                                                                                            reply.createdAt.toDate()
+                                                                                        ).from(
+                                                                                            dayjs(
+                                                                                                new Date()
+                                                                                            )
+                                                                                        )}
+                                                                                    &lt;/p>{" "}
+                                                                                &lt;/Col>
+
+                                                                                &lt;Col>
+                                                                                    {currentUser.uid ===
+                                                                                    reply
+                                                                                        .userId
+                                                                                        .id ? (
+                                                                                        &lt;Button
+                                                                                            variant="danger"
+                                                                                            size="sm"
+                                                                                            onClick={() =>
+                                                                                                openModal(
+                                                                                                    "removeReply",
+                                                                                                    reply.id,
+                                                                                                    index
+                                                                                                )
+                                                                                            }
+                                                                                        >
+                                                                                            &lt;FaTrash />
+                                                                                        &lt;/Button>
+                                                                                    ) : (
+                                                                                        &lt;div>&lt;/div>
+                                                                                    )}
+                                                                                &lt;/Col>
+                                                                            &lt;/Row>
+                                                                        &lt;/ListGroup.Item>
+                                                                    )
+                                                                )}
+                                                        &lt;/ListGroup>
+                                                    &lt;/Col>
+                                                &lt;/Collapse>
+                                            &lt;/ListGroup.Item>
+                                        ))}
+                                &lt;/ListGroup>
                             &lt;/Col>
 
                             &lt;Col>
@@ -271,6 +787,7 @@ function ViewTask() {
     // Get the task data on page load.
     useEffect(() => {
         getTask();
+        getComments();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

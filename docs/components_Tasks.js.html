@@ -72,7 +72,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="CalendarView.html">CalendarView</a></li><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TaskTableItem.html">TaskTableItem</a></li><li><a href="TaskTableView.html">TaskTableView</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li><li><a href="WorkflowListItemTask.html">WorkflowListItemTask</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="EditTask.html">EditTask</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
                 
             </nav>
         </div>
@@ -95,7 +95,6 @@
 
 // React imports
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
 
 // Styling imports
 import {
@@ -106,12 +105,7 @@ import {
     Form,
     Row,
     Col,
-    Table,
-    OverlayTrigger,
-    Tooltip,
-    Modal,
 } from "react-bootstrap";
-import { FaEye, FaCheck, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 
 // Context imports
 import { useStore } from "../contexts/StoreContext";
@@ -122,6 +116,7 @@ import DropdownList from "react-widgets/DropdownList";
 import Multiselect from "react-widgets/Multiselect";
 import Localization from "react-widgets/esm/Localization";
 import DatePicker from "react-widgets/DatePicker";
+import TaskTableView from "./TaskTableView";
 
 // Misc imports
 import { DateLocalizer } from "react-widgets/IntlLocalizer";
@@ -140,25 +135,14 @@ function Tasks() {
     // ------------------------------------------------------------------------
 
     // Context declarations
-    const {
-        teams,
-        tasks,
-        completedTasks,
-        createTask,
-        deleteTask,
-        completeTask,
-        getTeamUsers,
-    } = useStore();
+    const { teams, tasks, completedTasks, createTask, getTeamUsers } =
+        useStore();
 
     // useState declarations
     const [showCreate, setShowCreate] = useState(false);
     const [showCompletedTasks, setShowCompletedTasks] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-
-    const [action, setAction] = useState("");
-    const [actionTask, setActionTask] = useState("");
-    const [showModal, setShowModal] = useState(false);
 
     // ------------------------------------------------------------------------
     // NEW TASK FORM DECLARATIONS
@@ -170,136 +154,6 @@ function Tasks() {
     const [taskDate, setTaskDate] = useState(new Date());
     const [selectedUsers, setSelectedUsers] = useState([]);
     // ------------------------------------------------------------------------
-
-    /**
-     * Checks the current modal action and assigns it to `actionTask` for use
-     * by the `Modal`.
-     *
-     * @returns {void}
-     */
-    function modalAction() {
-        if (action === "delete") {
-            deleteTask(actionTask);
-        } else if (action === "complete") {
-            completeTask(actionTask);
-        }
-        closeModal();
-    }
-
-    /**
-     * Handles the opening of the `Modal`.
-     *
-     * @param {String} taskUid The unique document id of the Task
-     * @param {String} action The desired action to be applied to the Task
-     *
-     * @returns {void}
-     */
-    function openModal(taskUid, action) {
-        setAction(action);
-        setActionTask(taskUid);
-        setShowModal(true);
-    }
-
-    /**
-     * Handles the closing of the `Modal`.
-     *
-     * @returns {void}
-     */
-    function closeModal() {
-        setAction("");
-        setActionTask("");
-        setShowModal(false);
-    }
-
-    /**
-     * The render function to display the user's task in the form of a table
-     *
-     * @param {Object[]} t Array of user's tasks
-     * @returns {Component} A table interface for the display of the user's
-     * tasks
-     */
-    const renderTasks = (t) => {
-        return (
-            &lt;Table striped bordered hover responsive className="mt-3">
-                &lt;thead>
-                    &lt;tr>
-                        &lt;th>&lt;/th>
-                        &lt;th>Name&lt;/th>
-                        &lt;th>Description&lt;/th>
-                        &lt;th>Date Due&lt;/th>
-                        &lt;th>Team&lt;/th>
-                        &lt;th>Actions&lt;/th>
-                    &lt;/tr>
-                &lt;/thead>
-
-                &lt;tbody>
-                    {t.map((task, index) => (
-                        &lt;tr key={index}>
-                            &lt;td>{index + 1}&lt;/td>
-                            &lt;td>{task.name}&lt;/td>
-                            &lt;td>{task.desc}&lt;/td>
-                            &lt;td>{task.dueDate.toLocaleDateString("en-GB")}&lt;/td>
-                            &lt;td>{task.teamName}&lt;/td>
-                            &lt;td>
-                                &lt;OverlayTrigger
-                                    overlay={&lt;Tooltip>View&lt;/Tooltip>}
-                                >
-                                    &lt;span className="d-inline-block me-md-2 my-1">
-                                        &lt;Link to={`/task/${task.uid}`}>
-                                            &lt;Button variant="primary" size="sm">
-                                                &lt;FaEye />
-                                            &lt;/Button>
-                                        &lt;/Link>
-                                    &lt;/span>
-                                &lt;/OverlayTrigger>
-                                &lt;OverlayTrigger
-                                    overlay={
-                                        task.completed ? (
-                                            &lt;Tooltip>
-                                                Task has already been marked as
-                                                completed
-                                            &lt;/Tooltip>
-                                        ) : (
-                                            &lt;Tooltip>Complete&lt;/Tooltip>
-                                        )
-                                    }
-                                >
-                                    &lt;span className="d-inline-block me-md-2 my-1">
-                                        &lt;Button
-                                            onClick={() =>
-                                                openModal(task.uid, "complete")
-                                            }
-                                            variant="success"
-                                            size="sm"
-                                            disabled={task.completed}
-                                        >
-                                            &lt;FaCheck />
-                                        &lt;/Button>
-                                    &lt;/span>
-                                &lt;/OverlayTrigger>
-                                &lt;OverlayTrigger
-                                    overlay={&lt;Tooltip>Delete&lt;/Tooltip>}
-                                >
-                                    &lt;span className="d-inline-block my-1">
-                                        &lt;Button
-                                            onClick={() =>
-                                                openModal(task.uid, "delete")
-                                            }
-                                            variant="danger"
-                                            size="sm"
-                                            disabled={task.workflow}
-                                        >
-                                            &lt;FaTrash />
-                                        &lt;/Button>
-                                    &lt;/span>
-                                &lt;/OverlayTrigger>
-                            &lt;/td>
-                        &lt;/tr>
-                    ))}
-                &lt;/tbody>
-            &lt;/Table>
-        );
-    };
 
     /**
      * Gets the list of users within the selected team.
@@ -511,30 +365,13 @@ function Tasks() {
                         &lt;/Collapse>
                     &lt;/Container>
 
-                    &lt;Modal show={showModal} onHide={closeModal}>
-                        &lt;Modal.Header>
-                            &lt;Modal.Title>
-                                &lt;FaExclamationTriangle />
-                            &lt;/Modal.Title>
-                        &lt;/Modal.Header>
-                        &lt;Modal.Body>Are you sure?&lt;/Modal.Body>
-                        &lt;Modal.Footer>
-                            &lt;Button variant="secondary" onClick={closeModal}>
-                                Cancel
-                            &lt;/Button>
-                            &lt;Button variant="warning" onClick={modalAction}>
-                                I AM SURE
-                            &lt;/Button>
-                        &lt;/Modal.Footer>
-                    &lt;/Modal>
-
                     &lt;Container className="col-sm-12 mx-auto mt-2 mb-5 pt-5">
                         {tasks &amp;&amp; tasks.length === 0 ? (
                             &lt;h2>You do not have any active tasks right now.&lt;/h2>
                         ) : (
                             &lt;>
                                 &lt;h2>Your tasks&lt;/h2>
-                                {renderTasks(tasks)}
+                                &lt;TaskTableView tasks={tasks} />
                             &lt;/>
                         )}
                     &lt;/Container>
@@ -546,7 +383,7 @@ function Tasks() {
                             ) : (
                                 &lt;>
                                     &lt;h2>Your completed tasks&lt;/h2>
-                                    {renderTasks(completedTasks)}
+                                    &lt;TaskTableView tasks={completedTasks} />
                                 &lt;/>
                             )}
                         &lt;/Container>
