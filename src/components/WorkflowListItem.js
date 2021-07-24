@@ -6,11 +6,21 @@
 import { useState, useEffect } from "react";
 
 // Styling imports
-import { Container, ListGroup, Badge, Button } from "react-bootstrap";
+import {
+    Container,
+    ListGroup,
+    Badge,
+    Button,
+    Popover,
+    OverlayTrigger,
+} from "react-bootstrap";
 
 // Context imports
 import { store } from "../firebase";
 import { useStore } from "../contexts/StoreContext";
+
+// Page components imports
+import WorkflowListItemTask from "./WorkflowListItemTask";
 
 /**
  * @classdesc
@@ -86,20 +96,17 @@ function WorkflowListItem({ workflow, refreshFn }) {
                 Delete
             </Button>
             <h4 data-testid="wfName">
-                {wf.name} {completed && <Badge variant="success">Complete</Badge>}
+                {wf.name}{" "}
+                {completed && <Badge variant="success">Complete</Badge>}
             </h4>
             <p data-testid="wfDesc">{wf.desc}</p>
             <br />
             <ListGroup horizontal>
                 {wfTasks.map((task) => (
-                    <ListGroup.Item
-                        variant={
-                            task.order === wf.currentTask ? "primary" : "light"
-                        }
-                        key={task.uid}
-                    >
-                        {task.name}
-                    </ListGroup.Item>
+                    <WorkflowListItemTask
+                        task={task}
+                        currentTask={wf.currentTask}
+                    />
                 ))}
             </ListGroup>
         </Container>
