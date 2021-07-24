@@ -39,16 +39,17 @@ export default function ViewTask() {
     const [replyValue, setReplyValue] = useState("");
 
     const commentRef = useRef();
-    const replyRef = useRef("hey");
 
     function modalAction() {
         if (action === "remove") {
             deleteComment(cid);
+        } else if (action === "removeReply") {
+            removeReply();
         }
         closeModal();
     }
 
-    function openModal(action, cid) {
+    function openModal(action, cid, index) {
         setShowModal(true);
         setCid(cid);
         setAction(action);
@@ -132,50 +133,74 @@ export default function ViewTask() {
                 }
                 return 0;
             });
+
             setComments(comments);
-        });
-    }
+            console.log(comments);
 
-    async function getReply(cid, index) {
-        const replies = [];
-        const promise = [];
+            const promises = [];
+            const allReplies = [];
 
-        promise.push(
-            store
-                .collection("replies")
-                .where("commentId", "==", store.collection("comments").doc(cid))
-                .get()
-                .then((snapShot) => {
-                    snapShot.forEach((doc) => {
-                        const newReply = doc.data();
-                        newReply.id = doc.id;
-                        newReply.dateCreated = newReply.createdAt.toDate();
-                        replies.push(newReply);
-                    });
+            promises.push(
+                comments.forEach((comment) => {
+                    const replies = [];
+                    store
+                        .collection("replies")
+                        .where("commentId", "==", store.collection("comments").doc(comment.id))
+                        .get()
+                        .then((snapShot) => {
+                            snapShot.forEach((doc) => {
+                                const newReply = doc.data();
+                                newReply.id = doc.id;
+                                newReply.dateCreated = newReply.createdAt.toDate();
+                                replies.push(newReply);
+                            });
+                        });
+                    allReplies.push(replies);
                 })
-        );
+            );
 
-        Promise.all(promise).then(() => {
-            replies.sort((a, b) => {
-                const na = a.dateCreated;
-                const nb = b.dateCreated;
+            Promise.all(promises).then(() => {
+                if (allReplies.length === 0) {
+                    console.log(2);
+                    setReply([]);
+                } else {
+                    allReplies.forEach((replies) => {
+                        replies.sort((a, b) => {
+                            const na = a.dateCreated;
+                            const nb = b.dateCreated;
 
-                if (na < nb) {
-                    return 1;
+                            if (na < nb) {
+                                return 1;
+                            }
+                            if (na > nb) {
+                                return -1;
+                            }
+                            return 0;
+                        });
+                    });
+                    setReply(allReplies);
+                    console.log(reply);
                 }
-                if (na > nb) {
-                    return -1;
-                }
-                return 0;
             });
-            setReply(replies);
-            const newComments = [...comments];
-            const bool = newComments[index].showReplies;
-            newComments[index].showReplies = !bool;
-            setComments(newComments);
         });
     }
 
+    function showReplies(index) {
+        const newComments = [...comments];
+        const bool = newComments[index].showReplies;
+        newComments[index].showReplies = !bool;
+        setComments(newComments);
+    }
+
+    async function removeReply() {
+        store
+            .collection("replies")
+            .doc(cid)
+            .delete()
+            .then(() => {
+                getComments();
+            });
+    }
     async function handleComment(e) {
         e.preventDefault();
 
@@ -200,6 +225,15 @@ export default function ViewTask() {
 
     async function deleteComment(cid) {
         store
+            .collection("replies")
+            .where("commentId", "==", store.collection("comments").doc(cid))
+            .get()
+            .then((snapShot) => {
+                snapShot.forEach((doc) => {
+                    doc.ref.delete();
+                });
+            });
+        store
             .collection("comments")
             .doc(cid)
             .delete()
@@ -215,6 +249,7 @@ export default function ViewTask() {
             createdAt: new Date(),
             userId: store.collection("users").doc(currentUser.uid),
             commentId: store.collection("comments").doc(cid),
+            name: currentUser.displayName,
             body: replyValue,
         };
 
@@ -222,10 +257,7 @@ export default function ViewTask() {
             .collection("replies")
             .add(newReply)
             .then(() => {
-                const newComments = [...comments];
-                const bool = newComments[index].showReplyForm;
-                newComments[index].showReplyForm = !bool;
-                setComments(newComments);
+                getComments();
             });
     }
 
@@ -381,7 +413,11 @@ export default function ViewTask() {
                                                                 variant="danger"
                                                                 size="sm"
                                                                 onClick={() =>
-                                                                    openModal("remove", comment.id)
+                                                                    openModal(
+                                                                        "remove",
+                                                                        comment.id,
+                                                                        0
+                                                                    )
                                                                 }
                                                             >
                                                                 <FaTrash />
@@ -405,7 +441,6 @@ export default function ViewTask() {
                                                                 <Col>
                                                                     <InputGroup>
                                                                         <Form.Control
-                                                                            ref={replyRef}
                                                                             value={replyValue}
                                                                             onChange={handleChange}
                                                                             type="text"
@@ -430,7 +465,7 @@ export default function ViewTask() {
                                                     variant="link"
                                                     size="sm"
                                                     onClick={() => {
-                                                        getReply(comment.id, index);
+                                                        showReplies(index);
                                                     }}
                                                 >
                                                     View Replies
@@ -439,10 +474,76 @@ export default function ViewTask() {
                                                 <Collapse in={comment.showReplies}>
                                                     <Col>
                                                         <ListGroup variant="flush">
-                                                            {reply &&
-                                                                reply.map((reply) => (
+                                                            {reply[index] &&
+                                                                reply[index].map((reply) => (
                                                                     <ListGroup.Item>
-                                                                        {reply.body}
+                                                                        <Row>
+                                                                            <Col>
+                                                                                <svg
+                                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                                    width="16"
+                                                                                    height="16"
+                                                                                    fill="currentColor"
+                                                                                    class="bi bi-person-circle"
+                                                                                    viewBox="0 0 16 16"
+                                                                                    className="mx-1"
+                                                                                >
+                                                                                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                                                                                    <path
+                                                                                        fill-rule="evenodd"
+                                                                                        d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"
+                                                                                    />
+                                                                                </svg>
+                                                                            </Col>
+                                                                            <Col xs={8}>
+                                                                                <p
+                                                                                    className="font-weight-bold my-1"
+                                                                                    style={{
+                                                                                        fontSize: 14,
+                                                                                    }}
+                                                                                >
+                                                                                    {" "}
+                                                                                    {reply.name}
+                                                                                </p>
+                                                                                {reply.body}{" "}
+                                                                                <p
+                                                                                    className="text-muted"
+                                                                                    style={{
+                                                                                        fontSize: 12,
+                                                                                    }}
+                                                                                >
+                                                                                    {" "}
+                                                                                    {dayjs(
+                                                                                        reply.createdAt.toDate()
+                                                                                    ).from(
+                                                                                        dayjs(
+                                                                                            new Date()
+                                                                                        )
+                                                                                    )}
+                                                                                </p>{" "}
+                                                                            </Col>
+
+                                                                            <Col>
+                                                                                {currentUser.uid ===
+                                                                                reply.userId.id ? (
+                                                                                    <Button
+                                                                                        variant="danger"
+                                                                                        size="sm"
+                                                                                        onClick={() =>
+                                                                                            openModal(
+                                                                                                "removeReply",
+                                                                                                reply.id,
+                                                                                                index
+                                                                                            )
+                                                                                        }
+                                                                                    >
+                                                                                        <FaTrash />
+                                                                                    </Button>
+                                                                                ) : (
+                                                                                    <div></div>
+                                                                                )}
+                                                                            </Col>
+                                                                        </Row>
                                                                     </ListGroup.Item>
                                                                 ))}
                                                         </ListGroup>
