@@ -25,7 +25,7 @@ function TaskTableView({ tasks }) {
 
             <tbody>
                 {tasks.map((task, index) => (
-                    <TaskTableItem task={task} index={index} />
+                    <TaskTableItem task={task} index={index} key={index} />
                 ))}
             </tbody>
         </Table>

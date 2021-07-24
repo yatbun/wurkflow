@@ -48,7 +48,7 @@ function WorkflowListItemTask({ task, currentTask }) {
 
     return (
         <OverlayTrigger
-            trigger="hover"
+            trigger={["hover", "hover"]}
             placement="bottom"
             overlay={
                 <Popover id="popover-basic">
@@ -58,8 +58,10 @@ function WorkflowListItemTask({ task, currentTask }) {
 
                         <h6 className="mt-3">Involved Users:</h6>
                         <ListGroup></ListGroup>
-                        {taskUsers.map((user) => (
-                            <ListGroup.Item>{user.name}</ListGroup.Item>
+                        {taskUsers.map((user, index) => (
+                            <ListGroup.Item key={index}>
+                                {user.name}
+                            </ListGroup.Item>
                         ))}
                     </Container>
                 </Popover>

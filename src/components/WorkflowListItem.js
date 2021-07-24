@@ -6,14 +6,7 @@
 import { useState, useEffect } from "react";
 
 // Styling imports
-import {
-    Container,
-    ListGroup,
-    Badge,
-    Button,
-    Popover,
-    OverlayTrigger,
-} from "react-bootstrap";
+import { Container, ListGroup, Badge, Button } from "react-bootstrap";
 
 // Context imports
 import { store } from "../firebase";
@@ -102,10 +95,11 @@ function WorkflowListItem({ workflow, refreshFn }) {
             <p data-testid="wfDesc">{wf.desc}</p>
             <br />
             <ListGroup horizontal>
-                {wfTasks.map((task) => (
+                {wfTasks.map((task, index) => (
                     <WorkflowListItemTask
                         task={task}
                         currentTask={wf.currentTask}
+                        key={index}
                     />
                 ))}
             </ListGroup>
