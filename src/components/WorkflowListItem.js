@@ -1,18 +1,45 @@
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
 import { useState, useEffect } from "react";
+
+// Styling imports
+import { Container, ListGroup, Badge, Button } from "react-bootstrap";
+
+// Context imports
 import { store } from "../firebase";
 import { useStore } from "../contexts/StoreContext";
 
-import { Container, ListGroup, Badge, Button } from "react-bootstrap";
-
-export default function WorkflowListItem({ workflow, refreshFn }) {
-    const { deleteWorkflow } = useStore();
+/**
+ * @classdesc
+ * List display of an individual workflow instance.
+ *
+ * @category Page Components
+ * @hideconstructor
+ * @component
+ */
+function WorkflowListItem({ workflow, refreshFn }) {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
 
     const wf = workflow.data();
     wf.uid = workflow.id;
     const completed = wf.currentTask > wf.length;
 
+    // Context declarations
+    const { deleteWorkflow } = useStore();
+
+    // useState declarations
     const [wfTasks, setWfTasks] = useState([]);
 
+    /**
+     * Gets the tasks that are associated with the workflow.
+     *
+     * @returns {void}
+     */
     async function getWorkflowTasks() {
         const tempTasks = [];
 
@@ -33,10 +60,16 @@ export default function WorkflowListItem({ workflow, refreshFn }) {
             });
     }
 
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Gets the workflow tasks on page load
     useEffect(() => {
         getWorkflowTasks();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+    // ------------------------------------------------------------------------
 
     return (
         <Container className="my-5 px-5 py-4 border rounded position-relative">
@@ -60,7 +93,9 @@ export default function WorkflowListItem({ workflow, refreshFn }) {
             <ListGroup horizontal>
                 {wfTasks.map((task) => (
                     <ListGroup.Item
-                        variant={task.order === wf.currentTask ? "primary" : "light"}
+                        variant={
+                            task.order === wf.currentTask ? "primary" : "light"
+                        }
                         key={task.uid}
                     >
                         {task.name}
@@ -70,3 +105,5 @@ export default function WorkflowListItem({ workflow, refreshFn }) {
         </Container>
     );
 }
+
+export default WorkflowListItem;

@@ -1,7 +1,17 @@
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./components/App";
+
+// Styling imports
 import "react-widgets/styles.css";
+
+// Main app import
+import App from "./components/App";
+// ----------------------------------------------------------------------------
 
 ReactDOM.render(
     <React.StrictMode>

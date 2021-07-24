@@ -1,15 +1,53 @@
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
 import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+
+// Styling imports
+import {
+    Container,
+    InputGroup,
+    FormControl,
+    Button,
+    Row,
+    Col,
+} from "react-bootstrap";
+
+// Context imports
 import { useStore } from "../contexts/StoreContext";
 
-import { Container, InputGroup, FormControl, Button, Row, Col } from "react-bootstrap";
+// Page conponent imports
 import PageHeader from "./PageHeader";
+// ----------------------------------------------------------------------------
 
-export default function ManageOrganisation() {
+/**
+ * @classdesc
+ * The page for users to manage the organisation that they are owners of.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function ManageOrganisation() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
     const { userData } = useStore();
     const history = useHistory();
-    const [currentOrg, setCurrentOrg] = useState(null);
 
+    // useState declarations
+    const [currentOrg, setCurrentOrg] = useState(null);
+    // ------------------------------------------------------------------------
+
+    /**
+     * Render function for the organisation management interface.
+     * @returns {Component} The organisation management interface.
+     */
     const renderOrg = () => {
         return (
             <Container className="d-flex flex-column">
@@ -23,12 +61,17 @@ export default function ManageOrganisation() {
                                 <InputGroup.Prepend>
                                     <InputGroup.Text>OrgCode: </InputGroup.Text>
                                 </InputGroup.Prepend>
-                                <FormControl type="text" value={currentOrg.uid} />
+                                <FormControl
+                                    type="text"
+                                    value={currentOrg.uid}
+                                />
                                 <InputGroup.Append>
                                     <Button
                                         variant="outline-secondary"
                                         onClick={(e) => {
-                                            navigator.clipboard.writeText(currentOrg.uid);
+                                            navigator.clipboard.writeText(
+                                                currentOrg.uid
+                                            );
                                         }}
                                     >
                                         Copy Code!
@@ -42,6 +85,11 @@ export default function ManageOrganisation() {
         );
     };
 
+    /**
+     * Gets the current active organisation of the user.
+     *
+     * @returns {void}
+     */
     async function getCurrentOrg() {
         const res = await userData.orgAdmin.get();
         const temp = res.data();
@@ -49,6 +97,12 @@ export default function ManageOrganisation() {
         setCurrentOrg(temp);
     }
 
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Redirects the user to the homepage if they are not an owner of an
+    // organisation.
     useEffect(() => {
         if (userData && userData.orgAdmin) {
             getCurrentOrg();
@@ -57,6 +111,7 @@ export default function ManageOrganisation() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userData]);
+    // ------------------------------------------------------------------------
 
     return (
         <>
@@ -67,3 +122,5 @@ export default function ManageOrganisation() {
         </>
     );
 }
+
+export default ManageOrganisation;

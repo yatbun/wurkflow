@@ -1,4 +1,12 @@
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
 import { useState, useEffect, useRef } from "react";
+import { useParams, Link, useHistory } from "react-router-dom";
+
+// Styling imports
 import {
     Container,
     Row,
@@ -11,7 +19,8 @@ import {
     Modal,
     Collapse,
 } from "react-bootstrap";
-import { useParams, Link, useHistory } from "react-router-dom";
+
+// Context imports
 import { store } from "../firebase";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -19,15 +28,32 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { FaTrash, FaExclamationTriangle } from "react-icons/fa";
 
+// Page component imports
 import PageHeader from "./PageHeader";
+// ----------------------------------------------------------------------------
 
 dayjs.extend(relativeTime);
 
 export default function ViewTask() {
+/**
+ * @classdesc
+ * Page to display each task's detail. Takes in the task ID as the first param.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function ViewTask() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
     const { id } = useParams();
     const history = useHistory();
     const { currentUser } = useAuth();
 
+    // useState declarations
     const [task, setTask] = useState(null);
     const [taskUsers, setTaskUsers] = useState([]);
     const [taskCreator, setTaskCreator] = useState(null);
@@ -59,6 +85,11 @@ export default function ViewTask() {
         setShowModal(false);
     }
 
+    /**
+     * Gets the data for the provided ID and sets it to the `task` state.
+     *
+     * @returns {void}
+     */
     async function getTask() {
         store
             .collection("tasks")
@@ -73,6 +104,12 @@ export default function ViewTask() {
             });
     }
 
+    /**
+     * Gets the list of users involved in the task and updates the `TaskUsers`
+     * state.
+     *
+     * @returns {void}
+     */
     async function getTaskUsers() {
         const promises = [];
         const tempUsers = [];
@@ -91,6 +128,12 @@ export default function ViewTask() {
         });
     }
 
+    /**
+     * Gets the name of the task creator and saves it into the `TaskCreator`
+     * state.
+     *
+     * @returns {void}
+     */
     async function getTaskCreator() {
         Promise.resolve(
             task.creator.get().then((doc) => {
@@ -265,6 +308,11 @@ export default function ViewTask() {
         setReplyValue(event.target.value);
     }
 
+    /**
+     * Render function for the task.
+     *
+     * @returns {Component} The interface view of the task
+     */
     const renderTasks = () => {
         if (task) {
             return (
@@ -297,11 +345,17 @@ export default function ViewTask() {
                         <h1>
                             {task && task.name}
                             {task && task.completed ? (
-                                <Badge variant="success" className="align-top my-2 mx-3">
+                                <Badge
+                                    variant="success"
+                                    className="align-top my-2 mx-3"
+                                >
                                     <h6 className="my-0"> Completed </h6>
                                 </Badge>
                             ) : (
-                                <Badge variant="warning" className="align-middle my-2 mx-3">
+                                <Badge
+                                    variant="warning"
+                                    className="align-middle my-2 mx-3"
+                                >
                                     <h6 className="my-0"> In Progress </h6>
                                 </Badge>
                             )}
@@ -559,7 +613,10 @@ export default function ViewTask() {
                                 <ListGroup variant="secondary">
                                     <ListGroup.Item variant="secondary">
                                         <Row>
-                                            <Col>{taskCreator && taskCreator.name}</Col>
+                                            <Col>
+                                                {taskCreator &&
+                                                    taskCreator.name}
+                                            </Col>
                                             <Col className="text-right font-weight-bold">
                                                 Creator
                                             </Col>
@@ -567,7 +624,10 @@ export default function ViewTask() {
                                     </ListGroup.Item>
                                     {taskUsers &&
                                         taskUsers.map((user) => (
-                                            <ListGroup.Item variant="light" key={user.uid}>
+                                            <ListGroup.Item
+                                                variant="light"
+                                                key={user.uid}
+                                            >
                                                 {user.name}
                                             </ListGroup.Item>
                                         ))}
@@ -580,12 +640,19 @@ export default function ViewTask() {
         }
     };
 
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Get the task data on page load.
     useEffect(() => {
         getTask();
         getComments();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Get the users involved in the task and the task creator once the task is
+    // obtained.
     useEffect(() => {
         if (task) {
             getTaskUsers();
@@ -593,13 +660,18 @@ export default function ViewTask() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [task]);
+    // ------------------------------------------------------------------------
 
     return (
         <div>
             <PageHeader />
             <Container className="pt-5 mt-5">
-                <Container className="d-flex flex-column">{renderTasks()}</Container>
+                <Container className="d-flex flex-column">
+                    {renderTasks()}
+                </Container>
             </Container>
         </div>
     );
 }
+
+export default ViewTask;

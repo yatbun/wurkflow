@@ -1,11 +1,28 @@
+// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
 import { useRef, useState, useEffect } from "react";
+
+// Styling imports
+import {
+    Container,
+    Alert,
+    Form,
+    Button,
+    ButtonGroup,
+    Badge,
+    Card,
+    Spinner,
+} from "react-bootstrap";
+
+// Context imports
 import { store } from "../firebase";
 import { useStore } from "../contexts/StoreContext";
-import { differenceInCalendarDays, add, sub } from "date-fns";
-import { DateLocalizer } from "react-widgets/IntlLocalizer";
+import { useHistory } from "react-router-dom";
 
-import { Container, Alert, Form, Button, ButtonGroup, Badge, Card, Spinner } from "react-bootstrap";
-
+// Page component imports
 import PageHeader from "./PageHeader";
 import DropdownList from "react-widgets/DropdownList";
 import Multiselect from "react-widgets/Multiselect";
@@ -13,18 +30,59 @@ import Localization from "react-widgets/esm/Localization";
 import DatePicker from "react-widgets/DatePicker";
 import NumberPicker from "react-widgets/NumberPicker";
 
-export default function NewWorkflow() {
-    const { teams, createWorkflowTemplate } = useStore();
+// Misc imports
+import { differenceInCalendarDays, add, sub } from "date-fns";
+import { DateLocalizer } from "react-widgets/IntlLocalizer";
+// ----------------------------------------------------------------------------
 
+/**
+ * @classdesc
+ * The page for users to create new workflow templates.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function NewWorkflow() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
+    const { teams, createWorkflowTemplate } = useStore();
+    const history = useHistory();
+
+    // useState declarations
     const [error, setError] = useState("");
     const [continued, setContinued] = useState(false);
+    const [teamUsers, setTeamUsers] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    // ------------------------------------------------------------------------
+    // NEW WORKFLOW FORM DECLARATIONS
+    // ------------------------------------------------------------------------
     const wfNameRef = useRef();
     const wfDescRef = useRef();
     const [wfDate, setWfDate] = useState(new Date());
     const [wfTeam, setWfTeam] = useState(null);
 
-    const [teamUsers, setTeamUsers] = useState([]);
+    const blankTask = {
+        name: "",
+        desc: "",
+        users: [],
+        daysBefore: 0,
+        dueDate: wfDate,
+    };
+    const [taskData, setTaskData] = useState([{ ...blankTask }]);
 
+    // ------------------------------------------------------------------------
+
+    /**
+     * Gets the list of users belonging to the selected `wfTeam`.
+     *
+     * @returns {Object[]} Array of users belonging to the selected team in
+     * `wfTeam`.
+     */
     async function getTeamUsers() {
         if (wfTeam === null) {
             return;
@@ -36,7 +94,11 @@ export default function NewWorkflow() {
 
         store
             .collection("users")
-            .where("teams", "array-contains", store.collection("teams").doc(tuid))
+            .where(
+                "teams",
+                "array-contains",
+                store.collection("teams").doc(tuid)
+            )
             .get()
             .then((querySnapshot) => {
                 querySnapshot.docs.forEach((doc) => {
@@ -50,15 +112,24 @@ export default function NewWorkflow() {
             });
     }
 
-    const blankTask = { name: "", desc: "", users: [], daysBefore: 0, dueDate: wfDate };
-    const [taskData, setTaskData] = useState([{ ...blankTask }]);
-
+    /**
+     * Handles the adding of an event to the workflow template.
+     *
+     * @param {Event} e The `onClick` event from the Add button.
+     * @returns {void}
+     */
     function handleAdd(e) {
         e.preventDefault();
 
         setTaskData([...taskData, { ...blankTask }]);
     }
 
+    /**
+     * Handles the removing of an event to the workflow template.
+     *
+     * @param {Event} e The `onClick` event from the Remove button.
+     * @returns {void}
+     */
     function handleRemove(e) {
         e.preventDefault();
 
@@ -67,12 +138,24 @@ export default function NewWorkflow() {
         }
     }
 
+    /**
+     * Handles when any text fields within tasks are changed.
+     *
+     * @param {Event} e The `onChange` event from task text fields.
+     * @returns {void}
+     */
     function handleTaskDataChange(e) {
         const updatedTaskData = [...taskData];
         updatedTaskData[e.target.dataset.idx][e.target.id] = e.target.value;
         setTaskData(updatedTaskData);
     }
 
+    /**
+     * Handles when any `DatePicker` value changes within tasks are changed.
+     *
+     * @param {Event} e The `onChange` event from task `DatePicker`.
+     * @returns {void}
+     */
     function handleDateChange(idx, date) {
         const dateDiff = differenceInCalendarDays(wfDate, date);
 
@@ -82,12 +165,24 @@ export default function NewWorkflow() {
         setTaskData(updatedTaskData);
     }
 
+    /**
+     * Handles when any `Multiselect` value changes within tasks are changed.
+     *
+     * @param {Event} e The `onChange` event from task `Multiselect`.
+     * @returns {void}
+     */
     function handleUsersChange(idx, val) {
         const updatedTaskData = [...taskData];
         updatedTaskData[idx]["users"] = val;
         setTaskData(updatedTaskData);
     }
 
+    /**
+     * Handles when the Continue button is clicked. It is used to lock in the
+     * team chosen by the user.
+     *
+     * @returns {void}
+     */
     function handleContinue() {
         setError("");
 
@@ -98,8 +193,12 @@ export default function NewWorkflow() {
         }
     }
 
-    const [loading, setLoading] = useState(false);
-
+    /**
+     * Handles the creation of a new workflow template with the filled in
+     * information.
+     *
+     * @param {Event} e The `onClick` event from the Submit button
+     */
     async function handleSubmit(e) {
         e.preventDefault();
         setLoading(true);
@@ -112,25 +211,33 @@ export default function NewWorkflow() {
         );
 
         setLoading(false);
+        history.push("/kickstart-workflow");
     }
 
-    useEffect(() => {
-        getTeamUsers();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [wfTeam]);
-
-    const renderWfTeams = () => {
+    /**
+     * The render function for the tasks in the workflow template.
+     *
+     * @returns {Component} The interface for all the tasks in the workflow
+     * template.
+     */
+    const renderWfTasks = () => {
         return (
             <>
                 <h2 className="mt-5">
                     Template Tasks{" "}
                     <Badge variant="secondary">
-                        {taskData.length === 1 ? "1 Task" : taskData.length + " Tasks"}
+                        {taskData.length === 1
+                            ? "1 Task"
+                            : taskData.length + " Tasks"}
                     </Badge>
                 </h2>
 
                 <ButtonGroup className="mt-4 w-100">
-                    <Button variant="outline-primary" onClick={handleAdd} className="w-50">
+                    <Button
+                        variant="outline-primary"
+                        onClick={handleAdd}
+                        className="w-50"
+                    >
                         Add Task
                     </Button>
                     <Button
@@ -187,7 +294,11 @@ export default function NewWorkflow() {
                                             min={
                                                 idx === 0
                                                     ? new Date(2020, 1, 1, 0, 0)
-                                                    : add(taskData[idx - 1].dueDate, { days: 1 })
+                                                    : add(
+                                                          taskData[idx - 1]
+                                                              .dueDate,
+                                                          { days: 1 }
+                                                      )
                                             }
                                             max={sub(wfDate, { days: 1 })}
                                             valueDisplayFormat={{
@@ -217,7 +328,9 @@ export default function NewWorkflow() {
                                     defaultValue={[]}
                                     data={teamUsers}
                                     textField="name"
-                                    onChange={(sel) => handleUsersChange(idx, sel)}
+                                    onChange={(sel) =>
+                                        handleUsersChange(idx, sel)
+                                    }
                                 />
                             </Form.Group>
                         </Card>
@@ -240,6 +353,18 @@ export default function NewWorkflow() {
         );
     };
 
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Gets the list of users beloning in the selected team whenever the
+    // selected team is changed.
+    useEffect(() => {
+        getTeamUsers();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [wfTeam]);
+    // ------------------------------------------------------------------------
+
     return (
         <>
             <PageHeader />
@@ -249,14 +374,19 @@ export default function NewWorkflow() {
                     <Container className="col-sm-12 mx-auto bg-light p-5 rounded">
                         <h1>New Workflow Template</h1>
                         <p>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas luctus
-                            enim tellus. Interdum et malesuada fames ac ante ipsum primis in
-                            faucibus.
+                            Create a new workflow template for common repetitive
+                            tasks. You can then kickstart instances of it
+                            whenever!
                         </p>
                     </Container>
                     <Container className="col-sm-8 mx-auto my-5">
                         <Localization
-                            date={new DateLocalizer({ culture: "en-GB", firstOfWeek: 7 })}
+                            date={
+                                new DateLocalizer({
+                                    culture: "en-GB",
+                                    firstOfWeek: 7,
+                                })
+                            }
                         >
                             <Form onSubmit={handleSubmit}>
                                 <h2>Template Settings</h2>
@@ -271,7 +401,9 @@ export default function NewWorkflow() {
                                 </Form.Group>
 
                                 <Form.Group className="mt-4">
-                                    <Form.Label>Workflow Description</Form.Label>
+                                    <Form.Label>
+                                        Workflow Description
+                                    </Form.Label>
                                     <Form.Control
                                         as="textarea"
                                         rows={3}
@@ -298,7 +430,9 @@ export default function NewWorkflow() {
                                         value={wfDate}
                                         onSelect={(date) => setWfDate(date)}
                                         valueEditFormat={{ dateStyle: "short" }}
-                                        valueDisplayFormat={{ dateStyle: "medium" }}
+                                        valueDisplayFormat={{
+                                            dateStyle: "medium",
+                                        }}
                                         disabled={continued}
                                     />
                                 </Form.Group>
@@ -312,7 +446,7 @@ export default function NewWorkflow() {
                                     Continue
                                 </Button>
 
-                                {continued && renderWfTeams()}
+                                {continued && renderWfTasks()}
                             </Form>
                         </Localization>
                     </Container>
@@ -321,3 +455,5 @@ export default function NewWorkflow() {
         </>
     );
 }
+
+export default NewWorkflow;

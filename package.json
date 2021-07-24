@@ -1,9 +1,9 @@
 {
     "name": "wurkflow-dev",
-    "version": "0.1.0",
+    "version": "1.0.1",
     "private": true,
     "engines": {
-        "npm": "7.13.0",
+        "npm": "^7.13.0",
         "node": "16.1.0"
     },
     "dependencies": {
@@ -30,7 +30,8 @@
         "start": "react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",
-        "eject": "react-scripts eject"
+        "eject": "react-scripts eject",
+        "docs": "jsdoc -c ./jsdoc.json"
     },
     "eslintConfig": {
         "extends": [
@@ -51,6 +52,8 @@
         ]
     },
     "devDependencies": {
+        "better-docs": "^2.3.2",
+        "jsdoc": "^3.6.7",
         "enzyme": "^3.11.0",
         "enzyme-adapter-react-16": "^1.15.6",
         "redux-mock-store": "^1.5.4"

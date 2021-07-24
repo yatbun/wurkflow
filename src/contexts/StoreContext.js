@@ -1,5 +1,7 @@
+// Firebase imports
 import firebase from "firebase/app";
 
+// General imports
 import React, { useContext, useState, useEffect } from "react";
 import { store } from "../firebase";
 import { useAuth } from "./AuthContext";
@@ -11,14 +13,31 @@ export function useStore() {
     return useContext(StoreContext);
 }
 
+/**
+ * @classdesc
+ * A global context for the handling of firestore
+ *
+ * Exports all the methods for interfacing with firestore.
+ *
+ * @category Contexts
+ * @hideconstructor
+ * @component
+ */
 export function StoreProvider({ children }) {
     const { currentUser } = useAuth();
 
-    // -------------------------
-    // Manages the user document
+    // ------------------------------------------------------------------------
+    // userData
+    //
+    // Additional data for the current user
+    // ------------------------------------------------------------------------
 
     const [userData, setUserData] = useState(null);
 
+    /**
+     * Updates the `userData` state.
+     * @returns {void}
+     */
     async function getUserData() {
         if (!currentUser) {
             setUserData(null);
@@ -34,6 +53,12 @@ export function StoreProvider({ children }) {
             });
     }
 
+    /**
+     * Updates the current active organisation of the user.
+     * @param {string} oid The unique document ID of the new current active
+     * organisation
+     * @returns {void}
+     */
     async function updateCurrentOrg(oid) {
         store
             .collection("users")
@@ -46,8 +71,18 @@ export function StoreProvider({ children }) {
             });
     }
 
+    // ------------------------------------------------------------------------
+    // currentOrg
+    //
+    // The current working organisation of the user
+    // ------------------------------------------------------------------------
+
     const [currentOrg, setCurrentOrg] = useState(null);
 
+    /**
+     * Updates the `currentOrg` state.
+     * @returns {void}
+     */
     async function getCurrentOrg() {
         if (userData) {
             userData.currentOrg.get().then((doc) => {
@@ -59,11 +94,20 @@ export function StoreProvider({ children }) {
         }
     }
 
-    // -----------------------------------------
-    // Gets the list of orgs that the user is in
+    // ------------------------------------------------------------------------
+    // Organisations
+    //
+    // A list of all the organisation that the current user belongs to
+    // ------------------------------------------------------------------------
 
     const [orgs, setOrgs] = useState([]);
 
+    /**
+     * Gets the list of organisations that the user is part of and updates the
+     * `orgs` state.
+     *
+     * @returns {void}
+     */
     async function getOrgs() {
         if (userData === null) {
             setOrgs([]);
@@ -83,16 +127,38 @@ export function StoreProvider({ children }) {
         setOrgs(tempOrgs);
     }
 
-    async function orgExistsFromUid(uid) {
-        const res = await store.collection("orgs").doc(uid).get();
+    /**
+     * Checks if an organistaion exists based on the given unique document ID
+     * of the organistaion.
+     *
+     * @param {string} ouid The unique document ID of the organisation
+     * @returns {void}
+     */
+    async function orgExistsFromUid(ouid) {
+        const res = await store.collection("orgs").doc(ouid).get();
         return res.exists;
     }
 
+    /**
+     * Checks if an organisation exists based on the given ID of the
+     * organisation.
+     *
+     * @param {string} oid The unique ID of the organisation
+     * @returns {void}
+     */
     async function orgExistsFromId(oid) {
         const res = await store.collection("orgs").where("id", "==", oid).get();
         return !res.empty;
     }
 
+    /**
+     * Creates a new organisation with the given unique ID and name
+     *
+     * @param {string} oid The unique ID of the organisation
+     * @param {string} name The name of the organisation
+     * @returns {string} The unique document ID of the newly created
+     * organisation
+     */
     async function createOrg(oid, name) {
         const res = await store.collection("orgs").add({
             id: oid,
@@ -101,26 +167,42 @@ export function StoreProvider({ children }) {
         return res.id;
     }
 
+    /**
+     * Makes the `currentUser` a member of the organisation provided.
+     *
+     * @param {string} ouid The unique document ID of the organistaion
+     * @returns {void}
+     */
     async function joinOrg(ouid) {
         store
             .collection("users")
             .doc(currentUser.uid)
             .update({
-                orgs: firebase.firestore.FieldValue.arrayUnion(store.collection("orgs").doc(ouid)),
+                orgs: firebase.firestore.FieldValue.arrayUnion(
+                    store.collection("orgs").doc(ouid)
+                ),
             })
             .then(() => {
                 updateCurrentOrg(ouid);
             });
     }
 
-    // -----------------------------------------
-    // Get the list of teams that the user is in
-    // Note: Only the teams in the currentOrg
+    // ------------------------------------------------------------------------
+    // Teams
+    //
+    // The teams that the user is part of in their current active organisation
+    // ------------------------------------------------------------------------
 
     const [teams, setTeams] = useState([]);
     const [teamsMessage, setTeamsMessage] = useState("");
     const [teamsError, setTeamsError] = useState("");
 
+    /**
+     * Gets the list of teams that the user is part of in their current active
+     * organisation, then updates the `teams` state.
+     *
+     * @returns {void}
+     */
     async function getTeams() {
         if (userData === null || userData.teams === undefined) {
             setTeams([]);
@@ -160,6 +242,12 @@ export function StoreProvider({ children }) {
         });
     }
 
+    /**
+     * Removes the current user from the team provided.
+     *
+     * @param {string} tuid The unique document ID of the team
+     * @returns {void}
+     */
     async function quitTeam(tuid) {
         setTeamsMessage("");
         setTeamsError("");
@@ -182,6 +270,12 @@ export function StoreProvider({ children }) {
         setTeamsMessage("Successfully quit team.");
     }
 
+    /**
+     * Adds the current user to the team provided.
+     *
+     * @param {string} tid The unique ID of the team
+     * @returns {void}
+     */
     async function joinTeam(tid) {
         setTeamsMessage("");
         setTeamsError("");
@@ -210,6 +304,14 @@ export function StoreProvider({ children }) {
             });
     }
 
+    /**
+     * Creates a new team with the provided information.
+     *
+     * @param {string} id The unique ID of the team
+     * @param {string} name The name of the team
+     * @param {string} desc The team description
+     * @returns {void}
+     */
     async function createTeam(id, name, desc) {
         setTeamsMessage("");
         setTeamsError("");
@@ -234,18 +336,30 @@ export function StoreProvider({ children }) {
                             joinTeam(id);
                         });
                 } else {
-                    setTeamsError("A team with this ID already exists. Try another one.");
+                    setTeamsError(
+                        "A team with this ID already exists. Try another one."
+                    );
                     return;
                 }
             });
     }
 
-    // -------------------------------------------
-    // Gets the list of tasks for the user's teams
+    // ------------------------------------------------------------------------
+    // Tasks
+    //
+    // The list of tasks belonging to the teams that is currently active for
+    // the user
+    // ------------------------------------------------------------------------
 
     const [tasks, setTasks] = useState([]);
     const [completedTasks, setCompletedTasks] = useState([]);
 
+    /**
+     * Gets the list of tasks belonging to the teams that is currently active
+     * for the user and updates the `tasks` state.
+     *
+     * @returns {void}
+     */
     async function getTasks() {
         if (teams.length === 0) {
             setTasks([]);
@@ -259,7 +373,11 @@ export function StoreProvider({ children }) {
             promises.push(
                 store
                     .collection("tasks")
-                    .where("team", "==", store.collection("teams").doc(team.uid))
+                    .where(
+                        "team",
+                        "==",
+                        store.collection("teams").doc(team.uid)
+                    )
                     .where("hidden", "==", false)
                     .where(
                         "users",
@@ -300,6 +418,17 @@ export function StoreProvider({ children }) {
         });
     }
 
+    /**
+     * Creates a new task with the provided information.
+     *
+     * @param {string} name The name of the task
+     * @param {string[]} uids The users involved in the task
+     * @param {string} desc The task description
+     * @param {string} tuid The unique document ID of the team that the task
+     * belongs to
+     * @param {firebase.firestore.Timestamp} dueDate The due date of the task
+     * @returns {void}
+     */
     async function createTask(name, uids, desc, tuid, dueDate) {
         const userRefs = uids.map((uid) => store.collection("users").doc(uid));
 
@@ -322,6 +451,12 @@ export function StoreProvider({ children }) {
             });
     }
 
+    /**
+     * Deletes the provided task.
+     *
+     * @param {string} tuid The unique document ID of the task
+     * @returns {void}
+     */
     async function deleteTask(tuid) {
         store
             .collection("tasks")
@@ -332,12 +467,23 @@ export function StoreProvider({ children }) {
             });
     }
 
+    /**
+     * Retrieves all the users belonging to the provided team.
+     *
+     * @param {string} tuid The unique document id of the team that belong to
+     * @returns {firebase.firestore.DcoumentData[]} All users
+     * the team
+     */
     async function getTeamUsers(tuid) {
         const tempUsers = [];
 
         await store
             .collection("users")
-            .where("teams", "array-contains", store.collection("teams").doc(tuid))
+            .where(
+                "teams",
+                "array-contains",
+                store.collection("teams").doc(tuid)
+            )
             .get()
             .then((querySnapshot) => {
                 querySnapshot.forEach((doc) => {
@@ -349,16 +495,27 @@ export function StoreProvider({ children }) {
         return tempUsers;
     }
 
+    /**
+     * Marks the provided task as completed.
+     *
+     * @param {string} tuid The unique document ID of the task
+     * @returns {void}
+     */
     async function completeTask(tuid) {
+        store
+            .collection("tasks")
+            .doc(tuid)
+            .update({
+                completed: true,
+            })
+            .then(() => {
+                getTasks();
+            });
         store
             .collection("tasks")
             .doc(tuid)
             .get()
             .then((doc) => {
-                store.collection("tasks").doc(tuid).update({
-                    completed: true,
-                });
-
                 const tempDoc = doc.data();
 
                 if (tempDoc.workflow) {
@@ -373,18 +530,17 @@ export function StoreProvider({ children }) {
                                 getTasks();
                             });
                     }
-                    getTasks();
+                    store
+                        .collection("workflows")
+                        .doc(tempDoc.workflow.id)
+                        .update({
+                            currentTask:
+                                firebase.firestore.FieldValue.increment(1),
+                        })
+                        .then(() => {
+                            getTasks();
+                        });
                 }
-
-                store
-                    .collection("workflows")
-                    .doc(tempDoc.workflow.id)
-                    .update({
-                        currentTask: firebase.firestore.FieldValue.increment(1),
-                    });
-            })
-            .then(() => {
-                getTasks();
             });
     }
 
@@ -415,10 +571,27 @@ export function StoreProvider({ children }) {
             });
     }
 
+    // ------------------------------------------------------------------------
+    // Workflow
+    //
+    // ------------------------------------------------------------------------
+
+    /**
+     * Creates a new workflow template with the information provided.
+     *
+     * @param {string} name The name of the workflow template
+     * @param {string} desc Workflow template description
+     * @param {string} tuid The unique document ID of the team that the
+     * workflow template belongs to
+     * @param {Object[]} data List of tasks within the workflow template
+     * @returns {void}
+     */
     async function createWorkflowTemplate(name, desc, tuid, data) {
         for (let i = 0; i < data.length; ++i) {
             delete data[i].dueDate;
-            data[i].users = data[i].users.map((user) => store.collection("users").doc(user.uid));
+            data[i].users = data[i].users.map((user) =>
+                store.collection("users").doc(user.uid)
+            );
         }
 
         await store
@@ -438,6 +611,18 @@ export function StoreProvider({ children }) {
             });
     }
 
+    /**
+     * Creates a new workflow instance with the provided informattion.
+     *
+     * @param {string} name The name of the workflow instance
+     * @param {string} desc Workflow instance description
+     * @param {firebase.firestore.DocumentReference} team The team reference of
+     * the team that the workflow instance belongs to
+     * @param {firebase.firestore.Timestamp} dueDate The final due date of the
+     * workflow instance
+     * @param {Object[]} data The list of tasks within the workflow instance
+     * @returns {void}
+     */
     async function createWorkflow(name, desc, team, dueDate, data) {
         const newTemplate = {
             currentTask: 1,
@@ -473,7 +658,9 @@ export function StoreProvider({ children }) {
                     };
 
                     if (lastUid !== "") {
-                        newTask.nextTask = store.collection("tasks").doc(lastUid);
+                        newTask.nextTask = store
+                            .collection("tasks")
+                            .doc(lastUid);
                     }
 
                     await store
@@ -489,6 +676,12 @@ export function StoreProvider({ children }) {
             });
     }
 
+    /**
+     * Deletes the workflow instance that was provided and all its associated
+     * tasks.
+     *
+     * @param {string} wuid The unique document ID of the workflow
+     */
     async function deleteWorkflow(wuid) {
         var batch = store.batch();
 
@@ -555,5 +748,7 @@ export function StoreProvider({ children }) {
         deleteWorkflow,
     };
 
-    return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
+    return (
+        <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
+    );
 }
