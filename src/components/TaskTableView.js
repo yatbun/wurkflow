@@ -9,6 +9,14 @@ import { Table } from "react-bootstrap";
 import TaskTableItem from "./TaskTableItem";
 // ----------------------------------------------------------------------------
 
+/**
+ * @classdesc
+ * Table view of tasks.
+ *
+ * @category Page Components
+ * @hideconstructor
+ * @component
+ */
 function TaskTableView({ tasks }) {
     return (
         <Table striped bordered hover responsive className="mt-3">

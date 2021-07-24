@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> components/KickstartWorkflow.js</title>
+  <title> components/TaskTableItem.js</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -80,7 +80,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>components/KickstartWorkflow.js</h1>
+                    <h1>components/TaskTableItem.js</h1>
                 </header>
                 
 
@@ -94,131 +94,152 @@
 // ----------------------------------------------------------------------------
 
 // React imports
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 // Styling imports
-import { Container } from "react-bootstrap";
+import { OverlayTrigger, Tooltip, Button, Modal } from "react-bootstrap";
+import { FaEye, FaCheck, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 
 // Context imports
-import { store } from "../firebase";
 import { useStore } from "../contexts/StoreContext";
-
-// Page component imports
-import PageHeader from "./PageHeader";
-import TemplateListItem from "./TemplateListItem";
+// ----------------------------------------------------------------------------
 
 /**
  * @classdesc
- * The page for users to kickstart an instance of a workflow template.
+ * Each row of the task table.
  *
- * @category Pages
+ * @category Page Components
  * @hideconstructor
  * @component
  */
-function KickstartWorkflow() {
+function TaskTableItem({ task, index }) {
     // ------------------------------------------------------------------------
     // GLOBAL DECLARATIONS
     // ------------------------------------------------------------------------
 
     // Context declarations
-    const { teams } = useStore();
+    const { deleteTask, completeTask } = useStore();
 
     // useState declarations
-    const [templates, setTemplates] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [action, setAction] = useState("");
     // ------------------------------------------------------------------------
 
     /**
-     * Gets all the worklfow templates that belongs to the teams that the user
-     * is in and updates the `templates` state.
+     * Checks the current modal action and assigns it to `actionTask` for use
+     * by the `Modal`.
      *
      * @returns {void}
      */
-    async function getWorkflowTemplates() {
-        const promises = [];
-        const tempTemplates = [];
-
-        teams.forEach((team) => {
-            promises.push(
-                store
-                    .collection("wfTemplates")
-                    .where(
-                        "team",
-                        "==",
-                        store.collection("teams").doc(team.uid)
-                    )
-                    .get()
-                    .then((querySnapshot) => {
-                        if (!querySnapshot.empty) {
-                            tempTemplates.push.apply(
-                                tempTemplates,
-                                querySnapshot.docs
-                            );
-                        }
-                    })
-            );
-        });
-
-        Promise.all(promises).then(() => {
-            setTemplates(tempTemplates);
-        });
+    function modalAction() {
+        if (action === "delete") {
+            deleteTask(task.uid);
+        } else if (action === "complete") {
+            completeTask(task.uid);
+        }
+        closeModal();
     }
 
-    // ------------------------------------------------------------------------
-    // useEffect Hooks
-    // ------------------------------------------------------------------------
+    /**
+     * Handles the opening of the `Modal`.
+     *
+     * @param {String} taskUid The unique document id of the Task
+     * @param {String} action The desired action to be applied to the Task
+     *
+     * @returns {void}
+     */
+    function openModal(action) {
+        setAction(action);
+        setShowModal(true);
+    }
 
-    // Gets all workflow templates on load
-    useEffect(() => {
-        getWorkflowTemplates();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    // Updates all workflow templates upon change of users' teams
-    useEffect(() => {
-        getWorkflowTemplates();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [teams]);
-    // ------------------------------------------------------------------------
+    /**
+     * Handles the closing of the `Modal`.
+     *
+     * @returns {void}
+     */
+    function closeModal() {
+        setAction("");
+        setShowModal(false);
+    }
 
     return (
         &lt;>
-            &lt;PageHeader />
-            &lt;Container className="pt-5 mt-5">
-                &lt;Container className="d-flex flex-column">
-                    &lt;Container className="col-sm-12 mx-auto bg-light p-5 rounded ">
-                        &lt;h1>Kickstart Workflow&lt;/h1>
-                        &lt;p>
-                            Choose from the list of workflow templates in your
-                            teams and kickstart them right now!
-                        &lt;/p>
-                    &lt;/Container>
-                    &lt;Container className="col-sm-8 mx-auto p-5">
-                        {templates.length === 0 ? (
-                            &lt;>
-                                &lt;h2>No available templates&lt;/h2>
-                                &lt;p>
-                                    Make one &lt;Link to="/new-workflow">now&lt;/Link>
-                                    !
-                                &lt;/p>
-                            &lt;/>
-                        ) : (
-                            &lt;h2>Available templates&lt;/h2>
-                        )}
-                        {templates.map((template) => (
-                            &lt;TemplateListItem
-                                template={template}
-                                key={template.id}
-                            />
-                        ))}
-                    &lt;/Container>
-                &lt;/Container>
-            &lt;/Container>
+            &lt;Modal show={showModal} onHide={closeModal}>
+                &lt;Modal.Header>
+                    &lt;Modal.Title>
+                        &lt;FaExclamationTriangle />
+                    &lt;/Modal.Title>
+                &lt;/Modal.Header>
+                &lt;Modal.Body>Are you sure?&lt;/Modal.Body>
+                &lt;Modal.Footer>
+                    &lt;Button variant="secondary" onClick={closeModal}>
+                        Cancel
+                    &lt;/Button>
+                    &lt;Button variant="warning" onClick={modalAction}>
+                        I AM SURE
+                    &lt;/Button>
+                &lt;/Modal.Footer>
+            &lt;/Modal>
+
+            &lt;tr key={index}>
+                &lt;td>{index + 1}&lt;/td>
+                &lt;td>{task.name}&lt;/td>
+                &lt;td>{task.desc}&lt;/td>
+                &lt;td>{task.dueDate.toLocaleDateString("en-GB")}&lt;/td>
+                &lt;td>{task.teamName}&lt;/td>
+                &lt;td>
+                    &lt;OverlayTrigger overlay={&lt;Tooltip>View&lt;/Tooltip>}>
+                        &lt;span className="d-inline-block me-md-2 my-1">
+                            &lt;Link to={`/task/${task.uid}`}>
+                                &lt;Button variant="primary" size="sm">
+                                    &lt;FaEye />
+                                &lt;/Button>
+                            &lt;/Link>
+                        &lt;/span>
+                    &lt;/OverlayTrigger>
+                    &lt;OverlayTrigger
+                        overlay={
+                            task.completed ? (
+                                &lt;Tooltip>
+                                    Task has already been marked as completed
+                                &lt;/Tooltip>
+                            ) : (
+                                &lt;Tooltip>Complete&lt;/Tooltip>
+                            )
+                        }
+                    >
+                        &lt;span className="d-inline-block me-md-2 my-1">
+                            &lt;Button
+                                onClick={() => openModal("complete")}
+                                variant="success"
+                                size="sm"
+                                disabled={task.completed}
+                            >
+                                &lt;FaCheck />
+                            &lt;/Button>
+                        &lt;/span>
+                    &lt;/OverlayTrigger>
+                    &lt;OverlayTrigger overlay={&lt;Tooltip>Delete&lt;/Tooltip>}>
+                        &lt;span className="d-inline-block my-1">
+                            &lt;Button
+                                onClick={() => openModal("delete")}
+                                variant="danger"
+                                size="sm"
+                                disabled={task.workflow}
+                            >
+                                &lt;FaTrash />
+                            &lt;/Button>
+                        &lt;/span>
+                    &lt;/OverlayTrigger>
+                &lt;/td>
+            &lt;/tr>
         &lt;/>
     );
 }
 
-export default KickstartWorkflow;
+export default TaskTableItem;
 </code></pre>
         </article>
     </section>

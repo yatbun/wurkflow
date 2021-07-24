@@ -59,9 +59,9 @@ function Signup() {
     // ------------------------------------------------------------------------
 
     /**
-     * Updates `radioValue` state on toggle
+     * Updates `radioValue` state on toggle.
      * @param {Number} val The selected toggle option
-     * @returns
+     * @returns {void}
      */
     const radioToggle = (val) => setRadioValue(val);
 

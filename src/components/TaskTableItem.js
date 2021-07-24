@@ -14,6 +14,14 @@ import { FaEye, FaCheck, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import { useStore } from "../contexts/StoreContext";
 // ----------------------------------------------------------------------------
 
+/**
+ * @classdesc
+ * Each row of the task table.
+ *
+ * @category Page Components
+ * @hideconstructor
+ * @component
+ */
 function TaskTableItem({ task, index }) {
     // ------------------------------------------------------------------------
     // GLOBAL DECLARATIONS
@@ -25,6 +33,7 @@ function TaskTableItem({ task, index }) {
     // useState declarations
     const [showModal, setShowModal] = useState(false);
     const [action, setAction] = useState("");
+    // ------------------------------------------------------------------------
 
     /**
      * Checks the current modal action and assigns it to `actionTask` for use

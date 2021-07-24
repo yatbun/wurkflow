@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> PageHeader</title>
+  <title> TaskTableItem</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -78,7 +78,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Components</p>
-                    <h1>PageHeader</h1>
+                    <h1>TaskTableItem</h1>
                 </header>
                 
 
@@ -90,10 +90,10 @@
 <header>
     
         <h2>
-            &ltPageHeader  /&gt
+            &ltTaskTableItem  /&gt
         </h2>
         
-            <div class="class-description"><p>The navigation bar.</p></div>
+            <div class="class-description"><p>Each row of the task table.</p></div>
         
     
 </header>
@@ -152,9 +152,9 @@
 
     
         <p class="tag-source">
-            <a href="components_PageHeader.js.html" class="button">View Source</a>
+            <a href="components_TaskTableItem.js.html" class="button">View Source</a>
             <span>
-                <a href="components_PageHeader.js.html">components/PageHeader.js</a>, <a href="components_PageHeader.js.html#line35">line 35</a>
+                <a href="components_TaskTableItem.js.html">components/TaskTableItem.js</a>, <a href="components_TaskTableItem.js.html#line25">line 25</a>
             </span>
         </p>
     
@@ -210,18 +210,16 @@
 
 
     
-    <h4 class="name" id="~handleLogout">
-        <a class="href-link" href="#~handleLogout">#</a>
+    <h4 class="name" id="~closeModal">
+        <a class="href-link" href="#~closeModal">#</a>
         
-            
-                <span class='tag'>async</span>
             
                 <span class='tag'>inner</span>
             
         
         <span class="code-name">
             
-                handleLogout<span class="signature">()</span><span class="type-signature"> &rarr; {void}</span>
+                closeModal<span class="signature">()</span><span class="type-signature"> &rarr; {void}</span>
             
         </span>
     </h4>
@@ -230,7 +228,7 @@
     
     
     <div class="description">
-        <p>Handles the logging out of the user.</p>
+        <p>Handles the closing of the <code>Modal</code>.</p>
     </div>
     
 
@@ -279,9 +277,9 @@
 
     
         <p class="tag-source">
-            <a href="components_PageHeader.js.html" class="button">View Source</a>
+            <a href="components_TaskTableItem.js.html" class="button">View Source</a>
             <span>
-                <a href="components_PageHeader.js.html">components/PageHeader.js</a>, <a href="components_PageHeader.js.html#line54">line 54</a>
+                <a href="components_TaskTableItem.js.html">components/TaskTableItem.js</a>, <a href="components_TaskTableItem.js.html#line71">line 71</a>
             </span>
         </p>
     
@@ -336,8 +334,8 @@
 
 
     
-    <h4 class="name" id="~loggedInMenu">
-        <a class="href-link" href="#~loggedInMenu">#</a>
+    <h4 class="name" id="~modalAction">
+        <a class="href-link" href="#~modalAction">#</a>
         
             
                 <span class='tag'>inner</span>
@@ -345,7 +343,7 @@
         
         <span class="code-name">
             
-                loggedInMenu<span class="signature">()</span><span class="type-signature"> &rarr; {Component}</span>
+                modalAction<span class="signature">()</span><span class="type-signature"> &rarr; {void}</span>
             
         </span>
     </h4>
@@ -354,7 +352,8 @@
     
     
     <div class="description">
-        <p>Render function for the logged in section of the navigation bar.</p>
+        <p>Checks the current modal action and assigns it to <code>actionTask</code> for use
+by the <code>Modal</code>.</p>
     </div>
     
 
@@ -403,9 +402,9 @@
 
     
         <p class="tag-source">
-            <a href="components_PageHeader.js.html" class="button">View Source</a>
+            <a href="components_TaskTableItem.js.html" class="button">View Source</a>
             <span>
-                <a href="components_PageHeader.js.html">components/PageHeader.js</a>, <a href="components_PageHeader.js.html#line70">line 70</a>
+                <a href="components_TaskTableItem.js.html">components/TaskTableItem.js</a>, <a href="components_TaskTableItem.js.html#line44">line 44</a>
             </span>
         </p>
     
@@ -436,13 +435,211 @@
 
 <div class="columns">
     
-    <div class='param-desc column is-7'><p>The logged in section of the navigation bar.</p></div>
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<span class="param-type">void</span>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="~openModal">
+        <a class="href-link" href="#~openModal">#</a>
+        
+            
+                <span class='tag'>inner</span>
+            
+        
+        <span class="code-name">
+            
+                openModal<span class="signature">(taskUid, action)</span><span class="type-signature"> &rarr; {void}</span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+    <div class="description">
+        <p>Handles the opening of the <code>Modal</code>.</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>taskUid</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>The unique document id of the Task</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>action</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">String</span>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last"><p>The desired action to be applied to the Task</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="components_TaskTableItem.js.html" class="button">View Source</a>
+            <span>
+                <a href="components_TaskTableItem.js.html">components/TaskTableItem.js</a>, <a href="components_TaskTableItem.js.html#line61">line 61</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
     
     
     <div class='column is-5 has-text-left'>
         <label>Type: </label>
         
-<span class="param-type">Component</span>
+<span class="param-type">void</span>
 
 
     </div>

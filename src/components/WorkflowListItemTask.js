@@ -8,6 +8,14 @@ import { useState, useEffect } from "react";
 // Styling imports
 import { Container, ListGroup, Popover, OverlayTrigger } from "react-bootstrap";
 
+/**
+ * @classdesc
+ * The task `ListGroup` item. Includes its own `Popover`.
+ *
+ * @category Page Components
+ * @hideconstructor
+ * @component
+ */
 function WorkflowListItemTask({ task, currentTask }) {
     // ------------------------------------------------------------------------
     // GLOBAL DECLARATIONS
@@ -17,6 +25,11 @@ function WorkflowListItemTask({ task, currentTask }) {
     const [taskUsers, setTaskUsers] = useState([]);
     // ------------------------------------------------------------------------
 
+    /**
+     * Gets the list of users involved in the task.
+     *
+     * @returns {void}
+     */
     function getTaskUsers() {
         const promises = [];
         const tempUsers = [];
