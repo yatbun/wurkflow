@@ -14,11 +14,20 @@ import { ListGroup } from "react-bootstrap";
 // Page components imports
 import WorkflowListItemTask from "./WorkflowListItemTask";
 
+/**
+ * @classdesc
+ * Dashboard active workflow display.
+ *
+ * @category Page Components
+ * @hideconstructor
+ * @component
+ */
 function ActiveWorkflowItem({ workflow }) {
     // ------------------------------------------------------------------------
     // GLOBAL DECLARATIONS
     // ------------------------------------------------------------------------
 
+    // Constant declarations
     const wfData = workflow.data();
     wfData.uid = workflow.id;
 
@@ -44,8 +53,9 @@ function ActiveWorkflowItem({ workflow }) {
                 if (querySnapshot.empty) {
                     setCurrTask(null);
                 } else {
-                    console.log(querySnapshot.docs[0].data());
-                    setCurrTask(querySnapshot.docs[0].data());
+                    const tempTask = querySnapshot.docs[0].data();
+                    tempTask.uid = querySnapshot.docs[0].id;
+                    setCurrTask(tempTask);
                 }
             });
     }

@@ -4,6 +4,7 @@
 
 // React imports
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 // Styling imports
 import { Container, ListGroup, Popover, OverlayTrigger } from "react-bootstrap";
@@ -80,13 +81,15 @@ function WorkflowListItemTask({ task, currentTask }) {
                 </Popover>
             }
         >
-            <ListGroup.Item
-                variant={task.order === currentTask ? "primary" : "light"}
-                key={task.uid}
-                style={{ cursor: "pointer" }}
-            >
-                {task.name}
-            </ListGroup.Item>
+            <Link to={`/task/${task.uid}`}>
+                <ListGroup.Item
+                    variant={task.order === currentTask ? "primary" : "light"}
+                    key={task.uid}
+                    style={{ cursor: "pointer" }}
+                >
+                    {task.name}
+                </ListGroup.Item>
+            </Link>
         </OverlayTrigger>
     );
 }
