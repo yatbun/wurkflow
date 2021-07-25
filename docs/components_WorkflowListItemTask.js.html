@@ -72,7 +72,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="CalendarView.html">CalendarView</a></li><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TaskTableItem.html">TaskTableItem</a></li><li><a href="TaskTableView.html">TaskTableView</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li><li><a href="WorkflowListItemTask.html">WorkflowListItemTask</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="EditTask.html">EditTask</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="ActiveWorkflowItem.html">ActiveWorkflowItem</a></li><li><a href="CalendarView.html">CalendarView</a></li><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TaskTableItem.html">TaskTableItem</a></li><li><a href="TaskTableView.html">TaskTableView</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li><li><a href="WorkflowListItemTask.html">WorkflowListItemTask</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="EditTask.html">EditTask</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
                 
             </nav>
         </div>
@@ -95,6 +95,7 @@
 
 // React imports
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 // Styling imports
 import { Container, ListGroup, Popover, OverlayTrigger } from "react-bootstrap";
@@ -171,13 +172,15 @@ function WorkflowListItemTask({ task, currentTask }) {
                 &lt;/Popover>
             }
         >
-            &lt;ListGroup.Item
-                variant={task.order === currentTask ? "primary" : "light"}
-                key={task.uid}
-                style={{ cursor: "pointer" }}
-            >
-                {task.name}
-            &lt;/ListGroup.Item>
+            &lt;Link to={`/task/${task.uid}`}>
+                &lt;ListGroup.Item
+                    variant={task.order === currentTask ? "primary" : "light"}
+                    key={task.uid}
+                    style={{ cursor: "pointer" }}
+                >
+                    {task.name}
+                &lt;/ListGroup.Item>
+            &lt;/Link>
         &lt;/OverlayTrigger>
     );
 }
