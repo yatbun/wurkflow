@@ -72,7 +72,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="ActiveWorkflowItem.html">ActiveWorkflowItem</a></li><li><a href="CalendarView.html">CalendarView</a></li><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TaskTableItem.html">TaskTableItem</a></li><li><a href="TaskTableView.html">TaskTableView</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li><li><a href="WorkflowListItemTask.html">WorkflowListItemTask</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="EditTask.html">EditTask</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
                 
             </nav>
         </div>
@@ -98,7 +98,7 @@ import { store } from "../firebase";
 import { useAuth } from "./AuthContext";
 import { sub } from "date-fns";
 
-const StoreContext = React.createContext();
+export const StoreContext = React.createContext();
 
 export function useStore() {
     return useContext(StoreContext);
@@ -596,12 +596,17 @@ export function StoreProvider({ children }) {
         store
             .collection("tasks")
             .doc(tuid)
+            .update({
+                completed: true,
+            })
+            .then(() => {
+                getTasks();
+            });
+        store
+            .collection("tasks")
+            .doc(tuid)
             .get()
             .then((doc) => {
-                store.collection("tasks").doc(tuid).update({
-                    completed: true,
-                });
-
                 const tempDoc = doc.data();
 
                 if (tempDoc.workflow) {
@@ -616,18 +621,44 @@ export function StoreProvider({ children }) {
                                 getTasks();
                             });
                     }
-                    getTasks();
+                    store
+                        .collection("workflows")
+                        .doc(tempDoc.workflow.id)
+                        .update({
+                            currentTask:
+                                firebase.firestore.FieldValue.increment(1),
+                        })
+                        .then(() => {
+                            getTasks();
+                        });
                 }
+            });
+    }
 
-                store
-                    .collection("workflows")
-                    .doc(tempDoc.workflow.id)
-                    .update({
-                        currentTask: firebase.firestore.FieldValue.increment(1),
-                    });
-            })
-            .then(() => {
-                getTasks();
+    function updateTaskName(name, tid) {
+        return store.collection("tasks").doc(tid).update({
+            name: name,
+        });
+    }
+
+    function updateTaskDesc(desc, tid) {
+        return store.collection("tasks").doc(tid).update({
+            desc: desc,
+        });
+    }
+
+    function updateTaskProgress(progress, tid) {
+        return store.collection("tasks").doc(tid).update({
+            completed: progress,
+        });
+    }
+
+    function updateTaskDueDate(dueDate, tid) {
+        return store
+            .collection("tasks")
+            .doc(tid)
+            .update({
+                due: firebase.firestore.Timestamp.fromDate(dueDate),
             });
     }
 
@@ -798,6 +829,10 @@ export function StoreProvider({ children }) {
         createTask,
         deleteTask,
         completeTask,
+        updateTaskName,
+        updateTaskDesc,
+        updateTaskProgress,
+        updateTaskDueDate,
         getTeamUsers,
         createWorkflowTemplate,
         createWorkflow,

@@ -1,6 +1,6 @@
 {
     "name": "wurkflow-dev",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "private": true,
     "engines": {
         "npm": "^7.13.0",
@@ -12,8 +12,10 @@
         "@testing-library/user-event": "^12.8.3",
         "bootstrap": "4.6",
         "date-fns": "^2.22.1",
+        "dayjs": "^1.10.6",
         "firebase": "^8.6.3",
         "react": "^17.0.2",
+        "react-big-calendar": "^0.33.5",
         "react-bootstrap": "^1.6.1",
         "react-dom": "^17.0.2",
         "react-icons": "^4.2.0",
@@ -22,6 +24,7 @@
         "react-router-dom": "^5.2.0",
         "react-scripts": "4.0.3",
         "react-widgets": "^5.1.1",
+        "redux-thunk": "^2.3.0",
         "web-vitals": "^1.1.2"
     },
     "scripts": {
@@ -52,6 +55,8 @@
     "devDependencies": {
         "better-docs": "^2.3.2",
         "enzyme": "^3.11.0",
-        "jsdoc": "^3.6.7"
+        "enzyme-adapter-react-16": "^1.15.6",
+        "jsdoc": "^3.6.7",
+        "redux-mock-store": "^1.5.4"
     }
 }

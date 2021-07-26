@@ -1,0 +1,706 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> components/EditTask.js</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+             
+                <a href="index.html">
+                    <h1 class="navbar-item">WURKFLOW</h1>
+                </a>
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    API Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="ActiveWorkflowItem.html">ActiveWorkflowItem</a></li><li><a href="CalendarView.html">CalendarView</a></li><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TaskTableItem.html">TaskTableItem</a></li><li><a href="TaskTableView.html">TaskTableView</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li><li><a href="WorkflowListItemTask.html">WorkflowListItemTask</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="EditTask.html">EditTask</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>components/EditTask.js</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// ----------------------------------------------------------------------------
+// IMPORTS
+// ----------------------------------------------------------------------------
+
+// React imports
+import { useState, useEffect, useRef } from "react";
+import { useParams, useHistory } from "react-router-dom";
+
+// Styling imports
+import {
+    Container,
+    Row,
+    Col,
+    Form,
+    Modal,
+    ListGroup,
+    Button,
+} from "react-bootstrap";
+import { FaExclamationTriangle } from "react-icons/fa";
+
+// Context imports
+import { store } from "../firebase";
+import { useStore } from "../contexts/StoreContext";
+
+// Page component imports
+import PageHeader from "./PageHeader";
+import { DateLocalizer } from "react-widgets/IntlLocalizer";
+import Localization from "react-widgets/Localization";
+import DatePicker from "react-widgets/DatePicker";
+// ----------------------------------------------------------------------------
+
+/**
+ * @classdesc
+ * Page to edit a task's detail.
+ *
+ * @category Pages
+ * @hideconstructor
+ * @component
+ */
+function EditTask() {
+    // ------------------------------------------------------------------------
+    // GLOBAL DECLARATIONS
+    // ------------------------------------------------------------------------
+
+    // Context declarations
+    const { id } = useParams();
+    const history = useHistory();
+    const {
+        updateTaskName,
+        updateTaskDesc,
+        updateTaskProgress,
+        updateTaskDueDate,
+    } = useStore();
+
+    // useState declarations
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const [task, setTask] = useState(null);
+    const [taskDate, setTaskDate] = useState(new Date());
+    const [taskUsers, setTaskUsers] = useState([]);
+    const [remainingUsers, setRemainingUsers] = useState([]);
+    const [taskCreator, setTaskCreator] = useState(null);
+    const [userId, setUserId] = useState(null);
+
+    const taskNameRef = useRef();
+    const taskDescRef = useRef();
+    const [progress, setProgress] = useState();
+
+    /**
+     * Gets the current task.
+     *
+     * @returns {void}
+     */
+    async function getTask() {
+        store
+            .collection("tasks")
+            .doc(id)
+            .get()
+            .then((doc) => {
+                if (doc.exists) {
+                    setTask(doc.data());
+                } else {
+                    history.push("/");
+                }
+            });
+    }
+
+    /**
+     * Gets the users involved in the task.
+     *
+     * @returns {void}
+     */
+    async function getTaskUsers() {
+        const promises = [];
+        const tempUsers = [];
+        if (task.users.length > 0) {
+            task.users.forEach((user) => {
+                promises.push(
+                    user.get().then((doc) => {
+                        const tempUser = doc.data();
+                        tempUser.uid = doc.id;
+                        tempUsers.push(tempUser);
+                    })
+                );
+            });
+        }
+        Promise.all(promises).then(() => {
+            setTaskUsers(tempUsers);
+        });
+    }
+
+    /**
+     * Gets the creator of the task.
+     *
+     * @returns {void}
+     */
+    async function getTaskCreator() {
+        Promise.resolve(
+            task.creator.get().then((doc) => {
+                return doc.data();
+            })
+        ).then((data) => {
+            setTaskCreator(data);
+        });
+    }
+
+    function getRemainingUsers() {
+        const teamUsers = [];
+        const promises = [];
+        let remaining = [];
+        promises.push(
+            store
+                .collection("users")
+                .where(
+                    "teams",
+                    "array-contains",
+                    store.collection("teams").doc(task.team.id)
+                )
+                .get()
+                .then((querySnapShot) => {
+                    querySnapShot.forEach((doc) => {
+                        const userData = doc.data();
+                        userData.uid = doc.id;
+                        userData.added = false;
+                        teamUsers.push(userData);
+                    });
+                })
+        );
+        Promise.all(promises).then(() => {
+            if (taskUsers.length > 0) {
+                teamUsers.map((user) => {
+                    for (let i = 0; i &lt; taskUsers.length; i++) {
+                        if (user.uid === taskUsers[i].uid) {
+                            break;
+                        }
+                        if (i === taskUsers.length - 1) {
+                            user.added = false;
+                            remaining.push(user);
+                        }
+                    }
+                });
+                setRemainingUsers(remaining);
+            } else {
+                setRemainingUsers(teamUsers);
+            }
+        });
+    }
+
+    const [action, setAction] = useState("");
+    const [showModal, setShowModal] = useState(false);
+    const [showUserModal, setShowUserModal] = useState(false);
+
+    function modalAction() {
+        if (action === "removeUser") {
+            handleRemove(userId);
+        }
+        closeModal();
+    }
+
+    function openModal(action, id) {
+        setAction(action);
+        setUserId(id);
+        setShowModal(true);
+    }
+
+    function closeModal() {
+        setAction("");
+        setShowModal(false);
+    }
+
+    function openUserModal() {
+        getRemainingUsers();
+        setShowUserModal(true);
+    }
+
+    function closeUserModal() {
+        setAction("");
+        setShowUserModal(false);
+    }
+
+    function handleClick(user, index) {
+        let updatedUsers = [];
+        let promises = [];
+        if (taskUsers.length > 0) {
+            updatedUsers = taskUsers;
+        }
+        updatedUsers.push(user);
+
+        promises.push(
+            store
+                .collection("tasks")
+                .doc(id)
+                .update({
+                    users: updatedUsers.map((user) =>
+                        store.collection("users").doc(user.uid)
+                    ),
+                })
+        );
+
+        // previously did updated = remainingUsers but object reference is still the same
+        // updated = [...remainingUsers] creates a copy of remainingUsers and assigns it to updated instead
+        const updated = [...remainingUsers];
+        updated[index].added = true;
+        setRemainingUsers(updated);
+
+        Promise.all(promises).then(() => {
+            setTaskUsers(updatedUsers);
+        });
+    }
+
+    function handleSubmit(e) {
+        e.preventDefault();
+        const promises = [];
+        const completed = task.completed ? "Completed" : "In Progress";
+
+        if (taskNameRef.current.value !== task.name) {
+            promises.push(updateTaskName(taskNameRef.current.value, id));
+        }
+        if (taskDescRef.current.value !== task.desc) {
+            promises.push(updateTaskDesc(taskDescRef.current.value, id));
+        }
+        if (progress !== completed) {
+            promises.push(updateTaskProgress(!task.completed, id));
+        }
+        if (taskDate !== task.due.toDate()) {
+            promises.push(updateTaskDueDate(taskDate, id));
+        }
+
+        Promise.all(promises)
+            .then(() => {
+                window.location.reload();
+            })
+            .catch((e) => {
+                setError("Failed to update account. " + e.message);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }
+
+    function handleRemove(uid) {
+        const updatedUsers = taskUsers.filter((user) => user.uid !== uid);
+        store
+            .collection("tasks")
+            .doc(id)
+            .update({
+                users: updatedUsers.map((user) =>
+                    store.collection("users").doc(user.uid)
+                ),
+            });
+        setTaskUsers(updatedUsers);
+    }
+
+    const Content = () => {
+        if (task) {
+            return (
+                &lt;>
+                    &lt;Modal show={showModal} onHide={closeModal}>
+                        &lt;Modal.Header>
+                            &lt;Modal.Title>
+                                &lt;FaExclamationTriangle />
+                            &lt;/Modal.Title>
+                        &lt;/Modal.Header>
+                        &lt;Modal.Body>Are you sure?&lt;/Modal.Body>
+                        &lt;Modal.Footer>
+                            &lt;Button variant="secondary" onClick={closeModal}>
+                                Cancel
+                            &lt;/Button>
+                            &lt;Button variant="warning" onClick={modalAction}>
+                                I AM SURE
+                            &lt;/Button>
+                        &lt;/Modal.Footer>
+                    &lt;/Modal>
+
+                    &lt;Modal show={showUserModal} onHide={closeUserModal}>
+                        &lt;Modal.Header closeButton>
+                            &lt;Modal.Title>Add Users&lt;/Modal.Title>
+                        &lt;/Modal.Header>
+
+                        &lt;Modal.Body>
+                            &lt;ListGroup variant="flush">
+                                {remainingUsers &amp;&amp;
+                                    remainingUsers.map((user, index) => (
+                                        &lt;ListGroup.Item
+                                            variant=""
+                                            key={user.uid}
+                                        >
+                                            &lt;Row>
+                                                &lt;Col>{user.name}&lt;/Col>
+                                                &lt;Col className="text-right">
+                                                    {user.added === false ? (
+                                                        &lt;Button
+                                                            variant="success"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                handleClick(
+                                                                    user,
+                                                                    index
+                                                                )
+                                                            }
+                                                        >
+                                                            {" "}
+                                                            Add{" "}
+                                                        &lt;/Button>
+                                                    ) : (
+                                                        &lt;p className="text-muted">
+                                                            {" "}
+                                                            Successfully added!{" "}
+                                                        &lt;/p>
+                                                    )}
+                                                &lt;/Col>
+                                            &lt;/Row>
+                                        &lt;/ListGroup.Item>
+                                    ))}
+                            &lt;/ListGroup>
+                        &lt;/Modal.Body>
+
+                        &lt;Modal.Footer>
+                            &lt;Button
+                                variant="secondary"
+                                onClick={closeUserModal}
+                            >
+                                Close
+                            &lt;/Button>
+                        &lt;/Modal.Footer>
+                    &lt;/Modal>
+
+                    &lt;Container className="col-sm-12 mx-auto bg-light p-5 rounded">
+                        &lt;h1> Edit task: {task &amp;&amp; task.name} &lt;/h1>
+                        &lt;p>
+                            {" "}
+                            Change any information with regards to your task
+                            here.
+                        &lt;/p>
+                    &lt;/Container>
+
+                    &lt;Container>
+                        &lt;Row>
+                            &lt;Col className="my-3">
+                                &lt;h3> Task Details: &lt;/h3>
+                                &lt;Localization
+                                    date={
+                                        new DateLocalizer({
+                                            culture: "en-GB",
+                                            firstOfWeek: 7,
+                                        })
+                                    }
+                                >
+                                    &lt;Form
+                                        onSubmit={handleSubmit}
+                                        className="my-4"
+                                    >
+                                        &lt;Form.Group as={Row} id="taskName">
+                                            &lt;Form.Label column sm="3">
+                                                Task Name
+                                            &lt;/Form.Label>
+                                            &lt;Col sm="7">
+                                                &lt;Form.Control
+                                                    ref={taskNameRef}
+                                                    type="text"
+                                                    required
+                                                    defaultValue={task.name}
+                                                />
+                                            &lt;/Col>
+                                        &lt;/Form.Group>
+
+                                        &lt;Form.Group as={Row} id="taskName">
+                                            &lt;Form.Label column sm="3">
+                                                Task Description
+                                            &lt;/Form.Label>
+                                            &lt;Col sm="7">
+                                                &lt;Form.Control
+                                                    ref={taskDescRef}
+                                                    as="textarea"
+                                                    required
+                                                    defaultValue={task.desc}
+                                                />
+                                            &lt;/Col>
+                                        &lt;/Form.Group>
+
+                                        &lt;Form.Group as={Row} id="taskName">
+                                            &lt;Form.Label column sm="3">
+                                                Task Status
+                                            &lt;/Form.Label>
+                                            &lt;Col sm="4">
+                                                {task.completed ? (
+                                                    &lt;Form.Control
+                                                        onChange={(value) =>
+                                                            setProgress(value)
+                                                        }
+                                                        as="select"
+                                                        defaultValue="Completed"
+                                                        custom
+                                                    >
+                                                        &lt;option>
+                                                            {" "}
+                                                            Completed{" "}
+                                                        &lt;/option>
+                                                        &lt;option>
+                                                            {" "}
+                                                            In Progress{" "}
+                                                        &lt;/option>
+                                                    &lt;/Form.Control>
+                                                ) : (
+                                                    &lt;Form.Control
+                                                        onChange={(value) =>
+                                                            setProgress(value)
+                                                        }
+                                                        as="select"
+                                                        defaultValue="In Progress"
+                                                        custom
+                                                    >
+                                                        &lt;option>
+                                                            {" "}
+                                                            In Progress{" "}
+                                                        &lt;/option>
+                                                        &lt;option>
+                                                            {" "}
+                                                            Completed{" "}
+                                                        &lt;/option>
+                                                    &lt;/Form.Control>
+                                                )}
+                                            &lt;/Col>
+                                        &lt;/Form.Group>
+
+                                        &lt;Form.Group as={Row} id="taskName">
+                                            &lt;Form.Label column sm="3">
+                                                Due Date
+                                            &lt;/Form.Label>
+                                            &lt;Col sm="7">
+                                                &lt;DatePicker
+                                                    value={taskDate}
+                                                    onChange={(date) =>
+                                                        setTaskDate(date)
+                                                    }
+                                                />{" "}
+                                            &lt;/Col>
+                                        &lt;/Form.Group>
+                                        &lt;Button
+                                            disabled={loading}
+                                            type="submit"
+                                        >
+                                            {" "}
+                                            Update{" "}
+                                        &lt;/Button>
+                                    &lt;/Form>
+                                &lt;/Localization>
+                            &lt;/Col>
+
+                            &lt;Col className="my-3">
+                                &lt;Row>
+                                    &lt;Col xs={8}>
+                                        &lt;h3>Manage Users Involved &lt;/h3>{" "}
+                                    &lt;/Col>
+                                    &lt;Col>
+                                        &lt;Button
+                                            variant="link"
+                                            size="sm"
+                                            onClick={openUserModal}
+                                            style={{ textDecoration: "none" }}
+                                        >
+                                            &lt;p className="text-muted my-1">
+                                                &lt;svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="16"
+                                                    height="16"
+                                                    fill="currentColor"
+                                                    class="bi bi-person-plus"
+                                                    viewBox="0 0 16 16"
+                                                    className="mx-3"
+                                                >
+                                                    &lt;path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z" />
+                                                    &lt;path
+                                                        fill-rule="evenodd"
+                                                        d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"
+                                                    />
+                                                &lt;/svg>
+                                                Add users
+                                            &lt;/p>
+                                        &lt;/Button>
+                                    &lt;/Col>
+                                &lt;/Row>
+                                &lt;ListGroup variant="secondary" className="my-3">
+                                    &lt;ListGroup.Item variant="secondary">
+                                        &lt;Row>
+                                            &lt;Col>
+                                                {taskCreator &amp;&amp;
+                                                    taskCreator.name}
+                                            &lt;/Col>
+                                            &lt;Col className="text-right font-weight-bold">
+                                                Creator
+                                            &lt;/Col>
+                                        &lt;/Row>
+                                    &lt;/ListGroup.Item>
+                                    {taskUsers &amp;&amp;
+                                        taskUsers.map((user) => (
+                                            &lt;ListGroup.Item
+                                                variant="light"
+                                                key={user.uid}
+                                            >
+                                                &lt;Row>
+                                                    &lt;Col>{user.name} &lt;/Col>
+                                                    &lt;Col>
+                                                        &lt;Button
+                                                            className="float-right"
+                                                            variant="danger"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                openModal(
+                                                                    "removeUser",
+                                                                    user.uid
+                                                                )
+                                                            }
+                                                        >
+                                                            {" "}
+                                                            Remove{" "}
+                                                        &lt;/Button>
+                                                    &lt;/Col>
+                                                &lt;/Row>
+                                            &lt;/ListGroup.Item>
+                                        ))}
+                                &lt;/ListGroup>
+                            &lt;/Col>
+                        &lt;/Row>
+                    &lt;/Container>
+                &lt;/>
+            );
+        }
+    };
+
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Get the task data on page load.
+    useEffect(() => {
+        getTask();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Get the updated task data should the task change.
+    useEffect(() => {
+        if (task) {
+            getTaskUsers();
+            getTaskCreator();
+            setTaskDate(task.due.toDate());
+            if (task.completed) {
+                setProgress("Completed");
+            } else {
+                setProgress("In Progress");
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [task]);
+    // ------------------------------------------------------------------------
+
+    return (
+        &lt;div>
+            &lt;PageHeader />
+            &lt;Container className="pt-5 mt-5"> {Content()} &lt;/Container>
+        &lt;/div>
+    );
+}
+
+export default EditTask;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by 
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+</body>
+</html>

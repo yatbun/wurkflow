@@ -4,7 +4,6 @@
 
 // React imports
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
 
 // Styling imports
 import {
@@ -15,12 +14,7 @@ import {
     Form,
     Row,
     Col,
-    Table,
-    OverlayTrigger,
-    Tooltip,
-    Modal,
 } from "react-bootstrap";
-import { FaEye, FaCheck, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 
 // Context imports
 import { useStore } from "../contexts/StoreContext";
@@ -31,6 +25,7 @@ import DropdownList from "react-widgets/DropdownList";
 import Multiselect from "react-widgets/Multiselect";
 import Localization from "react-widgets/esm/Localization";
 import DatePicker from "react-widgets/DatePicker";
+import TaskTableView from "./TaskTableView";
 
 // Misc imports
 import { DateLocalizer } from "react-widgets/IntlLocalizer";
@@ -49,25 +44,14 @@ function Tasks() {
     // ------------------------------------------------------------------------
 
     // Context declarations
-    const {
-        teams,
-        tasks,
-        completedTasks,
-        createTask,
-        deleteTask,
-        completeTask,
-        getTeamUsers,
-    } = useStore();
+    const { teams, tasks, completedTasks, createTask, getTeamUsers } =
+        useStore();
 
     // useState declarations
     const [showCreate, setShowCreate] = useState(false);
     const [showCompletedTasks, setShowCompletedTasks] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-
-    const [action, setAction] = useState("");
-    const [actionTask, setActionTask] = useState("");
-    const [showModal, setShowModal] = useState(false);
 
     // ------------------------------------------------------------------------
     // NEW TASK FORM DECLARATIONS
@@ -79,136 +63,6 @@ function Tasks() {
     const [taskDate, setTaskDate] = useState(new Date());
     const [selectedUsers, setSelectedUsers] = useState([]);
     // ------------------------------------------------------------------------
-
-    /**
-     * Checks the current modal action and assigns it to `actionTask` for use
-     * by the `Modal`.
-     *
-     * @returns {void}
-     */
-    function modalAction() {
-        if (action === "delete") {
-            deleteTask(actionTask);
-        } else if (action === "complete") {
-            completeTask(actionTask);
-        }
-        closeModal();
-    }
-
-    /**
-     * Handles the opening of the `Modal`.
-     *
-     * @param {String} taskUid The unique document id of the Task
-     * @param {String} action The desired action to be applied to the Task
-     *
-     * @returns {void}
-     */
-    function openModal(taskUid, action) {
-        setAction(action);
-        setActionTask(taskUid);
-        setShowModal(true);
-    }
-
-    /**
-     * Handles the closing of the `Modal`.
-     *
-     * @returns {void}
-     */
-    function closeModal() {
-        setAction("");
-        setActionTask("");
-        setShowModal(false);
-    }
-
-    /**
-     * The render function to display the user's task in the form of a table
-     *
-     * @param {Object[]} t Array of user's tasks
-     * @returns {Component} A table interface for the display of the user's
-     * tasks
-     */
-    const renderTasks = (t) => {
-        return (
-            <Table striped bordered hover responsive className="mt-3">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Date Due</th>
-                        <th>Team</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {t.map((task, index) => (
-                        <tr key={index}>
-                            <td>{index + 1}</td>
-                            <td>{task.name}</td>
-                            <td>{task.desc}</td>
-                            <td>{task.dueDate.toLocaleDateString("en-GB")}</td>
-                            <td>{task.teamName}</td>
-                            <td>
-                                <OverlayTrigger
-                                    overlay={<Tooltip>View</Tooltip>}
-                                >
-                                    <span className="d-inline-block me-md-2 my-1">
-                                        <Link to={`/task/${task.uid}`}>
-                                            <Button variant="primary" size="sm">
-                                                <FaEye />
-                                            </Button>
-                                        </Link>
-                                    </span>
-                                </OverlayTrigger>
-                                <OverlayTrigger
-                                    overlay={
-                                        task.completed ? (
-                                            <Tooltip>
-                                                Task has already been marked as
-                                                completed
-                                            </Tooltip>
-                                        ) : (
-                                            <Tooltip>Complete</Tooltip>
-                                        )
-                                    }
-                                >
-                                    <span className="d-inline-block me-md-2 my-1">
-                                        <Button
-                                            onClick={() =>
-                                                openModal(task.uid, "complete")
-                                            }
-                                            variant="success"
-                                            size="sm"
-                                            disabled={task.completed}
-                                        >
-                                            <FaCheck />
-                                        </Button>
-                                    </span>
-                                </OverlayTrigger>
-                                <OverlayTrigger
-                                    overlay={<Tooltip>Delete</Tooltip>}
-                                >
-                                    <span className="d-inline-block my-1">
-                                        <Button
-                                            onClick={() =>
-                                                openModal(task.uid, "delete")
-                                            }
-                                            variant="danger"
-                                            size="sm"
-                                            disabled={task.workflow}
-                                        >
-                                            <FaTrash />
-                                        </Button>
-                                    </span>
-                                </OverlayTrigger>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
-        );
-    };
 
     /**
      * Gets the list of users within the selected team.
@@ -420,30 +274,13 @@ function Tasks() {
                         </Collapse>
                     </Container>
 
-                    <Modal show={showModal} onHide={closeModal}>
-                        <Modal.Header>
-                            <Modal.Title>
-                                <FaExclamationTriangle />
-                            </Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body>Are you sure?</Modal.Body>
-                        <Modal.Footer>
-                            <Button variant="secondary" onClick={closeModal}>
-                                Cancel
-                            </Button>
-                            <Button variant="warning" onClick={modalAction}>
-                                I AM SURE
-                            </Button>
-                        </Modal.Footer>
-                    </Modal>
-
                     <Container className="col-sm-12 mx-auto mt-2 mb-5 pt-5">
                         {tasks && tasks.length === 0 ? (
                             <h2>You do not have any active tasks right now.</h2>
                         ) : (
                             <>
                                 <h2>Your tasks</h2>
-                                {renderTasks(tasks)}
+                                <TaskTableView tasks={tasks} />
                             </>
                         )}
                     </Container>
@@ -455,7 +292,7 @@ function Tasks() {
                             ) : (
                                 <>
                                     <h2>Your completed tasks</h2>
-                                    {renderTasks(completedTasks)}
+                                    <TaskTableView tasks={completedTasks} />
                                 </>
                             )}
                         </Container>

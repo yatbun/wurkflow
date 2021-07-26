@@ -544,6 +544,33 @@ export function StoreProvider({ children }) {
             });
     }
 
+    function updateTaskName(name, tid) {
+        return store.collection("tasks").doc(tid).update({
+            name: name,
+        });
+    }
+
+    function updateTaskDesc(desc, tid) {
+        return store.collection("tasks").doc(tid).update({
+            desc: desc,
+        });
+    }
+
+    function updateTaskProgress(progress, tid) {
+        return store.collection("tasks").doc(tid).update({
+            completed: progress,
+        });
+    }
+
+    function updateTaskDueDate(dueDate, tid) {
+        return store
+            .collection("tasks")
+            .doc(tid)
+            .update({
+                due: firebase.firestore.Timestamp.fromDate(dueDate),
+            });
+    }
+
     // ------------------------------------------------------------------------
     // Workflow
     //
@@ -711,6 +738,10 @@ export function StoreProvider({ children }) {
         createTask,
         deleteTask,
         completeTask,
+        updateTaskName,
+        updateTaskDesc,
+        updateTaskProgress,
+        updateTaskDueDate,
         getTeamUsers,
         createWorkflowTemplate,
         createWorkflow,

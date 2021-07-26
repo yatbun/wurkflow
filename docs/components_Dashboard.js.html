@@ -72,7 +72,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Components</h3><ul><li><a href="App.html">App</a></li></ul></div><div class="category"><h2>Contexts</h2><h3>Components</h3><ul><li><a href="AuthProvider.html">AuthProvider</a></li><li><a href="StoreProvider.html">StoreProvider</a></li></ul></div><div class="category"><h2>Page Components</h2><h3>Components</h3><ul><li><a href="ActiveWorkflowItem.html">ActiveWorkflowItem</a></li><li><a href="CalendarView.html">CalendarView</a></li><li><a href="PageHeader.html">PageHeader</a></li><li><a href="TaskTableItem.html">TaskTableItem</a></li><li><a href="TaskTableView.html">TaskTableView</a></li><li><a href="TemplateListItem.html">TemplateListItem</a></li><li><a href="WorkflowListItem.html">WorkflowListItem</a></li><li><a href="WorkflowListItemTask.html">WorkflowListItemTask</a></li></ul></div><div class="category"><h2>Pages</h2><h3>Components</h3><ul><li><a href="Dashboard.html">Dashboard</a></li><li><a href="EditTask.html">EditTask</a></li><li><a href="ForgotPassword.html">ForgotPassword</a></li><li><a href="Home.html">Home</a></li><li><a href="Homepage.html">Homepage</a></li><li><a href="KickstartWorkflow.html">KickstartWorkflow</a></li><li><a href="LoggedOutHome.html">LoggedOutHome</a></li><li><a href="Login.html">Login</a></li><li><a href="ManageOrganisation.html">ManageOrganisation</a></li><li><a href="NewWorkflow.html">NewWorkflow</a></li><li><a href="Signup.html">Signup</a></li><li><a href="Tasks.html">Tasks</a></li><li><a href="Teams.html">Teams</a></li><li><a href="UpdateProfile.html">UpdateProfile</a></li><li><a href="UserSettings.html">UserSettings</a></li><li><a href="ViewTask.html">ViewTask</a></li><li><a href="Workflows.html">Workflows</a></li></ul></div><div class="category"><h2>Routing</h2><h3>Components</h3><ul><li><a href="LoggedInRoute.html">LoggedInRoute</a></li><li><a href="LoggedOutRoute.html">LoggedOutRoute</a></li></ul></div>
                 
             </nav>
         </div>
@@ -93,12 +93,21 @@
 // IMPORTS
 // ----------------------------------------------------------------------------
 
+// React imports
+import { useState, useEffect } from "react";
+
 // Styling imports
-import { Container } from "react-bootstrap";
+import { Container, ListGroup } from "react-bootstrap";
 
 // Context imports
+import { store } from "../firebase";
 import { useAuth } from "../contexts/AuthContext";
 import { useStore } from "../contexts/StoreContext";
+
+// Page component imports
+import CalendarView from "./CalendarView";
+import TaskTableView from "./TaskTableView";
+import ActiveWorkflowItem from "./ActiveWorkflowItem";
 // ----------------------------------------------------------------------------
 
 /**
@@ -116,15 +125,107 @@ function Dashboard() {
 
     // Context declarations
     const { currentUser } = useAuth();
-    const { tasks } = useStore();
+    const { tasks, teams } = useStore();
+
+    // useState declarations
+    const [activeWorkflows, setActiveWorkflows] = useState([]);
+
+    // ------------------------------------------------------------------------
+
+    /**
+     * Acquires workflows that belong to the teams that the user is part of.
+     *
+     * @returns {void}
+     */
+    async function getActiveWorkflows() {
+        const promises = [];
+        const wf = [];
+
+        teams.forEach((team) => {
+            promises.push(
+                store
+                    .collection("workflows")
+                    .where(
+                        "team",
+                        "==",
+                        store.collection("teams").doc(team.uid)
+                    )
+                    .get()
+                    .then((querySnapshot) => {
+                        if (!querySnapshot.empty) {
+                            wf.push.apply(wf, querySnapshot.docs);
+                        }
+                    })
+            );
+        });
+        Promise.all(promises).then(() => {
+            setActiveWorkflows(wf);
+            console.log(wf);
+        });
+    }
+
+    // ------------------------------------------------------------------------
+    // useEffect Hooks
+    // ------------------------------------------------------------------------
+
+    // Gets the list of active workflows on page load.
+    useEffect(() => {
+        getActiveWorkflows();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Updates the list of workflows should `teams` state be updated.
+    useEffect(() => {
+        getActiveWorkflows();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [teams]);
     // ------------------------------------------------------------------------
 
     return (
         &lt;>
             &lt;Container className="d-flex flex-column">
-                &lt;Container className="col-sm-12 mx-auto bg-light p-5 rounded">
-                    &lt;h1>Welcome, {currentUser.displayName}!&lt;/h1>
-                    &lt;h4>You have {tasks.length} ongoing tasks.&lt;/h4>
+                &lt;Container
+                    className="col-sm-12 mx-auto bg-light p-5 rounded"
+                    data-testid="Dashboard"
+                >
+                    &lt;h1 data-testid="Dashboard-name">
+                        Welcome, {currentUser.displayName}!
+                    &lt;/h1>
+                    &lt;h4 data-testid="Dashboard-task">
+                        You have {tasks.length} ongoing{" "}
+                        {tasks.length === 1 ? "task" : "tasks"}.
+                    &lt;/h4>
+                &lt;/Container>
+
+                &lt;Container className="col-sm-12 mx-auto p-4">
+                    &lt;CalendarView tasks={tasks} />
+                &lt;/Container>
+
+                {activeWorkflows.length > 0 &amp;&amp; (
+                    &lt;Container
+                        className="col-sm-12 mx-auto"
+                        style={{ overflowY: "hidden", overflowX: "scroll" }}
+                    >
+                        &lt;ListGroup horizontal className="mt-4">
+                            {activeWorkflows.map((workflow, index) => (
+                                &lt;ActiveWorkflowItem
+                                    workflow={workflow}
+                                    key={index}
+                                />
+                            ))}
+                        &lt;/ListGroup>
+                    &lt;/Container>
+                )}
+
+                &lt;Container className="col-sm-12 mx-auto p-4">
+                    {tasks.length > 0 ? (
+                        &lt;>
+                            &lt;h2>Next tasks&lt;/h2>
+                            &lt;TaskTableView tasks={tasks} />
+                        &lt;/>
+                    ) : (
+                        &lt;h2>No upcoming tasks&lt;/h2>
+                    )}
                 &lt;/Container>
             &lt;/Container>
         &lt;/>

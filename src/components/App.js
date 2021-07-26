@@ -28,8 +28,6 @@ import Signup from "./Signup";
 // User account-related pages
 import UserSettings from "./UserSettings";
 import UpdateProfile from "./UpdateProfile";
-
-// Organisation pages
 import ManageOrganisation from "./ManageOrganisation";
 
 // Workflow pages
@@ -40,6 +38,7 @@ import NewWorkflow from "./NewWorkflow";
 // Task pages
 import Tasks from "./Tasks";
 import ViewTask from "./ViewTask";
+import EditTask from "./EditTask";
 
 // Teams Pages
 import Teams from "./Teams";
@@ -108,6 +107,11 @@ function App() {
                                 exact
                                 path={`/task/:id`}
                                 component={ViewTask}
+                            />
+                            <LoggedInRoute
+                                exact
+                                path={`/edit-task/:id`}
+                                component={EditTask}
                             />
                             <LoggedInRoute path="/tasks" component={Tasks} />
 
