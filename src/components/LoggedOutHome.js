@@ -45,15 +45,22 @@ function LoggedOutHome() {
                                 Create Account
                             </button>
                         </Link>
-                        <button className="btn btn-outline-danger btn-lg px-4 my-2">
-                            See It In Action
-                        </button>
+                        <Link to="/login">
+                            <button className="btn btn-outline-danger btn-lg px-4 my-2">
+                                Log In
+                            </button>
+                        </Link>
                     </div>
                 </div>
 
                 <div className="overflow-hidden" style={{ maxHeight: "30vh" }}>
                     <Container className="px-5">
-                        <Image src={IntroPic} width={700} height={270} />
+                        <Image
+                            src={IntroPic}
+                            width={700}
+                            height={400}
+                            className="shadow-lg"
+                        />
                     </Container>
                 </div>
             </div>
@@ -77,14 +84,7 @@ function LoggedOutHome() {
                         to go.
                     </p>
 
-                    <div className="d-grid gap-2 d-md-flex justify-content-md-start">
-                        <button
-                            className="btn btn-danger btn-lg px-4 me-md-2"
-                            disabled
-                        >
-                            See More
-                        </button>
-                    </div>
+                    <div className="d-grid gap-2 d-md-flex justify-content-md-start"></div>
                 </div>
             </div>
 
@@ -118,14 +118,7 @@ function LoggedOutHome() {
                         as you sit back and monitor the task.
                     </p>
 
-                    <div className="d-grid gap-2 d-md-flex justify-content-md-start">
-                        <button
-                            className="btn btn-danger btn-lg px-4 me-md-2"
-                            disabled
-                        >
-                            Learn More
-                        </button>
-                    </div>
+                    <div className="d-grid gap-2 d-md-flex justify-content-md-start"></div>
                 </div>
             </div>
 
@@ -147,14 +140,7 @@ function LoggedOutHome() {
                         in a systematic and organised way.
                     </p>
 
-                    <div className="d-grid gap-2 d-md-flex justify-content-md-start">
-                        <button
-                            className="btn btn-danger btn-lg px-4 me-md-2"
-                            disabled
-                        >
-                            See More
-                        </button>
-                    </div>
+                    <div className="d-grid gap-2 d-md-flex justify-content-md-start"></div>
                 </div>
             </div>
         </>

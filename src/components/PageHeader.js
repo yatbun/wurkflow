@@ -110,10 +110,6 @@ function PageHeader() {
                     </LinkContainer>
 
                     {currentUser && loggedInMenu()}
-
-                    <Link to="/" className="nav-link px-2 disabled">
-                        About
-                    </Link>
                 </Nav>
 
                 {currentUser ? (
